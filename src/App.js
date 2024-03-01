@@ -57,6 +57,9 @@ function App() {
                                                 commonStore.updateCurrentDocumentID(id)
                                             }}>Confirm
                                             </button>
+
+                                            <button className="btn ml-2" >Close
+                                            </button>
                                         </form>
                                     </div>
                                 </div>
@@ -64,7 +67,10 @@ function App() {
                         </ModalContainerComp>
 
                         <AddIcon size={'1.5rem'} className='cursor-pointer'
-                                 onClick={() => document.getElementById('addDocument_modal').showModal()}/>
+                                 onClick={() => {
+                                     setAddFileName(commonStore.formatTime(new Date()))
+                                     document.getElementById('addDocument_modal').showModal()
+                                 }}/>
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip="delete document">
                         <DeleteIcon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
@@ -78,7 +84,7 @@ function App() {
                                     documentsGroup: _.cloneDeep(commonStore.documentsGroup)
                                 })
                                 alert('delete success')
-                                if(commonStore.documentsGroup!==undefined && commonStore.documentsGroup.length>0){
+                                if (commonStore.documentsGroup !== undefined && commonStore.documentsGroup.length > 0) {
                                     commonStore.updateCurrentDocumentID(commonStore.documentsGroup[0].id)
                                 }
                             } catch (e) {
@@ -135,7 +141,7 @@ function App() {
                     </div>
 
                     <div className="tooltip tooltip-left" data-tip='export current document'>
-                        <ExportIcon size={'1.5rem'} className='cursor-pointer' onClick={()=>{
+                        <ExportIcon size={'1.5rem'} className='cursor-pointer' onClick={() => {
                             commonStore.downloadMarkdown()
                         }}/>
                     </div>
