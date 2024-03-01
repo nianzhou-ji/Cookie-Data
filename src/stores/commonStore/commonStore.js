@@ -54,6 +54,9 @@ class CommonStore {
     async initDocumentsGroup(){
         await indexedDBEngine.open()
         const res = await indexedDBEngine.get(1)
+
+        if(res===undefined)return
+
         this.updateDocumentsGroup(res.documentsGroup)
 
         if(res.documentsGroup!==undefined && res.documentsGroup.length>0){
@@ -63,6 +66,25 @@ class CommonStore {
 
 
     }
+
+
+    async saveIndexedDB   () {
+        let state = true
+        try {
+            await indexedDBEngine.open()
+
+            await indexedDBEngine.patch({
+                id: 1,
+                documentsGroup: _.cloneDeep(this.documentsGroup)
+            })
+
+        } catch (e) {
+            state = false
+        }
+
+        return state
+    }
+
 
     deleteDocumentsGroup(id) {
         const tempObj = _.cloneDeep(this.documentsGroup)

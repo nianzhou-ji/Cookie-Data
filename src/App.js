@@ -19,10 +19,47 @@ function App() {
     const currentDocumentObj = commonStore.getCurrentDocumentObj()
 
     const [addFileName, setAddFileName] = useState('default')
+    const [isDocumentsGroupDataUpdate, setIsDocumentsGroupDataUpdate] = useState(false)
+
 
     useEffect(() => {
         commonStore.initDocumentsGroup()
     }, []);
+
+    useEffect(() => {
+        setIsDocumentsGroupDataUpdate(true)
+    }, [commonStore.documentsGroup]);
+
+
+    document.addEventListener('visibilitychange', async function () {
+        if (document.visibilityState === 'hidden') {
+            // console.log('用户离开了当前标签页');
+            const res = commonStore.saveIndexedDB()
+            if (res) {
+                setIsDocumentsGroupDataUpdate(false)
+            }else {
+                setIsDocumentsGroupDataUpdate(true)
+            }
+
+        } else {
+            console.log('用户回到了当前标签页');
+        }
+    });
+
+
+    document.addEventListener('keydown', async function (event) {
+        if (event.ctrlKey && event.key === 's') {
+            event.preventDefault(); // 阻止默认行为，即阻止浏览器执行保存操作
+            // 在这里编写你的回调函数逻辑
+            const res = commonStore.saveIndexedDB()
+            if (res) {
+                setIsDocumentsGroupDataUpdate(false)
+            }else {
+                setIsDocumentsGroupDataUpdate(true)
+            }
+        }
+    });
+
 
     return (
         <div className="flex flex-col pl-1 pr-1 h-screen pt-2 pb-2 w-screen">
@@ -58,7 +95,7 @@ function App() {
                                             }}>Confirm
                                             </button>
 
-                                            <button className="btn ml-2" >Close
+                                            <button className="btn ml-2">Close
                                             </button>
                                         </form>
                                     </div>
@@ -75,20 +112,14 @@ function App() {
                     <div className="tooltip tooltip-left mr-2" data-tip="delete document">
                         <DeleteIcon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
                             commonStore.deleteDocumentsGroup(commonStore.currentDocumentID)
-
-                            try {
-                                await indexedDBEngine.open()
-                                await indexedDBEngine.delete(1)
-                                await indexedDBEngine.add({
-                                    id: 1,
-                                    documentsGroup: _.cloneDeep(commonStore.documentsGroup)
-                                })
+                            const res = await commonStore.saveIndexedDB()
+                            if (res) {
                                 alert('delete success')
                                 if (commonStore.documentsGroup !== undefined && commonStore.documentsGroup.length > 0) {
                                     commonStore.updateCurrentDocumentID(commonStore.documentsGroup[0].id)
                                 }
-                            } catch (e) {
-                                alert(`delete failed ${e}`)
+                            } else {
+                                alert(`delete failed failed`)
                             }
 
                         }}/>
@@ -124,17 +155,15 @@ function App() {
 
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip='save document'>
-                        <SaveIcon size={'1.5rem'} className='mr-1 cursor-pointer' onClick={async () => {
-                            try {
-                                await indexedDBEngine.open()
-                                await indexedDBEngine.delete(1)
-                                await indexedDBEngine.add({
-                                    id: 1,
-                                    documentsGroup: _.cloneDeep(commonStore.documentsGroup)
-                                })
+                        <SaveIcon size={'1.5rem'} className='mr-1 cursor-pointer'
+                                  color={`${isDocumentsGroupDataUpdate ? '#fa0404' : '#000'}`} onClick={async () => {
+                            const res = await commonStore.saveIndexedDB()
+
+                            if (res) {
                                 alert('save success')
-                            } catch (e) {
-                                alert(`save failed ${e}`)
+                                setIsDocumentsGroupDataUpdate(false)
+                            } else {
+                                alert(`save failed`)
                             }
 
                         }}/>

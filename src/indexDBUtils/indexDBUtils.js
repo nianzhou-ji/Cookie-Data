@@ -27,11 +27,11 @@ class IndexedDB {
         });
     }
 
-    async add(item) {
+    async patch(item) {
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction([this.storeName], 'readwrite');
             const store = transaction.objectStore(this.storeName);
-            const request = store.add(item);
+            const request = store.put(item);
 
             request.onsuccess = () => {
                 resolve(request.result);
@@ -75,21 +75,6 @@ class IndexedDB {
         });
     }
 
-    async delete(id) {
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction([this.storeName], 'readwrite');
-            const store = transaction.objectStore(this.storeName);
-            const request = store.delete(id);
-
-            request.onsuccess = () => {
-                resolve();
-            };
-
-            request.onerror = (event) => {
-                reject(event.target.error);
-            };
-        });
-    }
 }
 
 const indexedDBEngine = new IndexedDB('CookieDataDB', 'CookieDataStore')

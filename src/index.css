@@ -12,6 +12,13 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  .w-md-editor-toolbar{
+    & svg {
+      width: 1.3rem;
+      height: 1.3rem;
+    }
+  }
 }
 
 
