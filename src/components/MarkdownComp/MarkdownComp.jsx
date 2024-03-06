@@ -7,9 +7,7 @@ const MarkdownComp = ({className}) => {
     const {commonStore} = useStore()
     const currentDocumentObj = commonStore.getCurrentDocumentObj()
     return <MDEditor value={currentDocumentObj === undefined ? "" : currentDocumentObj.content}
-                     onChange={(e) => commonStore.patchDocumentsGroup(e)} className={className} />
-
-
+                     onChange={(e) => commonStore.patchDocumentsGroup(e,'markdown')} className={className} />
 };
 
 

@@ -8,6 +8,8 @@ import {SiCookiecutter as TitleIcon} from "react-icons/si";
 import {IoMdAddCircle as AddIcon} from "react-icons/io";
 import {AiFillDelete as DeleteIcon} from "react-icons/ai";
 import {IoCloseCircle as CloseIcon} from "react-icons/io5";
+import {MdDraw as DrawICon} from "react-icons/md";
+import {AiOutlineFileMarkdown as MarkDownIcon} from "react-icons/ai";
 import {observer} from "mobx-react-lite";
 import MarkdownComp from "./components/MarkdownComp/MarkdownComp";
 import {LuDatabaseBackup as BackupIcon} from "react-icons/lu";
@@ -18,6 +20,7 @@ import ModalContainerComp from "./components/ModalComp/ModalComp";
 import React, {useEffect, useState} from "react";
 import _ from "lodash";
 import MDEditor from "@uiw/react-md-editor";
+import ProcessComp from "./components/processComp/processComp";
 
 function App() {
     const {commonStore} = useStore()
@@ -25,8 +28,9 @@ function App() {
 
     const [addFileName, setAddFileName] = useState('default')
     const [openSearch, setOpenSearch] = useState(false)
-
-    const [isDocumentsGroupDataUpdate, setIsDocumentsGroupDataUpdate] = useState(false)
+    const [openArray, setOpenArray] = useState([])
+    const [openExcelDraw, setOpenExcelDraw] = useState(false)
+    const [openMarkdown, setOpenMarkdown] = useState(true)
 
 
     useEffect(() => {
@@ -34,7 +38,7 @@ function App() {
     }, []);
 
     useEffect(() => {
-        setIsDocumentsGroupDataUpdate(true)
+        commonStore.setIsDocumentsGroupDataUpdate(true)
     }, [commonStore.documentsGroup]);
 
 
@@ -60,9 +64,9 @@ function App() {
             // 在这里编写你的回调函数逻辑
             const res = commonStore.saveIndexedDB()
             if (res) {
-                setIsDocumentsGroupDataUpdate(false)
+                commonStore.setIsDocumentsGroupDataUpdate(false)
             } else {
-                setIsDocumentsGroupDataUpdate(true)
+                commonStore.setIsDocumentsGroupDataUpdate(true)
             }
         }
     });
@@ -117,8 +121,9 @@ function App() {
                                                 const id = crypto.randomUUID()
                                                 const name = addFileName
                                                 const content = '**Hello** *world*!'
+                                                const excalidrawElements = []
                                                 commonStore.addDocumentsGroup({
-                                                    id, name, content
+                                                    id, name, content, excalidrawElements
                                                 })
                                                 commonStore.updateCurrentDocumentID(id)
                                             }}>Confirm
@@ -153,9 +158,31 @@ function App() {
 
                         }}/>
                     </div>
+
+
+                    <div className="tooltip tooltip-left mr-2" data-tip="excel draw">
+                        <DrawICon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
+                            setOpenSearch(false)
+                            setOpenExcelDraw(true)
+                            setOpenMarkdown(false)
+                        }}/>
+                    </div>
+                    <div className="tooltip tooltip-left mr-2" data-tip="markdown">
+                        <MarkDownIcon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
+                            setOpenSearch(false)
+                            setOpenExcelDraw(false)
+                            setOpenMarkdown(true)
+                        }}/>
+                    </div>
+
                     <div className="tooltip tooltip-left mr-2" data-tip="view document list">
                         <DocumentsIcon size={'1.5rem'} className='cursor-pointer' htmlFor="my-drawer-4" onClick={() => {
                             document.getElementById('drawerID').click()
+                            setOpenArray([openMarkdown, openSearch, openExcelDraw])
+
+                            setOpenMarkdown(false)
+                            setOpenSearch(false)
+                            setOpenExcelDraw(false)
                         }}/>
 
                         <ModalContainerComp>
@@ -168,13 +195,22 @@ function App() {
                                 </div>
                                 <div className="drawer-side">
                                     <label htmlFor="my-drawer-4" aria-label="close sidebar"
-                                           className="drawer-overlay"></label>
+                                           className="drawer-overlay"  onClick={(e)=>{
+                                        // openMarkdown, openSearch, openExcelDraw
+
+                                        setOpenMarkdown(openArray[0])
+                                        setOpenSearch(openArray[1])
+                                        setOpenExcelDraw(openArray[2])
+
+                                    }}></label>
                                     <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
                                         {/* Sidebar content here */}
-                                        {commonStore.documentsGroup.map(item => <li key={item.id}
-                                                                                    className={`${item.id === commonStore.currentDocumentID ? 'bg-blue-100' : null}`}>
+                                        {commonStore.documentsGroup.slice().reverse().map(item => <li key={item.id}
+                                                                                                      className={`${item.id === commonStore.currentDocumentID ? 'bg-blue-100' : null}`}>
                                             <a
-                                                onClick={() => commonStore.updateCurrentDocumentID(item.id)}>{item.name}</a>
+                                                onClick={() => {
+                                                    commonStore.updateCurrentDocumentID(item.id)
+                                                }}>{item.name}</a>
                                         </li>)}
 
                                     </ul>
@@ -185,15 +221,20 @@ function App() {
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip='save document'>
                         <SaveIcon size={'1.5rem'} className='mr-1 cursor-pointer'
-                                  color={`${isDocumentsGroupDataUpdate ? '#fa0404' : '#000'}`} onClick={async () => {
+                                  color={`${commonStore.isDocumentsGroupDataUpdate ? '#fa0404' : '#000'}`} onClick={async () => {
                             const res = await commonStore.saveIndexedDB()
 
                             if (res) {
                                 alert('save success')
-                                setIsDocumentsGroupDataUpdate(false)
+                                commonStore.setIsDocumentsGroupDataUpdate(false)
                             } else {
                                 alert(`save failed`)
                             }
+
+
+                            document.getElementById('excalidrawAPIButton').click()
+
+                            // console.log(_.cloneDeep(commonStore.documentsGroup))
 
                         }}/>
                     </div>
@@ -201,7 +242,11 @@ function App() {
 
                     <div className="tooltip tooltip-left  mr-2" data-tip='export current document'>
 
-                        <SearchIcon size={'1.5rem'} className='cursor-pointer' onClick={() => setOpenSearch(true)}/>
+                        <SearchIcon size={'1.5rem'} className='cursor-pointer' onClick={() => {
+                            setOpenSearch(true)
+                            setOpenExcelDraw(false)
+                            setOpenMarkdown(false)
+                        }}/>
                     </div>
 
                     <div className="tooltip tooltip-left  mr-2" data-tip='export current document to local desktop'>
@@ -217,7 +262,6 @@ function App() {
                         }}/>
                     </div>
                     <div className="tooltip tooltip-left" data-tip='import backup documents'>
-
                         <ModalContainerComp>
                             <dialog id="ImportBackupData_modal" className="modal">
                                 <div className="modal-box">
@@ -226,7 +270,8 @@ function App() {
                                            className="file-input file-input-bordered w-full mt-3" multiple
                                            accept=".json" onChange={e => {
 
-                                               commonStore.parsingBackupData(e.target.files)
+                                        commonStore.parsingBackupData(e.target.files)
+
 
                                     }}/>
                                     <div className="modal-action">
@@ -244,34 +289,31 @@ function App() {
                         }}/>
                     </div>
                 </div>
-
             </div>
 
             {openSearch ? <div className='overflow-auto'>
-                    <div className="tooltip tooltip-left cursor-pointer fixed bottom-3 right-5"
-                         data-tip='close search'>
-                        <CloseIcon size={'3rem'}
-                                   onClick={() => setOpenSearch(false)}
-                        />
-                    </div>
+                {
+                    commonStore.documentsGroup.map(item =>
+                        <div className={'flex flex-col items-center'}
+                             style={{width: '100%'}} key={item.id}>
+                            <h1 className={'font-bold cursor-pointer'} style={{fontSize: '2rem'}}
+                                onClick={() => commonStore.updateCurrentDocumentID(item.id)}>{item.name}</h1>
+                            <MDEditor
+                                value={item.content}
+                                hideToolbar={true} preview={'preview'} style={{width: '80%', height: '20%'}}
+                                visibleDragbar={false}/>
+                            <div className="divider"></div>
+                        </div>
+                    )
+                }
 
-                    {
-                        commonStore.documentsGroup.map(item =>
-                            <div className={'flex flex-col items-center'}
-                                 style={{width: '100%'}} key={item.id}>
-                                <h1 className={'font-bold cursor-pointer'} style={{fontSize: '2rem'}}
-                                    onClick={() => commonStore.updateCurrentDocumentID(item.id)}>{item.name}</h1>
-                                <MDEditor
-                                    value={item.content}
-                                    hideToolbar={true} preview={'preview'} style={{width: '80%', height: '20%'}}
-                                    visibleDragbar={false}/>
-                                <div className="divider"></div>
-                            </div>
-                        )
-                    }
+            </div> : null}
 
-                </div> :
-                <MarkdownComp className='flex-auto'/>}
+
+            {openMarkdown ? <MarkdownComp className='flex-auto'/> : null}
+
+
+            {openExcelDraw ? <ProcessComp className='flex-auto'/> : null}
 
 
         </div>

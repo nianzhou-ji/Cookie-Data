@@ -6,6 +6,12 @@ class CommonStore {
 
     documentsGroup = []
 
+    isDocumentsGroupDataUpdate = false
+
+    setIsDocumentsGroupDataUpdate(value){
+        this.isDocumentsGroupDataUpdate = value
+    }
+
     formatTime(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -157,7 +163,7 @@ class CommonStore {
         this.updateDocumentsGroup(res.documentsGroup)
 
         if (res.documentsGroup !== undefined && res.documentsGroup.length > 0) {
-            this.updateCurrentDocumentID(res.documentsGroup[0].id)
+            this.updateCurrentDocumentID(res.documentsGroup[res.documentsGroup.length - 1].id)
         }
 
 
@@ -190,12 +196,18 @@ class CommonStore {
     currentDocumentID = ''
 
 
-    patchDocumentsGroup(content) {
+    patchDocumentsGroup(data, type = 'markdown') {
         const tempObj = _.cloneDeep(this.documentsGroup)
         const res = tempObj.find(item => item.id === this.currentDocumentID)
         if (res !== undefined) {
-            res.content = content
-            this.documentsGroup = tempObj
+
+            if (type === 'markdown') {
+                res.content = data
+                this.documentsGroup = tempObj
+            } else if (type === 'excalidrawElements') {
+                res.excalidrawElements = data
+                this.documentsGroup = tempObj
+            }
         }
 
     }
