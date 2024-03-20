@@ -121,11 +121,20 @@ function App() {
                                                 const id = crypto.randomUUID()
                                                 const name = addFileName
                                                 const content = '**Hello** *world*!'
-                                                const excalidrawElements = []
+                                                const excalidrawSceneData = {
+                                                    elements: [],
+                                                    appState: {},
+                                                    files: {},
+                                                }
                                                 commonStore.addDocumentsGroup({
-                                                    id, name, content, excalidrawElements
+                                                    id, name, content, excalidrawSceneData
                                                 })
                                                 commonStore.updateCurrentDocumentID(id)
+
+                                                document.getElementById('excalidrawAPIUpdateSceneData')?.click()
+
+
+
                                             }}>Confirm
                                             </button>
 
@@ -150,7 +159,8 @@ function App() {
                             if (res) {
                                 alert('delete success')
                                 if (commonStore.documentsGroup !== undefined && commonStore.documentsGroup.length > 0) {
-                                    commonStore.updateCurrentDocumentID(commonStore.documentsGroup[0].id)
+                                    commonStore.updateCurrentDocumentID(commonStore.documentsGroup[commonStore.documentsGroup.length-1].id)
+                                    document.getElementById('excalidrawAPIUpdateSceneData')?.click()
                                 }
                             } else {
                                 alert(`delete failed failed`)
@@ -176,17 +186,18 @@ function App() {
                     </div>
 
                     <div className="tooltip tooltip-left mr-2" data-tip="view document list">
-                        <DocumentsIcon size={'1.5rem'} className='cursor-pointer' htmlFor="my-drawer-4" onClick={() => {
-                            document.getElementById('drawerID').click()
-                            setOpenArray([openMarkdown, openSearch, openExcelDraw])
+                        <DocumentsIcon size={'1.5rem'} className='cursor-pointer ' htmlFor="my-drawer-4"
+                                       onClick={() => {
+                                           document.getElementById('drawerID').click()
+                                           setOpenArray([openMarkdown, openSearch, openExcelDraw])
 
-                            setOpenMarkdown(false)
-                            setOpenSearch(false)
-                            setOpenExcelDraw(false)
-                        }}/>
+                                           // setOpenMarkdown(false)
+                                           // setOpenSearch(false)
+                                           // setOpenExcelDraw(false)
+                                       }}/>
 
                         <ModalContainerComp>
-                            <div className="drawer">
+                            <div className="drawer z-50">
                                 <input id="my-drawer-4" type="checkbox" className="drawer-toggle"/>
                                 <div className="drawer-content">
                                     {/* Page content here */}
@@ -195,7 +206,7 @@ function App() {
                                 </div>
                                 <div className="drawer-side">
                                     <label htmlFor="my-drawer-4" aria-label="close sidebar"
-                                           className="drawer-overlay"  onClick={(e)=>{
+                                           className="drawer-overlay" onClick={(e) => {
                                         // openMarkdown, openSearch, openExcelDraw
 
                                         setOpenMarkdown(openArray[0])
@@ -210,6 +221,7 @@ function App() {
                                             <a
                                                 onClick={() => {
                                                     commonStore.updateCurrentDocumentID(item.id)
+                                                    document.getElementById('excalidrawAPIUpdateSceneData')?.click()
                                                 }}>{item.name}</a>
                                         </li>)}
 
@@ -221,22 +233,19 @@ function App() {
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip='save document'>
                         <SaveIcon size={'1.5rem'} className='mr-1 cursor-pointer'
-                                  color={`${commonStore.isDocumentsGroupDataUpdate ? '#fa0404' : '#000'}`} onClick={async () => {
-                            const res = await commonStore.saveIndexedDB()
+                                  color={`${commonStore.isDocumentsGroupDataUpdate ? '#fa0404' : '#000'}`}
+                                  onClick={async () => {
+                                      document.getElementById('excalidrawAPISaveSceneData')?.click()
+                                      const res = await commonStore.saveIndexedDB()
+                                      if (res) {
+                                          alert('save success')
+                                          commonStore.setIsDocumentsGroupDataUpdate(false)
+                                      } else {
+                                          alert(`save failed`)
+                                      }
 
-                            if (res) {
-                                alert('save success')
-                                commonStore.setIsDocumentsGroupDataUpdate(false)
-                            } else {
-                                alert(`save failed`)
-                            }
 
-
-                            document.getElementById('excalidrawAPIButton').click()
-
-                            // console.log(_.cloneDeep(commonStore.documentsGroup))
-
-                        }}/>
+                                  }}/>
                     </div>
 
 

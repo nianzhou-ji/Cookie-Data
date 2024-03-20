@@ -120,7 +120,7 @@ class CommonStore {
 
                 // 等待文件读取完成
                 await readFile(file);
-                console.log(new Date(file.lastModified))
+                // console.log(new Date(file.lastModified))
             }
 
 
@@ -159,7 +159,7 @@ class CommonStore {
         const res = await indexedDBEngine.get(1)
 
         if (res === undefined) return
-
+        res.documentsGroup = JSON.parse(res.documentsGroup)
         this.updateDocumentsGroup(res.documentsGroup)
 
         if (res.documentsGroup !== undefined && res.documentsGroup.length > 0) {
@@ -171,17 +171,20 @@ class CommonStore {
 
 
     async saveIndexedDB() {
+        console.log(_.cloneDeep(this.documentsGroup))
         let state = true
         try {
             await indexedDBEngine.open()
 
             await indexedDBEngine.patch({
                 id: 1,
-                documentsGroup: _.cloneDeep(this.documentsGroup)
+                documentsGroup: JSON.stringify(this.documentsGroup)
             })
 
         } catch (e) {
             state = false
+
+            // console.log(e, 'saveIndexedDB')
         }
 
         return state
@@ -204,8 +207,8 @@ class CommonStore {
             if (type === 'markdown') {
                 res.content = data
                 this.documentsGroup = tempObj
-            } else if (type === 'excalidrawElements') {
-                res.excalidrawElements = data
+            } else if (type === 'excalidrawSceneData') {
+                res.excalidrawSceneData = data
                 this.documentsGroup = tempObj
             }
         }
@@ -220,6 +223,13 @@ class CommonStore {
 
     updateCurrentDocumentID(value) {
         this.currentDocumentID = value
+    }
+
+
+    excalidrawAPI = null
+
+    updateExcalidrawAPI(value){
+        this.excalidrawAPI =value
     }
 
 
