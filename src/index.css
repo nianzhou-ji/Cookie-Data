@@ -77,6 +77,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 
 
+  #ModalContainer{
+    z-index: 1000000;
+    position: absolute;
+  }
+
+
 
 }
 

@@ -1,10 +1,42 @@
 import {makeAutoObservable} from "mobx";
 import _ from 'lodash'
 import indexedDBEngine from "../../indexDBUtils/indexDBUtils";
+import {value} from "lodash/seq";
 
 class CommonStore {
 
+    appCompOpenConfig = {
+        markdownAppOpen: true,
+        processAppOpen: false,
+    }
+
+    updateAppCompOpenConfig(value) {
+        const temp = _.cloneDeep(this.appCompOpenConfig)
+        if (value.markdownAppOpen !== undefined) {
+            temp.markdownAppOpen = value.markdownAppOpen
+        }
+
+        if (value.processAppOpen !== undefined) {
+            temp.processAppOpen = value.processAppOpen
+        }
+
+        this.appCompOpenConfig = temp
+    }
+
+
+    documentSelectionOpen = false
+
+    updateDocumentSelectionOpen(value) {
+        this.documentSelectionOpen = value
+    }
+
     markdownObj = null
+    processDrawObj = null
+
+
+    updateProcessDrawObj(value) {
+        this.processDrawObj = value
+    }
 
     updateMarkdownObj(value) {
         this.markdownObj = value
@@ -43,7 +75,7 @@ class CommonStore {
         const obj = this.getCurrentDocumentObj()
 
         // 创建一个新的 Blob 对象，内容为 Markdown 文本
-        const blob = new Blob([obj.content], {type: 'text/markdown;charset=utf-8'});
+        const blob = new Blob([obj.markdownData], {type: 'text/markdown;charset=utf-8'});
 
         // 创建一个指向 Blob 对象的 URL
         const url = URL.createObjectURL(blob);
@@ -173,19 +205,22 @@ class CommonStore {
             this.updateCurrentDocumentID(res.documentsGroup[res.documentsGroup.length - 1].id)
         }
 
-
-
-
     }
 
 
     async saveIndexedDB() {
 
-        if (this.markdownObj!==null){
+        if (this.markdownObj !== null) {
             const res = await this.markdownObj.save()
-            this.patchDocumentsGroup(res)
+            this.patchDocumentsGroup(res, 'markdownData')
         }
 
+        if (this.processDrawObj !== null) {
+            const snapshot = this.processDrawObj.store.getSnapshot()
+            this.patchDocumentsGroup(JSON.stringify(snapshot), 'processData')
+        }
+
+        console.log(_.cloneDeep(this.documentsGroup), 'documentsGroup')
 
         let state = true
         try {
@@ -212,12 +247,17 @@ class CommonStore {
     currentDocumentID = ''
 
 
-    patchDocumentsGroup(data, type = 'markdown') {
+    patchDocumentsGroup(data, type) {
         const tempObj = _.cloneDeep(this.documentsGroup)
         const res = tempObj.find(item => item.id === this.currentDocumentID)
         if (res !== undefined) {
-            if (type === 'markdown') {
-                res.content = data
+            if (type === 'markdownData') {
+                res['markdownData'] = data
+                this.documentsGroup = tempObj
+            }
+
+            if (type === 'processData') {
+                res['processData'] = data
                 this.documentsGroup = tempObj
             }
         }

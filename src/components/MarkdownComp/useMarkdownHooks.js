@@ -11,7 +11,10 @@ import LinkTool from "@editorjs/link";
 import Embed from "@editorjs/embed";
 import Table from "@editorjs/table";
 import EditorJS from "@editorjs/editorjs";
+import CodeTool from '@editorjs/code';
+import RawTool from '@editorjs/raw';
 import {useStore} from "../../stores";
+
 import _ from 'lodash'
 
 const useMarkdownHooks = () => {
@@ -89,9 +92,10 @@ const useMarkdownHooks = () => {
 
             linkTool: LinkTool,
 
-            // raw: RawTool,
+            code: CodeTool,
 
             embed: Embed,
+            raw: RawTool,
 
             table: {
                 class: Table,
@@ -100,12 +104,15 @@ const useMarkdownHooks = () => {
             },
 
         },
+
+
+        data:{}
     }
 
     const getNewEditorJS = () => {
 
         const parentNode = document.getElementById('editorjs');
-        while (parentNode.firstChild) {
+        while (parentNode?.firstChild) {
             parentNode.removeChild(parentNode.firstChild);
         }
 

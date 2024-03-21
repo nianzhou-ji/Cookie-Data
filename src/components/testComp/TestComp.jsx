@@ -1,257 +1,106 @@
-import {Excalidraw} from "@excalidraw/excalidraw";
-import EditorJS from '@editorjs/editorjs'
-import {useEffect} from "react";
-import Header from '@editorjs/header';
-import SimpleImage from "@editorjs/simple-image";
-import Quote from "@editorjs/quote";
-import Warning from "@editorjs/warning";
-import Marker from "@editorjs/marker";
-import Delimiter from "@editorjs/delimiter";
-import InlineCode from "@editorjs/inline-code";
-import LinkTool from "@editorjs/link";
-import Embed from "@editorjs/embed";
-import Table from "@editorjs/table";
-import Checklist from '@editorjs/checklist'
-import NestedList from '@editorjs/nested-list';
+import _ from 'lodash'
+import {useCallback, useEffect, useState} from 'react'
+import {Editor, TLEventMapHandler, Tldraw} from 'tldraw'
+import 'tldraw/tldraw.css'
+
 const TestComp = () => {
 
-    window.EditorJS = EditorJS;
+    const [editor, setEditor] = useState();
 
-    /**
-     * To initialize the Editor, create a new instance with configuration object
-     * @see docs/installation.md for mode details
-     */
-    const editorConfig = {
-        /**
-         * Enable/Disable the read only mode
-         */
-        readOnly: false,
+    const setAppToState = useCallback((editor) => {
+        setEditor(editor);
+    }, []);
 
-        /**
-         * Wrapper of Editor
-         */
-        holder: 'editorjs',
+    const [storeEvents, setStoreEvents] = useState([]);
 
-        /**
-         * Tools list
-         */
-        tools: {
-            /**
-             * Each Tool is a Plugin. Pass them via 'class' option with necessary settings {@link docs/tools.md}
-             */
-            header: {
-                class: Header,
-                inlineToolbar: ['marker', 'link'],
-                config: {
-                    placeholder: 'Header'
-                },
-                shortcut: 'CMD+SHIFT+H'
-            },
+    useEffect(() => {
+        if (!editor) return;
 
-            /**
-             * Or pass class directly without any configuration
-             */
-            image: SimpleImage,
+        function logChangeEvent(eventName) {
+            setStoreEvents((events) => [...events, eventName]);
+        }
 
-            list: {
-                class: NestedList,
-                inlineToolbar: true,
-                shortcut: 'CMD+SHIFT+L'
-            },
+        //[1]
+        const handleChangeEvent = (change) => {
+            // Added
+            for (const record of Object.values(change.changes.added)) {
+                if (record.typeName === 'shape') {
+                    logChangeEvent(`created shape (${record.type})\n`);
+                }
+            }
 
-            checklist: {
-                class: Checklist,
-                inlineToolbar: true,
-            },
+            // Updated
+            for (const [from, to] of Object.values(change.changes.updated)) {
+                if (
+                    from.typeName === 'instance' &&
+                    to.typeName === 'instance' &&
+                    from.currentPageId !== to.currentPageId
+                ) {
+                    logChangeEvent(`changed page (${from.currentPageId}, ${to.currentPageId})`);
+                } else if (from.id.startsWith('shape') && to.id.startsWith('shape')) {
+                    // let diff = _.reduce(
+                    //     from,
+                    //     (result, value, key) =>
+                    //         _.isEqual(value, to[key]) ? result : result.concat([key, to[key]]),
+                    //     []
+                    // );
+                    // if (diff?.[0] === 'props') {
+                    //     diff = _.reduce(
+                    //         from.props,
+                    //         (result, value, key) =>
+                    //             _.isEqual(value, to.props[key])
+                    //                 ? result
+                    //                 : result.concat([key, to.props[key]]),
+                    //         []
+                    //     );
+                    // }
+                    logChangeEvent(`updated shape (${JSON.stringify('diff')})\n`);
+                }
+            }
 
-            quote: {
-                class: Quote,
-                inlineToolbar: true,
-                config: {
-                    quotePlaceholder: 'Enter a quote',
-                    captionPlaceholder: 'Quote\'s author',
-                },
-                shortcut: 'CMD+SHIFT+O'
-            },
+            // Removed
+            for (const record of Object.values(change.changes.removed)) {
+                if (record.typeName === 'shape') {
+                    logChangeEvent(`deleted shape (${record.type})\n`);
+                }
+            }
+        };
 
-            warning: Warning,
+        // [2]
+        const cleanupFunction = editor.store.listen(handleChangeEvent, {
+            source: 'user',
+            scope: 'all'
+        });
 
-            marker: {
-                class:  Marker,
-                shortcut: 'CMD+SHIFT+M'
-            },
-
-            // code: {
-            //     class:  CodeTool,
-            //     shortcut: 'CMD+SHIFT+C'
-            // },
-
-            delimiter: Delimiter,
-
-            inlineCode: {
-                class: InlineCode,
-                shortcut: 'CMD+SHIFT+C'
-            },
-
-            linkTool: LinkTool,
-
-            // raw: RawTool,
-
-            embed: Embed,
-
-            table: {
-                class: Table,
-                inlineToolbar: true,
-                shortcut: 'CMD+ALT+T'
-            },
-
-        },
-
-        /**
-         * This Tool will be used as default
-         */
-        // defaultBlock: 'paragraph',
-
-        /**
-         * Initial Editor data
-         */
-        data: {
-            blocks: [
-                {
-                    id: "zcKCF1S7X8",
-                    type: "header",
-                    data: {
-                        text: "Editor.js",
-                        level: 1
-                    }
-                },
-                {
-                    id: "b6ji-DvaKb",
-                    type: "paragraph",
-                    data: {
-                        text: "Hey. Meet the new Editor. On this page you can see it in action — try to edit this text. Source code of the page contains the example of connection and configuration."
-                    }
-                },
-                {
-                    type: "header",
-                    id: "7ItVl5biRo",
-                    data: {
-                        text: "Key features",
-                        level: 2
-                    }
-                },
-                {
-                    type : 'list',
-                    id: "SSBSguGvP7",
-                    data : {
-                        items : [
-                            {
-                                content: 'It is a block-styled editor',
-                                items: []
-                            },
-                            {
-                                content: 'It returns clean data output in JSON',
-                                items: []
-                            },
-                            {
-                                content: 'Designed to be extendable and pluggable with a simple API',
-                                items: []
-                            }
-                        ],
-                        style: 'unordered'
-                    }
-                },
-                {
-                    type: "header",
-                    id: "QZFox1m_ul",
-                    data: {
-                        text: "What does it mean «block-styled editor»",
-                        level: 2
-                    }
-                },
-                {
-                    type : 'paragraph',
-                    id: "bwnFX5LoX7",
-                    data : {
-                        text : 'Workspace in classic editors is made of a single contenteditable element, used to create different HTML markups. Editor.js <mark class=\"cdx-marker\">workspace consists of separate Blocks: paragraphs, headings, images, lists, quotes, etc</mark>. Each of them is an independent contenteditable element (or more complex structure) provided by Plugin and united by Editor\'s Core.'
-                    }
-                },
-                {
-                    type : 'paragraph',
-                    id: "mTrPOHAQTe",
-                    data : {
-                        text : `There are dozens of <a href="https://github.com/editor-js">ready-to-use Blocks</a> and the <a href="https://editorjs.io/creating-a-block-tool">simple API</a> for creation any Block you need. For example, you can implement Blocks for Tweets, Instagram posts, surveys and polls, CTA-buttons and even games.`
-                    }
-                },
-                {
-                    type: "header",
-                    id: "1sYMhUrznu",
-                    data: {
-                        text: "What does it mean clean data output",
-                        level: 2
-                    }
-                },
-                {
-                    type : 'paragraph',
-                    id: "jpd7WEXrJG",
-                    data : {
-                        text : 'Classic WYSIWYG-editors produce raw HTML-markup with both content data and content appearance. On the contrary, Editor.js outputs JSON object with data of each Block. You can see an example below'
-                    }
-                },
-                {
-                    type : 'paragraph',
-                    id: "0lOGNUKxqt",
-                    data : {
-                        text : `Given data can be used as you want: render with HTML for <code class="inline-code">Web clients</code>, render natively for <code class="inline-code">mobile apps</code>, create markup for <code class="inline-code">Facebook Instant Articles</code> or <code class="inline-code">Google AMP</code>, generate an <code class="inline-code">audio version</code> and so on.`
-                    }
-                },
-                {
-                    type : 'paragraph',
-                    id: "WvX7kBjp0I",
-                    data : {
-                        text : 'Clean data is useful to sanitize, validate and process on the backend.'
-                    }
-                },
-                {
-                    type : 'delimiter',
-                    id: "H9LWKQ3NYd",
-                    data : {}
-                },
-                {
-                    type : 'paragraph',
-                    id: "h298akk2Ad",
-                    data : {
-                        text : 'We have been working on this project more than three years. Several large media projects help us to test and debug the Editor, to make its core more stable. At the same time we significantly improved the API. Now, it can be used to create any plugin for any task. Hope you enjoy. 😏'
-                    }
-                },
-                {
-                    type: 'image',
-                    id: "9802bjaAA2",
-                    data: {
-                        url: '/assets/codex2x.png',
-                        caption: '',
-                        stretched: false,
-                        withBorder: true,
-                        withBackground: false,
-                    }
-                },
-            ]
-        },
-
-    }
-    /**
-     * To initialize the Editor, create a new instance with configuration object
-     * @see docs/installation.md for mode details
-     */
-    useEffect(()=>{
-        var editor = new EditorJS(editorConfig);
-    }, [])
-
-
+        return () => {
+            cleanupFunction();
+        };
+    }, [editor]);
 
     return (
-        <div id={'editorjs'}></div>
+        <div style={{display: 'flex'}}>
+            <div style={{width: '60vw', height: '100vh'}}>
+                <Tldraw onMount={setAppToState}/>
+            </div>
+            <div
+
+                onCopy={(event) => event.stopPropagation()}
+            >
+            </div>
+
+
+            <button
+                onClick={() => {
+                    const snapshot = editor.store.getSnapshot()
+                    const stringified = JSON.stringify(snapshot)
+                    console.log(stringified, 'stringified')
+                }}
+            >
+                Save
+            </button>
+        </div>
     )
+
 }
 
 export default TestComp;

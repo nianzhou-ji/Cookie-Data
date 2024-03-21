@@ -19,32 +19,35 @@ import indexedDBEngine from "./indexDBUtils/indexDBUtils";
 import ModalContainerComp from "./components/ModalComp/ModalComp";
 import React, {useEffect, useState} from "react";
 import _ from "lodash";
-import MDEditor from "@uiw/react-md-editor";
 import ProcessComp from "./components/processComp/processComp";
 import useMarkdownHooks from "./components/MarkdownComp/useMarkdownHooks";
 
 function App() {
     const {commonStore} = useStore()
     const currentDocumentObj = commonStore.getCurrentDocumentObj()
-
     const [addFileName, setAddFileName] = useState('default')
-    const [openSearch, setOpenSearch] = useState(false)
-    const [openArray, setOpenArray] = useState([])
-    const [openExcelDraw, setOpenExcelDraw] = useState(false)
-    const [openMarkdown, setOpenMarkdown] = useState(true)
 
     const {updateMarkdownData} = useMarkdownHooks()
 
 
     useEffect(() => {
+
+
         commonStore.initDocumentsGroup().then(() => {
-            const data = _.cloneDeep(commonStore.documentsGroup.find(item => item.id === commonStore.currentDocumentID)).content
-            updateMarkdownData(data)
+            const currentObj = _.cloneDeep(commonStore.documentsGroup.find(item => item.id === commonStore.currentDocumentID))
+            if (currentObj == undefined) return
+
+
+            updateMarkdownData(currentObj.markdownData)
+
+
+            commonStore.processDrawObj?.store.loadSnapshot(JSON.parse(currentObj.processData))
+
+
         })
 
 
     }, []);
-
 
 
     document.addEventListener('keydown', async function (event) {
@@ -56,6 +59,30 @@ function App() {
                 commonStore.setIsDocumentsGroupDataUpdate(false)
             } else {
                 commonStore.setIsDocumentsGroupDataUpdate(true)
+            }
+        }
+    });
+
+
+    document.addEventListener('paste', function (event) {
+        // 获取粘贴板中的数据
+        const items = (event.clipboardData || window.clipboardData).items;
+
+        // 遍历粘贴板中的每个项目
+        for (let i = 0; i < items.length; i++) {
+            // 如果项目类型为图像
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+
+                // 使用FileReader读取文件内容
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    // 此处的event.target.result就是图像的Base64编码
+                    const base64String = event.target.result;
+                };
+
+                // 读取文件为Data URL
+                reader.readAsDataURL(file);
             }
         }
     });
@@ -87,11 +114,82 @@ function App() {
                                             <button className="btn" onClick={() => {
                                                 const id = crypto.randomUUID()
                                                 const name = addFileName
-                                                const content = '**Hello** *world*!'
+                                                const markdownData = {
+                                                    "time": 1711019875915,
+                                                    "blocks": [],
+                                                    "version": "2.29.0"
+                                                }
+                                                const processData = {
+                                                    "store": {
+                                                        "document:document": {
+                                                            "gridSize": 10,
+                                                            "name": "",
+                                                            "meta": {},
+                                                            "id": "document:document",
+                                                            "typeName": "document"
+                                                        },
+                                                        "page:page": {
+                                                            "meta": {},
+                                                            "id": "page:page",
+                                                            "name": "Page 1",
+                                                            "index": "a1",
+                                                            "typeName": "page"
+                                                        }
+                                                    },
+                                                    "schema": {
+                                                        "schemaVersion": 1,
+                                                        "storeVersion": 4,
+                                                        "recordVersions": {
+                                                            "asset": {
+                                                                "version": 1,
+                                                                "subTypeKey": "type",
+                                                                "subTypeVersions": {
+                                                                    "image": 3,
+                                                                    "video": 3,
+                                                                    "bookmark": 1
+                                                                }
+                                                            },
+                                                            "camera": {"version": 1},
+                                                            "document": {"version": 2},
+                                                            "instance": {"version": 24},
+                                                            "instance_page_state": {"version": 5},
+                                                            "page": {"version": 1},
+                                                            "shape": {
+                                                                "version": 3,
+                                                                "subTypeKey": "type",
+                                                                "subTypeVersions": {
+                                                                    "group": 0,
+                                                                    "text": 1,
+                                                                    "bookmark": 2,
+                                                                    "draw": 1,
+                                                                    "geo": 8,
+                                                                    "note": 5,
+                                                                    "line": 4,
+                                                                    "frame": 0,
+                                                                    "arrow": 3,
+                                                                    "highlight": 0,
+                                                                    "embed": 4,
+                                                                    "image": 3,
+                                                                    "video": 2
+                                                                }
+                                                            },
+                                                            "instance_presence": {"version": 5},
+                                                            "pointer": {"version": 1}
+                                                        }
+                                                    }
+                                                }
                                                 commonStore.addDocumentsGroup({
-                                                    id, name, content
+                                                    id, name, markdownData, processData
                                                 })
                                                 commonStore.updateCurrentDocumentID(id)
+
+                                                updateMarkdownData(markdownData)
+
+                                                commonStore.processDrawObj.store.loadSnapshot(processData)
+
+
+
+
 
                                             }}>Confirm
                                             </button>
@@ -128,9 +226,20 @@ function App() {
 
                     <div className="tooltip tooltip-left mr-2" data-tip="markdown">
                         <MarkDownIcon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
-                            setOpenSearch(false)
-                            setOpenExcelDraw(false)
-                            setOpenMarkdown(true)
+                            commonStore.updateAppCompOpenConfig({
+                                markdownAppOpen: true,
+                                processAppOpen: false,
+                            })
+                        }}/>
+                    </div>
+
+
+                    <div className="tooltip tooltip-left mr-2" data-tip="process">
+                        <DrawICon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
+                            commonStore.updateAppCompOpenConfig({
+                                markdownAppOpen: false,
+                                processAppOpen: true,
+                            })
                         }}/>
                     </div>
 
@@ -138,8 +247,6 @@ function App() {
                         <DocumentsIcon size={'1.5rem'} className='cursor-pointer ' htmlFor="my-drawer-4"
                                        onClick={() => {
                                            document.getElementById('drawerID').click()
-                                           setOpenArray([openMarkdown, openSearch])
-
                                        }}/>
 
                         <ModalContainerComp>
@@ -153,9 +260,6 @@ function App() {
                                 <div className="drawer-side">
                                     <label htmlFor="my-drawer-4" aria-label="close sidebar"
                                            className="drawer-overlay" onClick={(e) => {
-                                        setOpenMarkdown(openArray[0])
-                                        setOpenSearch(openArray[1])
-
                                     }}></label>
                                     <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
                                         {/* Sidebar content here */}
@@ -164,8 +268,14 @@ function App() {
                                             <a
                                                 onClick={() => {
                                                     commonStore.updateCurrentDocumentID(item.id)
-                                                    const data = _.cloneDeep(commonStore.documentsGroup.find(item => item.id === commonStore.currentDocumentID)).content
-                                                    updateMarkdownData(data)
+                                                    const currentObj = _.cloneDeep(commonStore.documentsGroup.find(item => item.id === commonStore.currentDocumentID))
+                                                    updateMarkdownData(currentObj.markdownData)
+
+
+
+                                                        commonStore.processDrawObj.store.loadSnapshot(JSON.parse(currentObj.processData))
+
+
 
                                                 }}>{item.name}</a>
                                         </li>)}
@@ -184,6 +294,8 @@ function App() {
                                       if (res) {
                                           alert('save success')
                                           commonStore.setIsDocumentsGroupDataUpdate(false)
+
+
                                       } else {
                                           alert(`save failed`)
                                       }
@@ -191,20 +303,18 @@ function App() {
                     </div>
 
 
-                    <div className="tooltip tooltip-left  mr-2" data-tip='export current document'>
+                    {/*<div className="tooltip tooltip-left  mr-2" data-tip='export current document'>*/}
 
-                        <SearchIcon size={'1.5rem'} className='cursor-pointer' onClick={() => {
-                            setOpenSearch(true)
-                            setOpenExcelDraw(false)
-                            setOpenMarkdown(false)
-                        }}/>
-                    </div>
+                    {/*    <SearchIcon size={'1.5rem'} className='cursor-pointer' onClick={() => {*/}
 
-                    <div className="tooltip tooltip-left  mr-2" data-tip='export current document to local desktop'>
-                        <ExportIcon size={'1.5rem'} className='cursor-pointer' onClick={() => {
-                            commonStore.downloadMarkdown()
-                        }}/>
-                    </div>
+                    {/*    }}/>*/}
+                    {/*</div>*/}
+
+                    {/*<div className="tooltip tooltip-left  mr-2" data-tip='export current document to local desktop'>*/}
+                    {/*    <ExportIcon size={'1.5rem'} className='cursor-pointer' onClick={() => {*/}
+                    {/*        commonStore.downloadMarkdown()*/}
+                    {/*    }}/>*/}
+                    {/*</div>*/}
 
 
                     <div className="tooltip tooltip-left  mr-2" data-tip='backup all documents to local desktop'>
@@ -241,7 +351,9 @@ function App() {
                     </div>
                 </div>
             </div>
-            {openMarkdown ? <MarkdownComp/> : null}
+            <MarkdownComp/>
+            <ProcessComp/>
+            <button className='hidden'>bu</button>
 
 
         </div>
