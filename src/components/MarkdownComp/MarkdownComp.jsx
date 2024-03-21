@@ -1,13 +1,14 @@
-import React from 'react';
-import {useStore} from "../../stores";
-import MDEditor from "@uiw/react-md-editor";
+import React, {useEffect} from 'react';
 import {observer} from "mobx-react-lite";
 
+
 const MarkdownComp = ({className}) => {
-    const {commonStore} = useStore()
-    const currentDocumentObj = commonStore.getCurrentDocumentObj()
-    return <MDEditor value={currentDocumentObj === undefined ? "" : currentDocumentObj.content}
-                     onChange={(e) => commonStore.patchDocumentsGroup(e,'markdown')} className={className} />
+    return <div id={'editorjs'} className={`${className}`} style={{
+        maxHeight: '92vh',
+        height: '92vh',
+        overflow: "auto",
+        // backgroundColor:'blue'
+    }}></div>
 };
 
 

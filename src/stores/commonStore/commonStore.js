@@ -4,11 +4,18 @@ import indexedDBEngine from "../../indexDBUtils/indexDBUtils";
 
 class CommonStore {
 
+    markdownObj = null
+
+    updateMarkdownObj(value) {
+        this.markdownObj = value
+    }
+
+
     documentsGroup = []
 
     isDocumentsGroupDataUpdate = false
 
-    setIsDocumentsGroupDataUpdate(value){
+    setIsDocumentsGroupDataUpdate(value) {
         this.isDocumentsGroupDataUpdate = value
     }
 
@@ -167,11 +174,19 @@ class CommonStore {
         }
 
 
+
+
     }
 
 
     async saveIndexedDB() {
-        console.log(_.cloneDeep(this.documentsGroup))
+
+        if (this.markdownObj!==null){
+            const res = await this.markdownObj.save()
+            this.patchDocumentsGroup(res)
+        }
+
+
         let state = true
         try {
             await indexedDBEngine.open()
@@ -183,8 +198,6 @@ class CommonStore {
 
         } catch (e) {
             state = false
-
-            // console.log(e, 'saveIndexedDB')
         }
 
         return state
@@ -203,12 +216,8 @@ class CommonStore {
         const tempObj = _.cloneDeep(this.documentsGroup)
         const res = tempObj.find(item => item.id === this.currentDocumentID)
         if (res !== undefined) {
-
             if (type === 'markdown') {
                 res.content = data
-                this.documentsGroup = tempObj
-            } else if (type === 'excalidrawSceneData') {
-                res.excalidrawSceneData = data
                 this.documentsGroup = tempObj
             }
         }
@@ -223,13 +232,6 @@ class CommonStore {
 
     updateCurrentDocumentID(value) {
         this.currentDocumentID = value
-    }
-
-
-    excalidrawAPI = null
-
-    updateExcalidrawAPI(value){
-        this.excalidrawAPI =value
     }
 
 

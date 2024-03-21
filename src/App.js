@@ -21,6 +21,7 @@ import React, {useEffect, useState} from "react";
 import _ from "lodash";
 import MDEditor from "@uiw/react-md-editor";
 import ProcessComp from "./components/processComp/processComp";
+import useMarkdownHooks from "./components/MarkdownComp/useMarkdownHooks";
 
 function App() {
     const {commonStore} = useStore()
@@ -32,30 +33,18 @@ function App() {
     const [openExcelDraw, setOpenExcelDraw] = useState(false)
     const [openMarkdown, setOpenMarkdown] = useState(true)
 
+    const {updateMarkdownData} = useMarkdownHooks()
+
 
     useEffect(() => {
-        commonStore.initDocumentsGroup()
+        commonStore.initDocumentsGroup().then(() => {
+            const data = _.cloneDeep(commonStore.documentsGroup.find(item => item.id === commonStore.currentDocumentID)).content
+            updateMarkdownData(data)
+        })
+
+
     }, []);
 
-    useEffect(() => {
-        commonStore.setIsDocumentsGroupDataUpdate(true)
-    }, [commonStore.documentsGroup]);
-
-
-    // document.addEventListener('visibilitychange', async function () {
-    //     if (document.visibilityState === 'hidden') {
-    //         // console.log('用户离开了当前标签页');
-    //         const res = commonStore.saveIndexedDB()
-    //         if (res) {
-    //             setIsDocumentsGroupDataUpdate(false)
-    //         } else {
-    //             setIsDocumentsGroupDataUpdate(true)
-    //         }
-    //
-    //     } else {
-    //         console.log('用户回到了当前标签页');
-    //     }
-    // });
 
 
     document.addEventListener('keydown', async function (event) {
@@ -72,40 +61,18 @@ function App() {
     });
 
 
-    // 监听paste事件
-    // document.addEventListener('paste', function(event) {
-    //     // 获取剪贴板中的所有项
-    //     var items = event.clipboardData.items;
-    //     for (var i = 0; i < items.length; i++) {
-    //         // 检查该项是否为图片
-    //         if (items[i].type.indexOf('image') !== -1) {
-    //             // 获取图片文件
-    //             var file = items[i].getAsFile();
-    //
-    //
-    //
-    //             // 创建Blob URL
-    //             var blobUrl = URL.createObjectURL(file);
-    //             console.log('Blob URL:', blobUrl);
-    //             // 在这里你可以使用blobUrl，例如将其设置为img标签的src属性
-    //             // document.getElementById('your-image-element-id').src = blobUrl;
-    //         }
-    //     }
-    // });
-
-
     return (
-        <div className="flex flex-col pl-1 pr-1 h-screen pt-2 pb-2 w-screen">
-            <div className="flex flee-none items-center justify-between mb-2">
+        <div id={'app'} className="flex flex-col p-2">
+            <div style={{}} className="w-full flex items-center justify-between">
                 <div className="flex items-center">
                     <TitleIcon size={'2rem'} className='ml-1'/>
-                    <h1 className='font-bold'>Cookie Data</h1>
+                    <div className='font-bold'>Cookie Data</div>
                 </div>
 
                 <div className='flex'>
-                    <h1 className={`font-bold mr-2`}>
+                    <div className={`font-bold mr-2`}>
                         Document Title: {currentDocumentObj === undefined ? "" : currentDocumentObj.name}
-                    </h1>
+                    </div>
                     <div className="tooltip tooltip-left mr-2" data-tip="add document">
                         <ModalContainerComp>
                             <dialog id="addDocument_modal" className="modal">
@@ -121,19 +88,10 @@ function App() {
                                                 const id = crypto.randomUUID()
                                                 const name = addFileName
                                                 const content = '**Hello** *world*!'
-                                                const excalidrawSceneData = {
-                                                    elements: [],
-                                                    appState: {},
-                                                    files: {},
-                                                }
                                                 commonStore.addDocumentsGroup({
-                                                    id, name, content, excalidrawSceneData
+                                                    id, name, content
                                                 })
                                                 commonStore.updateCurrentDocumentID(id)
-
-                                                document.getElementById('excalidrawAPIUpdateSceneData')?.click()
-
-
 
                                             }}>Confirm
                                             </button>
@@ -159,8 +117,7 @@ function App() {
                             if (res) {
                                 alert('delete success')
                                 if (commonStore.documentsGroup !== undefined && commonStore.documentsGroup.length > 0) {
-                                    commonStore.updateCurrentDocumentID(commonStore.documentsGroup[commonStore.documentsGroup.length-1].id)
-                                    document.getElementById('excalidrawAPIUpdateSceneData')?.click()
+                                    commonStore.updateCurrentDocumentID(commonStore.documentsGroup[commonStore.documentsGroup.length - 1].id)
                                 }
                             } else {
                                 alert(`delete failed failed`)
@@ -169,14 +126,6 @@ function App() {
                         }}/>
                     </div>
 
-
-                    <div className="tooltip tooltip-left mr-2" data-tip="excel draw">
-                        <DrawICon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
-                            setOpenSearch(false)
-                            setOpenExcelDraw(true)
-                            setOpenMarkdown(false)
-                        }}/>
-                    </div>
                     <div className="tooltip tooltip-left mr-2" data-tip="markdown">
                         <MarkDownIcon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
                             setOpenSearch(false)
@@ -189,11 +138,8 @@ function App() {
                         <DocumentsIcon size={'1.5rem'} className='cursor-pointer ' htmlFor="my-drawer-4"
                                        onClick={() => {
                                            document.getElementById('drawerID').click()
-                                           setOpenArray([openMarkdown, openSearch, openExcelDraw])
+                                           setOpenArray([openMarkdown, openSearch])
 
-                                           // setOpenMarkdown(false)
-                                           // setOpenSearch(false)
-                                           // setOpenExcelDraw(false)
                                        }}/>
 
                         <ModalContainerComp>
@@ -207,11 +153,8 @@ function App() {
                                 <div className="drawer-side">
                                     <label htmlFor="my-drawer-4" aria-label="close sidebar"
                                            className="drawer-overlay" onClick={(e) => {
-                                        // openMarkdown, openSearch, openExcelDraw
-
                                         setOpenMarkdown(openArray[0])
                                         setOpenSearch(openArray[1])
-                                        setOpenExcelDraw(openArray[2])
 
                                     }}></label>
                                     <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
@@ -221,7 +164,9 @@ function App() {
                                             <a
                                                 onClick={() => {
                                                     commonStore.updateCurrentDocumentID(item.id)
-                                                    document.getElementById('excalidrawAPIUpdateSceneData')?.click()
+                                                    const data = _.cloneDeep(commonStore.documentsGroup.find(item => item.id === commonStore.currentDocumentID)).content
+                                                    updateMarkdownData(data)
+
                                                 }}>{item.name}</a>
                                         </li>)}
 
@@ -235,7 +180,6 @@ function App() {
                         <SaveIcon size={'1.5rem'} className='mr-1 cursor-pointer'
                                   color={`${commonStore.isDocumentsGroupDataUpdate ? '#fa0404' : '#000'}`}
                                   onClick={async () => {
-                                      document.getElementById('excalidrawAPISaveSceneData')?.click()
                                       const res = await commonStore.saveIndexedDB()
                                       if (res) {
                                           alert('save success')
@@ -243,8 +187,6 @@ function App() {
                                       } else {
                                           alert(`save failed`)
                                       }
-
-
                                   }}/>
                     </div>
 
@@ -299,30 +241,7 @@ function App() {
                     </div>
                 </div>
             </div>
-
-            {openSearch ? <div className='overflow-auto'>
-                {
-                    commonStore.documentsGroup.map(item =>
-                        <div className={'flex flex-col items-center'}
-                             style={{width: '100%'}} key={item.id}>
-                            <h1 className={'font-bold cursor-pointer'} style={{fontSize: '2rem'}}
-                                onClick={() => commonStore.updateCurrentDocumentID(item.id)}>{item.name}</h1>
-                            <MDEditor
-                                value={item.content}
-                                hideToolbar={true} preview={'preview'} style={{width: '80%', height: '20%'}}
-                                visibleDragbar={false}/>
-                            <div className="divider"></div>
-                        </div>
-                    )
-                }
-
-            </div> : null}
-
-
-            {openMarkdown ? <MarkdownComp className='flex-auto'/> : null}
-
-
-            {openExcelDraw ? <ProcessComp className='flex-auto'/> : null}
+            {openMarkdown ? <MarkdownComp/> : null}
 
 
         </div>
