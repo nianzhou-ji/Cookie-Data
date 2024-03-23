@@ -1,8 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
-import {TfiSave as SaveIcon} from "react-icons/tfi";
+import { FiSave as SaveIcon} from "react-icons/fi";
 import {SiCodereview as SearchIcon} from "react-icons/si";
-import {FaThList as DocumentsIcon} from "react-icons/fa";
+import { IoList as DocumentsIcon} from "react-icons/io5";
 import {FaFileExport as ExportIcon} from "react-icons/fa";
 import {SiCookiecutter as TitleIcon} from "react-icons/si";
 import {IoMdAddCircle as AddIcon} from "react-icons/io";
@@ -18,50 +18,66 @@ import {useStore} from "./stores";
 import indexedDBEngine from "./indexDBUtils/indexDBUtils";
 import ModalContainerComp from "./components/ModalComp/ModalComp";
 import React, {useEffect, useState} from "react";
+import Swal from "sweetalert2";
 import _ from "lodash";
 import ProcessComp from "./components/processComp/processComp";
 import useMarkdownHooks from "./components/MarkdownComp/useMarkdownHooks";
+import useAppHook from "./useAppHook";
+import ErrorPage from "./components/ErrorPage/ErrorPage";
+import Utils from "./utils";
 
 function App() {
     const {commonStore} = useStore()
     const currentDocumentObj = commonStore.getCurrentDocumentObj()
-    const [addFileName, setAddFileName] = useState('default')
 
     const {updateMarkdownData} = useMarkdownHooks()
 
+    const buttonGroupID = ['AddIconID', 'DeleteIconID', 'MarkDownIconID', 'DrawIConID', 'DocumentsIconID',
+        'SaveIconID', 'BackupIconID', 'ImportBackupDataIconID']
+
+
+    const {initInterfaceData} = useAppHook()
+
 
     useEffect(() => {
-
-
-        commonStore.initDocumentsGroup().then(() => {
-            const currentObj = _.cloneDeep(commonStore.documentsGroup.find(item => item.id === commonStore.currentDocumentID))
-            if (currentObj == undefined) return
-
-
-            updateMarkdownData(currentObj.markdownData)
-
-
-            commonStore.processDrawObj?.store.loadSnapshot(JSON.parse(currentObj.processData))
-
-
+        commonStore.initDocumentsGroup().then(async () => {
+            await initInterfaceData()
         })
+
 
 
     }, []);
 
 
-    document.addEventListener('keydown', async function (event) {
-        if (event.ctrlKey && event.key === 's') {
-            event.preventDefault(); // 阻止默认行为，即阻止浏览器执行保存操作
-            // 在这里编写你的回调函数逻辑
-            const res = commonStore.saveIndexedDB()
-            if (res) {
-                commonStore.setIsDocumentsGroupDataUpdate(false)
-            } else {
-                commonStore.setIsDocumentsGroupDataUpdate(true)
-            }
+    useEffect(() => {
+        if (commonStore.documentsGroup.length === 0) {
+            buttonGroupID.forEach(item => {
+                if (!['AddIconID', 'ImportBackupDataIconID'].includes(item)) {
+                    Utils.setElementDisabled(item, true)
+                }
+            })
+        } else {
+            buttonGroupID.forEach(item => {
+                Utils.setElementDisabled(item, false)
+            })
         }
-    });
+
+
+    }, [commonStore.documentsGroup])
+
+
+    // document.addEventListener('keydown', async function (event) {
+    //     if (event.ctrlKey && event.key === 's') {
+    //         event.preventDefault(); // 阻止默认行为，即阻止浏览器执行保存操作
+    //         // 在这里编写你的回调函数逻辑
+    //         const res = commonStore.saveIndexedDB()
+    //         if (res) {
+    //             commonStore.setIsDocumentsGroupDataUpdate(false)
+    //         } else {
+    //             commonStore.setIsDocumentsGroupDataUpdate(true)
+    //         }
+    //     }
+    // });
 
 
     document.addEventListener('paste', function (event) {
@@ -88,16 +104,20 @@ function App() {
     });
 
 
+    const btnClass = ' btn btn-ghost btn-square btn-sm hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-gray-500'
+
+
     return (
-        <div id={'app'} className="flex flex-col p-2">
-            <div style={{}} className="w-full flex items-center justify-between">
+        <div id={'app'} className="flex flex-col p-2 h-screen ">
+            <div style={{}} className="w-full flex  items-center justify-between">
                 <div className="flex items-center">
                     <TitleIcon size={'2rem'} className='ml-1'/>
-                    <div className='font-bold'>Cookie Data</div>
+                    <div className='font-bold '>Cookie Data</div>
+                    <p className='ml-2 font-bold'>{commonStore.VERSION}</p>
                 </div>
 
                 <div className='flex'>
-                    <div className={`font-bold mr-2`}>
+                    <div className={`font-bold mr-2 flex items-center`}>
                         Document Title: {currentDocumentObj === undefined ? "" : currentDocumentObj.name}
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip="add document">
@@ -107,13 +127,14 @@ function App() {
                                     <h3 className="font-bold text-lg">Title</h3>
                                     <input type="text" placeholder="Type here"
                                            className="mt-2 input input-bordered" style={{width: '100%'}}
-                                           value={addFileName} onChange={e => setAddFileName(e.target.value)}/>
+                                           value={commonStore.addDocumentName}
+                                           onChange={e => commonStore.updateAddDocumentName(e.target.value)}/>
                                     <div className="modal-action">
                                         <form method="dialog">
                                             {/* if there is a button in form, it will close the modal */}
                                             <button className="btn" onClick={() => {
                                                 const id = crypto.randomUUID()
-                                                const name = addFileName
+                                                const name = commonStore.addDocumentName
                                                 const markdownData = {
                                                     "time": 1711019875915,
                                                     "blocks": [],
@@ -187,8 +208,10 @@ function App() {
 
                                                 commonStore.processDrawObj.store.loadSnapshot(processData)
 
-
-
+                                                commonStore.updateAppCompOpenConfig({
+                                                    markdownAppOpen: true,
+                                                    processAppOpen: false,
+                                                })
 
 
                                             }}>Confirm
@@ -202,49 +225,79 @@ function App() {
                             </dialog>
                         </ModalContainerComp>
 
-                        <AddIcon size={'1.5rem'} className='cursor-pointer'
+                        <AddIcon size={'1.5rem'} className={btnClass+'cursor-pointer'}
                                  onClick={() => {
-                                     setAddFileName(commonStore.formatTime(new Date()))
+                                     commonStore.updateAddDocumentName(commonStore.formatTime(new Date()))
                                      document.getElementById('addDocument_modal').showModal()
-                                 }}/>
+                                 }} id={'AddIconID'}/>
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip="delete document">
-                        <DeleteIcon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
+                        <DeleteIcon id={'DeleteIconID'} size={'1.5rem'}
+                                    className={btnClass+'cursor-pointer'} onClick={async () => {
                             commonStore.deleteDocumentsGroup(commonStore.currentDocumentID)
                             const res = await commonStore.saveIndexedDB()
-                            if (res) {
-                                alert('delete success')
-                                if (commonStore.documentsGroup !== undefined && commonStore.documentsGroup.length > 0) {
-                                    commonStore.updateCurrentDocumentID(commonStore.documentsGroup[commonStore.documentsGroup.length - 1].id)
-                                }
-                            } else {
-                                alert(`delete failed failed`)
-                            }
 
+                            if (res.state) {
+                                await Swal.fire({
+                                    position: "top-end",
+                                    icon: "success",
+                                    title: "Your work has been saved",
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                });
+
+
+                                if (commonStore.documentsGroup.length === 0) {
+                                    commonStore.updateAppCompOpenConfig({
+                                        markdownAppOpen: false,
+                                        processAppOpen: false,
+                                    })
+
+                                    return
+                                }
+
+
+                                commonStore.updateCurrentDocumentID(commonStore.documentsGroup[commonStore.documentsGroup.length - 1].id)
+                                await initInterfaceData()
+
+
+                            } else {
+                                await Swal.fire({
+                                    icon: "error",
+                                    title: "Oops...",
+                                    text: "delete failed"
+                                });
+                            }
                         }}/>
                     </div>
 
                     <div className="tooltip tooltip-left mr-2" data-tip="markdown">
-                        <MarkDownIcon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
+                        <MarkDownIcon id={'MarkDownIconID'} size={'1.5rem'}
+                                      className={btnClass+'cursor-pointer'} onClick={async () => {
                             commonStore.updateAppCompOpenConfig({
                                 markdownAppOpen: true,
                                 processAppOpen: false,
                             })
+                            await initInterfaceData()
                         }}/>
                     </div>
 
 
                     <div className="tooltip tooltip-left mr-2" data-tip="process">
-                        <DrawICon size={'1.5rem'} className='cursor-pointer' onClick={async () => {
+                        <DrawICon id={'DrawIConID'} size={'1.5rem'}
+                                  className={btnClass+'cursor-pointer'} onClick={async () => {
                             commonStore.updateAppCompOpenConfig({
                                 markdownAppOpen: false,
                                 processAppOpen: true,
                             })
+
+                            await initInterfaceData()
                         }}/>
                     </div>
 
                     <div className="tooltip tooltip-left mr-2" data-tip="view document list">
-                        <DocumentsIcon size={'1.5rem'} className='cursor-pointer ' htmlFor="my-drawer-4"
+                        <DocumentsIcon id={'DocumentsIconID'} size={'1.5rem'}
+                                       className={btnClass+'cursor-pointer'} htmlFor="my-drawer-4"
                                        onClick={() => {
                                            document.getElementById('drawerID').click()
                                        }}/>
@@ -266,17 +319,9 @@ function App() {
                                         {commonStore.documentsGroup.slice().reverse().map(item => <li key={item.id}
                                                                                                       className={`${item.id === commonStore.currentDocumentID ? 'bg-blue-100' : null}`}>
                                             <a
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     commonStore.updateCurrentDocumentID(item.id)
-                                                    const currentObj = _.cloneDeep(commonStore.documentsGroup.find(item => item.id === commonStore.currentDocumentID))
-                                                    updateMarkdownData(currentObj.markdownData)
-
-
-
-                                                        commonStore.processDrawObj.store.loadSnapshot(JSON.parse(currentObj.processData))
-
-
-
+                                                    await initInterfaceData()
                                                 }}>{item.name}</a>
                                         </li>)}
 
@@ -287,12 +332,19 @@ function App() {
 
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip='save document'>
-                        <SaveIcon size={'1.5rem'} className='mr-1 cursor-pointer'
+                        <SaveIcon id={'SaveIconID'} size={'1.5rem'}
+                                  className={btnClass+'cursor-pointer'}
                                   color={`${commonStore.isDocumentsGroupDataUpdate ? '#fa0404' : '#000'}`}
                                   onClick={async () => {
                                       const res = await commonStore.saveIndexedDB()
                                       if (res) {
-                                          alert('save success')
+                                          await Swal.fire({
+                                              position: "top-end",
+                                              icon: "success",
+                                              title: "data save success",
+                                              showConfirmButton: false,
+                                              timer: 1500
+                                          });
                                           commonStore.setIsDocumentsGroupDataUpdate(false)
 
 
@@ -318,7 +370,8 @@ function App() {
 
 
                     <div className="tooltip tooltip-left  mr-2" data-tip='backup all documents to local desktop'>
-                        <BackupIcon size={'1.5rem'} className='cursor-pointer' onClick={() => {
+                        <BackupIcon id={'BackupIconID'} size={'1.5rem'}
+                                    className={btnClass+'cursor-pointer'} onClick={() => {
                             commonStore.downloadAllData()
                         }}/>
                     </div>
@@ -345,17 +398,17 @@ function App() {
                             </dialog>
 
                         </ModalContainerComp>
-                        <ImportBackupDataIcon size={'1.5rem'} className='cursor-pointer' onClick={() => {
-                            document.getElementById('ImportBackupData_modal').showModal()
-                        }}/>
+                        <ImportBackupDataIcon id={'ImportBackupDataIconID'} size={'1.5rem'}
+                                              className={btnClass+'cursor-pointer'}
+                                              onClick={() => {
+                                                  document.getElementById('ImportBackupData_modal').showModal()
+                                              }}/>
                     </div>
                 </div>
             </div>
             <MarkdownComp/>
             <ProcessComp/>
-            <button className='hidden'>bu</button>
-
-
+            <ErrorPage/>
         </div>
     );
 }

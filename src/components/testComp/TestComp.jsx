@@ -93,7 +93,7 @@ const TestComp = () => {
                 onClick={() => {
                     const snapshot = editor.store.getSnapshot()
                     const stringified = JSON.stringify(snapshot)
-                    console.log(stringified, 'stringified')
+                    // console.log(stringified, 'stringified')
                 }}
             >
                 Save

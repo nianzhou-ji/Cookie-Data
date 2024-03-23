@@ -5,6 +5,17 @@ import {value} from "lodash/seq";
 
 class CommonStore {
 
+    VERSION = 'V1.0'
+
+
+    addDocumentName='default'
+
+
+    updateAddDocumentName(value){
+        this.addDocumentName = value
+    }
+
+
     appCompOpenConfig = {
         markdownAppOpen: true,
         processAppOpen: false,
@@ -167,7 +178,7 @@ class CommonStore {
         }
 
         readFiles(filesArray).then((resTemp) => {
-            console.log('所有文件读取完成', resTemp);
+            // console.log('所有文件读取完成', resTemp);
             this.updateDocumentsGroup(this.mergeArrays(resTemp))
             alert('import backup data success')
 
@@ -199,31 +210,33 @@ class CommonStore {
 
         if (res === undefined) return
         res.documentsGroup = JSON.parse(res.documentsGroup)
+
+        // console.log(res, 'initDocumentsGroup')
         this.updateDocumentsGroup(res.documentsGroup)
 
         if (res.documentsGroup !== undefined && res.documentsGroup.length > 0) {
             this.updateCurrentDocumentID(res.documentsGroup[res.documentsGroup.length - 1].id)
         }
 
+
     }
 
 
     async saveIndexedDB() {
-
-        if (this.markdownObj !== null) {
-            const res = await this.markdownObj.save()
-            this.patchDocumentsGroup(res, 'markdownData')
-        }
-
-        if (this.processDrawObj !== null) {
-            const snapshot = this.processDrawObj.store.getSnapshot()
-            this.patchDocumentsGroup(JSON.stringify(snapshot), 'processData')
-        }
-
-        console.log(_.cloneDeep(this.documentsGroup), 'documentsGroup')
-
-        let state = true
         try {
+            if (this.markdownObj !== null) {
+                const res = await this.markdownObj.save()
+                this.patchDocumentsGroup(res, 'markdownData')
+            }
+
+            if (this.processDrawObj !== null) {
+                const snapshot = this.processDrawObj.store.getSnapshot()
+                this.patchDocumentsGroup(JSON.stringify(snapshot), 'processData')
+            }
+
+            // console.log(_.cloneDeep(this.documentsGroup), 'documentsGroup')
+
+
             await indexedDBEngine.open()
 
             await indexedDBEngine.patch({
@@ -231,11 +244,12 @@ class CommonStore {
                 documentsGroup: JSON.stringify(this.documentsGroup)
             })
 
+            return {state: true}
         } catch (e) {
-            state = false
+            return {state: false, error: e}
         }
 
-        return state
+
     }
 
 

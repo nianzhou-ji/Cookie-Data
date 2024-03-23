@@ -70,7 +70,7 @@ const ProcessComp = ({className}) => {
     }, [editor]);
 
     return (
-        <div className={`mt-3 ${commonStore.appCompOpenConfig.processAppOpen ? null : 'hidden'}`} style={{
+        <div className={`flex-grow  mt-3 ${commonStore.documentsGroup.length > 0 && commonStore.appCompOpenConfig.processAppOpen ? null : 'hidden'}`} style={{
             height: '92vh',
             overflow: "auto",
             // backgroundColor:'blue'
@@ -78,21 +78,6 @@ const ProcessComp = ({className}) => {
             <div style={{width: '100%', height: '100%'}}>
                 <Tldraw onMount={setAppToState}/>
             </div>
-            <div className='hidden'
-                 onCopy={(event) => event.stopPropagation()}
-            >
-            </div>
-
-
-            <button className='hidden'
-                    onClick={() => {
-                        const snapshot = editor.store.getSnapshot()
-                        const stringified = JSON.stringify(snapshot)
-                        console.log(stringified, 'stringified')
-                    }}
-            >
-                Save
-            </button>
         </div>
     )
 };

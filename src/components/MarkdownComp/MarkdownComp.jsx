@@ -6,13 +6,12 @@ import {useStore} from "../../stores";
 const MarkdownComp = ({className}) => {
     const {commonStore} = useStore()
     return <div id={'editorjs'}
-                className={`${className} ${commonStore.appCompOpenConfig.markdownAppOpen ? null : 'hidden'}`} style={{
-        maxHeight: '92vh',
-        height: '92vh',
-        overflow: "auto",
-
-        // backgroundColor:'blue'
-    }}></div>
+                className={`flex-auto ${className} ${commonStore.documentsGroup.length > 0 && commonStore.appCompOpenConfig.markdownAppOpen ? null : 'hidden'}`}
+                style={{
+                    maxHeight: '92vh',
+                    height: '92vh',
+                    overflow: "auto",
+                }}></div>
 };
 
 
