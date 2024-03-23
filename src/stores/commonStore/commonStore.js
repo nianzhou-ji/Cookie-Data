@@ -3,7 +3,7 @@ import _ from 'lodash'
 import indexedDBEngine from "../../indexDBUtils/indexDBUtils";
 import {value} from "lodash/seq";
 import Utils from "../../utils";
-import Swal from "sweetalert2";
+
 
 class CommonStore {
 
