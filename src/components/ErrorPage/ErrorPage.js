@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {observer} from "mobx-react-lite";
 import {useStore} from "../../stores";
+import Utils from "../../utils";
 
 const ErrorPage = () => {
 
@@ -46,7 +47,7 @@ const ErrorPage = () => {
                 <h1 className="mt-6 text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">Uh-oh!</h1>
 
                 <a className="group relative inline-block focus:outline-none focus:ring" href="#" onClick={()=>{
-                    commonStore.updateAddDocumentName(commonStore.formatTime(new Date()))
+                    commonStore.updateAddDocumentName(Utils.formatTime(new Date()))
                     document.getElementById('addDocument_modal').showModal()
                 }}>
                       <span

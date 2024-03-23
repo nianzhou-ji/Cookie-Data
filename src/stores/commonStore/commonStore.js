@@ -2,16 +2,18 @@ import {makeAutoObservable} from "mobx";
 import _ from 'lodash'
 import indexedDBEngine from "../../indexDBUtils/indexDBUtils";
 import {value} from "lodash/seq";
+import Utils from "../../utils";
+import Swal from "sweetalert2";
 
 class CommonStore {
 
-    VERSION = 'V1.0'
+    VERSION = 'V1.1'
 
 
-    addDocumentName='default'
+    addDocumentName = 'default'
 
 
-    updateAddDocumentName(value){
+    updateAddDocumentName(value) {
         this.addDocumentName = value
     }
 
@@ -62,16 +64,6 @@ class CommonStore {
         this.isDocumentsGroupDataUpdate = value
     }
 
-    formatTime(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        const seconds = String(date.getSeconds()).padStart(2, '0');
-        return `${year}-${month}-${day}__${hours}-${minutes}-${seconds}`;
-    }
-
     addDocumentsGroup(value) {
         const tempObj = _.cloneDeep(this.documentsGroup)
         tempObj.push(value)
@@ -116,7 +108,7 @@ class CommonStore {
         // 创建一个临时的 a 标签用于下载
         const a = document.createElement('a');
         a.href = url;
-        a.download = this.formatTime(new Date()) + '_backup.json';
+        a.download = Utils.formatTime(new Date()) + '_backup.json';
 
         // 触发下载
         document.body.appendChild(a);
@@ -125,69 +117,6 @@ class CommonStore {
         // 清理
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-    }
-
-    parsingBackupData(files) {
-        let resTemp = [];
-
-        // 获取选中的所有文件
-        var filesArray = Array.from(files);
-
-        // 按照文件的最后修改时间进行排序
-        filesArray.sort(function (a, b) {
-            return a.lastModified - b.lastModified;
-        });
-
-
-        // 在控制台打印排序后的文件名和最后修改时间
-        // filesArray.forEach(function(file) {
-        //     console.log("File: " + file.name + ", Last Modified: " + new Date(file.lastModified));
-        // });
-
-        async function readFiles(filesArray) {
-            for (const file of filesArray) {
-
-
-                // 创建一个用于读取文件的函数，返回一个 Promise
-                const readFile = (file) => {
-                    return new Promise((resolve, reject) => {
-                        const reader = new FileReader();
-
-                        reader.onload = function (event) {
-                            const json = JSON.parse(event.target.result);
-                            resTemp.push(json);
-                            // console.log(json);
-                            resolve(); // 文件读取成功，解决 Promise
-                        };
-
-                        reader.onerror = function (error) {
-                            reject(error); // 文件读取失败，拒绝 Promise
-                        };
-
-                        reader.readAsText(file);
-                    });
-                };
-
-                // 等待文件读取完成
-                await readFile(file);
-                // console.log(new Date(file.lastModified))
-            }
-
-
-            return resTemp
-        }
-
-        readFiles(filesArray).then((resTemp) => {
-            // console.log('所有文件读取完成', resTemp);
-            this.updateDocumentsGroup(this.mergeArrays(resTemp))
-            alert('import backup data success')
-
-            if (this.documentsGroup !== undefined && this.documentsGroup.length > 0) {
-                this.updateCurrentDocumentID(this.documentsGroup[0].id)
-            }
-        }).catch((error) => {
-            console.error('读取文件时发生错误:', error);
-        });
     }
 
 
@@ -203,14 +132,65 @@ class CommonStore {
         return Array.from(map.values());
     }
 
+    async parsingBackupData(files) {
+
+        try {
+            // 获取选中的所有文件
+            const filesArray = Array.from(files);
+
+            // 按照文件的最后修改时间进行排序
+            filesArray.sort(function (a, b) {
+                return a.lastModified - b.lastModified;
+            });
+
+
+            async function readFiles(filesArray) {
+                let resTemp = [];
+
+                for (const file of filesArray) {
+                    // 创建一个用于读取文件的函数，返回一个 Promise
+                    const readFile = (file) => {
+                        return new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = function (event) {
+                                const json = JSON.parse(event.target.result);
+                                resTemp.push(json);
+                                // console.log(json);
+                                resolve(); // 文件读取成功，解决 Promise
+                            };
+
+                            reader.readAsText(file);
+                        });
+                    };
+
+                    // 等待文件读取完成
+                    await readFile(file);
+                }
+
+
+                return resTemp
+            }
+
+            const res = await readFiles(filesArray)
+
+            res.push(_.cloneDeep(this.documentsGroup))
+            console.log(res, 'res')
+            this.updateDocumentsGroup(this.mergeArrays(res))
+
+            return await this.saveIndexedDB()
+        } catch (e) {
+            return {state: false, error: e}
+        }
+
+
+    }
+
 
     async initDocumentsGroup() {
         await indexedDBEngine.open()
         const res = await indexedDBEngine.get(1)
 
         if (res === undefined) return
-        res.documentsGroup = JSON.parse(res.documentsGroup)
-
         // console.log(res, 'initDocumentsGroup')
         this.updateDocumentsGroup(res.documentsGroup)
 
@@ -231,8 +211,9 @@ class CommonStore {
 
             if (this.processDrawObj !== null) {
                 const snapshot = this.processDrawObj.store.getSnapshot()
-                this.patchDocumentsGroup(JSON.stringify(snapshot), 'processData')
+                this.patchDocumentsGroup(snapshot, 'processData')
             }
+
 
             // console.log(_.cloneDeep(this.documentsGroup), 'documentsGroup')
 
@@ -241,7 +222,7 @@ class CommonStore {
 
             await indexedDBEngine.patch({
                 id: 1,
-                documentsGroup: JSON.stringify(this.documentsGroup)
+                documentsGroup: _.cloneDeep(this.documentsGroup)
             })
 
             return {state: true}
@@ -280,7 +261,10 @@ class CommonStore {
 
 
     getCurrentDocumentObj() {
-        return this.documentsGroup.find(item => item.id === this.currentDocumentID)
+        if (this.documentsGroup.length === 0) return null
+        const res = this.documentsGroup.find(item => item.id === this.currentDocumentID)
+        if (res === undefined) return null
+        return _.cloneDeep(res)
     }
 
 

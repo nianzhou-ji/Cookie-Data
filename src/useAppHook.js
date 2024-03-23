@@ -20,13 +20,13 @@ const useAppHook = () => {
                 return
             }
 
-            const currentObj = _.cloneDeep(commonStore.documentsGroup.find(item => item.id === commonStore.currentDocumentID))
-            if (currentObj === undefined) {
+            const currentObj = commonStore.getCurrentDocumentObj()
+            if (currentObj === null) {
                 return {state: false, error: 'not find data'}
             }
 
             updateMarkdownData(currentObj.markdownData)
-            commonStore.processDrawObj.store.loadSnapshot(JSON.parse(currentObj.processData))
+            commonStore.processDrawObj.store.loadSnapshot(currentObj.processData)
             return {state: true}
 
         } catch (e) {

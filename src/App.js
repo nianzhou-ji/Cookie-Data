@@ -1,8 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
-import { FiSave as SaveIcon} from "react-icons/fi";
+import {FiSave as SaveIcon} from "react-icons/fi";
 import {SiCodereview as SearchIcon} from "react-icons/si";
-import { IoList as DocumentsIcon} from "react-icons/io5";
+import {IoList as DocumentsIcon} from "react-icons/io5";
 import {FaFileExport as ExportIcon} from "react-icons/fa";
 import {SiCookiecutter as TitleIcon} from "react-icons/si";
 import {IoMdAddCircle as AddIcon} from "react-icons/io";
@@ -28,7 +28,7 @@ import Utils from "./utils";
 
 function App() {
     const {commonStore} = useStore()
-    const currentDocumentObj = commonStore.getCurrentDocumentObj()
+
 
     const {updateMarkdownData} = useMarkdownHooks()
 
@@ -43,7 +43,6 @@ function App() {
         commonStore.initDocumentsGroup().then(async () => {
             await initInterfaceData()
         })
-
 
 
     }, []);
@@ -118,7 +117,7 @@ function App() {
 
                 <div className='flex'>
                     <div className={`font-bold mr-2 flex items-center`}>
-                        Document Title: {currentDocumentObj === undefined ? "" : currentDocumentObj.name}
+                        {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: '+commonStore.getCurrentDocumentObj().name}
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip="add document">
                         <ModalContainerComp>
@@ -225,15 +224,15 @@ function App() {
                             </dialog>
                         </ModalContainerComp>
 
-                        <AddIcon size={'1.5rem'} className={btnClass+'cursor-pointer'}
+                        <AddIcon size={'1.5rem'} className={btnClass + 'cursor-pointer'}
                                  onClick={() => {
-                                     commonStore.updateAddDocumentName(commonStore.formatTime(new Date()))
+                                     commonStore.updateAddDocumentName(Utils.formatTime(new Date()))
                                      document.getElementById('addDocument_modal').showModal()
                                  }} id={'AddIconID'}/>
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip="delete document">
                         <DeleteIcon id={'DeleteIconID'} size={'1.5rem'}
-                                    className={btnClass+'cursor-pointer'} onClick={async () => {
+                                    className={btnClass + 'cursor-pointer'} onClick={async () => {
                             commonStore.deleteDocumentsGroup(commonStore.currentDocumentID)
                             const res = await commonStore.saveIndexedDB()
 
@@ -241,7 +240,7 @@ function App() {
                                 await Swal.fire({
                                     position: "top-end",
                                     icon: "success",
-                                    title: "Your work has been saved",
+                                    title: "delete saved",
                                     showConfirmButton: false,
                                     timer: 1500
                                 });
@@ -252,10 +251,8 @@ function App() {
                                         markdownAppOpen: false,
                                         processAppOpen: false,
                                     })
-
                                     return
                                 }
-
 
                                 commonStore.updateCurrentDocumentID(commonStore.documentsGroup[commonStore.documentsGroup.length - 1].id)
                                 await initInterfaceData()
@@ -273,7 +270,7 @@ function App() {
 
                     <div className="tooltip tooltip-left mr-2" data-tip="markdown">
                         <MarkDownIcon id={'MarkDownIconID'} size={'1.5rem'}
-                                      className={btnClass+'cursor-pointer'} onClick={async () => {
+                                      className={btnClass + 'cursor-pointer'} onClick={async () => {
                             commonStore.updateAppCompOpenConfig({
                                 markdownAppOpen: true,
                                 processAppOpen: false,
@@ -285,7 +282,7 @@ function App() {
 
                     <div className="tooltip tooltip-left mr-2" data-tip="process">
                         <DrawICon id={'DrawIConID'} size={'1.5rem'}
-                                  className={btnClass+'cursor-pointer'} onClick={async () => {
+                                  className={btnClass + 'cursor-pointer'} onClick={async () => {
                             commonStore.updateAppCompOpenConfig({
                                 markdownAppOpen: false,
                                 processAppOpen: true,
@@ -297,7 +294,7 @@ function App() {
 
                     <div className="tooltip tooltip-left mr-2" data-tip="view document list">
                         <DocumentsIcon id={'DocumentsIconID'} size={'1.5rem'}
-                                       className={btnClass+'cursor-pointer'} htmlFor="my-drawer-4"
+                                       className={btnClass + 'cursor-pointer'} htmlFor="my-drawer-4"
                                        onClick={() => {
                                            document.getElementById('drawerID').click()
                                        }}/>
@@ -333,11 +330,11 @@ function App() {
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip='save document'>
                         <SaveIcon id={'SaveIconID'} size={'1.5rem'}
-                                  className={btnClass+'cursor-pointer'}
+                                  className={btnClass + 'cursor-pointer'}
                                   color={`${commonStore.isDocumentsGroupDataUpdate ? '#fa0404' : '#000'}`}
                                   onClick={async () => {
                                       const res = await commonStore.saveIndexedDB()
-                                      if (res) {
+                                      if (res.state) {
                                           await Swal.fire({
                                               position: "top-end",
                                               icon: "success",
@@ -349,7 +346,13 @@ function App() {
 
 
                                       } else {
-                                          alert(`save failed`)
+                                          await Swal.fire({
+                                              icon: "error",
+                                              title: "Oops...",
+                                              text: "import failed:"+res.error
+                                          });
+
+
                                       }
                                   }}/>
                     </div>
@@ -371,7 +374,7 @@ function App() {
 
                     <div className="tooltip tooltip-left  mr-2" data-tip='backup all documents to local desktop'>
                         <BackupIcon id={'BackupIconID'} size={'1.5rem'}
-                                    className={btnClass+'cursor-pointer'} onClick={() => {
+                                    className={btnClass + 'cursor-pointer'} onClick={() => {
                             commonStore.downloadAllData()
                         }}/>
                     </div>
@@ -382,9 +385,38 @@ function App() {
                                     <h3 className="font-bold text-lg">Import backup data</h3>
                                     <input id="fileInput" type="file"
                                            className="file-input file-input-bordered w-full mt-3" multiple
-                                           accept=".json" onChange={e => {
+                                           accept=".json" onChange={async e => {
 
-                                        commonStore.parsingBackupData(e.target.files)
+                                        const res  = await commonStore.parsingBackupData(e.target.files)
+                                        if (!res.state){
+                                            await Swal.fire({
+                                                icon: "error",
+                                                title: "Oops...",
+                                                text: "import failed:"+res.error
+                                            });
+
+                                            return
+                                        }
+
+                                        if (commonStore.documentsGroup !== undefined && commonStore.documentsGroup.length > 0) {
+                                            commonStore.updateCurrentDocumentID(commonStore.documentsGroup[0].id)
+                                        }
+
+                                        await initInterfaceData()
+
+
+                                        commonStore.updateAppCompOpenConfig({
+                                            markdownAppOpen: true,
+                                            processAppOpen: false,
+                                        })
+
+                                        await Swal.fire({
+                                            position: "top-end",
+                                            icon: "success",
+                                            title: "Import backup data success",
+                                            showConfirmButton: false,
+                                            timer: 1500
+                                        });
 
 
                                     }}/>
@@ -399,7 +431,7 @@ function App() {
 
                         </ModalContainerComp>
                         <ImportBackupDataIcon id={'ImportBackupDataIconID'} size={'1.5rem'}
-                                              className={btnClass+'cursor-pointer'}
+                                              className={btnClass + 'cursor-pointer'}
                                               onClick={() => {
                                                   document.getElementById('ImportBackupData_modal').showModal()
                                               }}/>
