@@ -25,6 +25,7 @@ import useMarkdownHooks from "./components/MarkdownComp/useMarkdownHooks";
 import useAppHook from "./useAppHook";
 import ErrorPage from "./components/ErrorPage/ErrorPage";
 import Utils from "./utils";
+import SearchComp from "./components/searchComp/searchComp";
 
 function App() {
     const {commonStore} = useStore()
@@ -114,6 +115,9 @@ function App() {
                     <div className='font-bold '>Cookie Data</div>
                     <p className='ml-2 font-bold'>{commonStore.VERSION}</p>
                 </div>
+
+
+                <SearchComp/>
 
                 <div className='flex'>
                     <div className={`font-bold mr-2 flex items-center`}>
