@@ -2,10 +2,17 @@ import React, {useCallback, useEffect, useState} from 'react';
 import {observer} from "mobx-react-lite";
 import {useStore} from "../../stores";
 import _ from 'lodash'
-import {Tldraw} from "tldraw";
-
+import {Tldraw} from "@tldraw/tldraw";
+import 'tldraw/tldraw.css'
+import { getAssetUrls } from '@tldraw/assets/selfHosted'
+// const assetUrls = getAssetUrls({
+//     // baseUrl:`${process.env.PUBLIC_URL}/assets`,
+//     baseUrl:`./assets`,
+// })
 
 const ProcessComp = ({className}) => {
+
+
     const {commonStore} = useStore()
 
 
@@ -64,6 +71,8 @@ const ProcessComp = ({className}) => {
             scope: 'all'
         });
 
+
+
         return () => {
             cleanupFunction();
         };
@@ -75,7 +84,8 @@ const ProcessComp = ({className}) => {
             overflow: "auto",
             // backgroundColor:'blue'
         }}>
-            <div style={{width: '100%', height: '100%'}}>
+            <div style={{width: '100%', height: '100%'}} className="tldraw__editor">
+                {/*<Tldraw onMount={setAppToState} assetUrls={assetUrls}/>*/}
                 <Tldraw onMount={setAppToState}/>
             </div>
         </div>
