@@ -14,7 +14,7 @@ class CommonStore {
 
         isCaseSensitive: false,
         findAllMatches: true,
-        minMatchCharLength: 1,
+        minMatchCharLength: 5,
         location: 0,
         threshold: 0.6,
         distance: 100,

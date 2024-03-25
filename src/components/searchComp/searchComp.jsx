@@ -100,6 +100,7 @@ const SearchComp = () => {
                         threshold: commonStore.searchEngineConfig.threshold,
                         distance: commonStore.searchEngineConfig.distance,
                         ignoreLocation: commonStore.searchEngineConfig.ignoreLocation,
+                        includeMatches: true,
                         keys: ['markdownData.blocks.SearchedText']
                     })
 
