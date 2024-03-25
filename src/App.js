@@ -109,19 +109,23 @@ function App() {
 
     return (
         <div id={'app'} className="flex flex-col p-2 h-screen ">
-            <div style={{}} className="w-full flex  items-center justify-between">
-                <div className="flex items-center">
-                    <TitleIcon size={'2rem'} className='ml-1'/>
-                    <div className='font-bold '>Cookie Data</div>
-                    <p className='ml-2 font-bold'>{commonStore.VERSION}</p>
+            <div style={{}} className="w-full flex  items-center justify-between mb-4">
+
+                <div className='flex'>
+                    <div className="flex items-center">
+                        <TitleIcon size={'2rem'} className='ml-1'/>
+                        <div className='font-bold '>Cookie Data</div>
+                        <p className='ml-2 font-bold'>{commonStore.VERSION}</p>
+                    </div>
+
+
+                    <SearchComp/>
                 </div>
 
 
-                <SearchComp/>
-
                 <div className='flex'>
                     <div className={`font-bold mr-2 flex items-center`}>
-                        {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: '+commonStore.getCurrentDocumentObj().name}
+                        {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: ' + commonStore.getCurrentDocumentObj().name}
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip="add document">
                         <ModalContainerComp>

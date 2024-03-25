@@ -90,26 +90,12 @@ class SearchEngine {
 
     }
 
-    static fuseOptions = {
-        // isCaseSensitive: false,
-        // includeScore: false,
-        // shouldSort: true,
-        includeMatches: true,
-        findAllMatches: true,
-        // minMatchCharLength: 1,
-        // location: 0,
-        // threshold: 0.6,
-        // distance: 100,
-        // useExtendedSearch: false,
-        ignoreLocation: true,
-        // ignoreFieldNorm: false,
-        // fieldNormWeight: 1,
-        // keys: ['author.tags.value']
-        keys: ['markdownData.blocks.SearchedText']
-    };
 
-    constructor(data) {
-        this.fuse = new Fuse(SearchEngine.convertSearchDatabase(data), SearchEngine.fuseOptions);
+
+    constructor(data, fuseOptions) {
+        this.fuse = new Fuse(SearchEngine.convertSearchDatabase(data), fuseOptions);
+
+        console.log(fuseOptions, 'fuseOptions')
     }
 
 

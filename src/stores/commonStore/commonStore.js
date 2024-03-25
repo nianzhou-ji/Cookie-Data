@@ -7,14 +7,23 @@ import Utils from "../../utils";
 class CommonStore {
 
 
-    searchEngineConfig ={
-        searchResultMenuOpen:false,
-        searchedText:'',
-        searchResultList:[],
+    searchEngineConfig = {
+        searchResultMenuOpen: false,
+        searchedText: '',
+        searchResultList: [],
+
+        isCaseSensitive: false,
+        findAllMatches: true,
+        minMatchCharLength: 1,
+        location: 0,
+        threshold: 0.6,
+        distance: 100,
+        ignoreLocation: false,
+
     }
 
 
-    patchSearchEngineConfig(value){
+    patchSearchEngineConfig(value) {
         const temp = _.cloneDeep(this.searchEngineConfig)
         if (value.searchResultMenuOpen !== undefined) {
             temp.searchResultMenuOpen = value.searchResultMenuOpen
@@ -27,14 +36,39 @@ class CommonStore {
             temp.searchResultList = value.searchResultList
         }
 
+
+        if (value.isCaseSensitive !== undefined) {
+            temp.isCaseSensitive = value.isCaseSensitive
+        }
+
+        if (value.findAllMatches !== undefined) {
+            temp.findAllMatches = value.findAllMatches
+        }
+        if (value.minMatchCharLength !== undefined) {
+            temp.minMatchCharLength = value.minMatchCharLength
+        }
+        if (value.location !== undefined) {
+            temp.location = value.location
+        }
+
+
+        if (value.threshold !== undefined) {
+            temp.threshold = value.threshold
+        }
+
+
+        if (value.distance !== undefined) {
+            temp.distance = value.distance
+        }
+
+
+        if (value.ignoreLocation !== undefined) {
+            temp.ignoreLocation = value.ignoreLocation
+        }
         this.searchEngineConfig = temp
 
 
-
     }
-
-
-
 
 
     VERSION = 'V1.1'
