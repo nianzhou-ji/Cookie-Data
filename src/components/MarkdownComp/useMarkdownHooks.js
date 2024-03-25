@@ -116,7 +116,7 @@ const useMarkdownHooks = () => {
                 shortcut: 'CMD+SHIFT+C'
             },
 
-            linkTool: LinkTool,
+            // linkTool: LinkTool,
 
             code: CodeTool,
 
@@ -148,7 +148,7 @@ const useMarkdownHooks = () => {
                                 // 异步操作
                                 let condition = true; // 假设这是某个异步操作的条件
                                 if (condition) {
-                                    console.log(file, 'ssdfsf')
+
 
                                     const reader = new FileReader();
 
@@ -204,7 +204,7 @@ const useMarkdownHooks = () => {
         data: {}
     }
 
-    const getNewEditorJS = () => {
+    const getNewEditorJS = (editorJSOnReady=()=>{}) => {
 
         const parentNode = document.getElementById('editorjs');
         while (parentNode?.firstChild) {
@@ -219,16 +219,21 @@ const useMarkdownHooks = () => {
 
 
                 // console.log(e, 'editorConfig')
-            })
+            }),
+
+            onReady() {
+                // console.log('EditorJS ok')
+                editorJSOnReady()
+            }
 
         })
 
 
         commonStore.updateMarkdownObj(editorJS)
     }
-    const updateMarkdownData = (value) => {
+    const updateMarkdownData = (value, editorJSOnReady=()=>{}) => {
         editorConfig['data'] = value
-        getNewEditorJS()
+        getNewEditorJS(editorJSOnReady)
     }
 
 

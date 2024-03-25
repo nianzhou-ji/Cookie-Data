@@ -104,7 +104,7 @@ function App() {
     });
 
 
-    const btnClass = ' btn btn-ghost btn-square btn-sm hover:scale-110 hover:shadow-xl focus:outline-none focus:ring active:bg-gray-500'
+    const btnClass = ' btn btn-ghost btn-square btn-sm hover:scale-125 hover:shadow-xl focus:outline-none focus:ring active:bg-gray-500'
 
 
     return (

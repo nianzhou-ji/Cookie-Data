@@ -1,11 +1,41 @@
 import {makeAutoObservable} from "mobx";
 import _ from 'lodash'
 import indexedDBEngine from "../../indexDBUtils/indexDBUtils";
-import {value} from "lodash/seq";
 import Utils from "../../utils";
 
 
 class CommonStore {
+
+
+    searchEngineConfig ={
+        searchResultMenuOpen:false,
+        searchedText:'',
+        searchResultList:[],
+    }
+
+
+    patchSearchEngineConfig(value){
+        const temp = _.cloneDeep(this.searchEngineConfig)
+        if (value.searchResultMenuOpen !== undefined) {
+            temp.searchResultMenuOpen = value.searchResultMenuOpen
+        }
+
+        if (value.searchedText !== undefined) {
+            temp.searchedText = value.searchedText
+        }
+        if (value.searchResultList !== undefined) {
+            temp.searchResultList = value.searchResultList
+        }
+
+        this.searchEngineConfig = temp
+
+
+
+    }
+
+
+
+
 
     VERSION = 'V1.1'
 
@@ -174,7 +204,7 @@ class CommonStore {
             const res = await readFiles(filesArray)
 
             res.push(_.cloneDeep(this.documentsGroup))
-            console.log(res, 'res')
+            // console.log(res, 'res')
             this.updateDocumentsGroup(this.mergeArrays(res))
 
             return await this.saveIndexedDB()
@@ -211,6 +241,7 @@ class CommonStore {
 
             if (this.processDrawObj !== null) {
                 const snapshot = this.processDrawObj.store.getSnapshot()
+                // this.patchDocumentsGroup(JSON.parse(snapshot), 'processData')
                 this.patchDocumentsGroup(snapshot, 'processData')
             }
 

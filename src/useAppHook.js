@@ -1,14 +1,13 @@
 import _ from "lodash";
 import {useStore} from "./stores";
 import useMarkdownHooks from "./components/MarkdownComp/useMarkdownHooks";
-import Swal from "sweetalert2";
 
 const useAppHook = () => {
     const {commonStore} = useStore()
     const {updateMarkdownData} = useMarkdownHooks()
 
 
-    const initInterfaceData = async () => {
+    const initInterfaceData = async (editorJSOnReady=()=>{}) => {
         try {
 
             if (commonStore.documentsGroup.length === 0) {
@@ -25,8 +24,9 @@ const useAppHook = () => {
                 return {state: false, error: 'not find data'}
             }
 
-            updateMarkdownData(currentObj.markdownData)
+            updateMarkdownData(currentObj.markdownData, editorJSOnReady)
             commonStore.processDrawObj.store.loadSnapshot(currentObj.processData)
+            // commonStore.processDrawObj.store.loadSnapshot(JSON.stringify(currentObj.processData))
             return {state: true}
 
         } catch (e) {
