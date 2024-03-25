@@ -71,7 +71,7 @@ class CommonStore {
     }
 
 
-    VERSION = 'V1.1'
+    VERSION = 'V1.2'
 
 
     addDocumentName = 'default'
