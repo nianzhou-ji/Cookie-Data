@@ -6,6 +6,12 @@ import Utils from "../../utils";
 
 class CommonStore {
 
+    toolboxAppOpenIconState = true
+
+    updateToolboxAppOpenIconState = (value) => {
+        this.toolboxAppOpenIconState = value
+    }
+
 
     searchEngineConfig = {
         searchResultMenuOpen: false,
@@ -18,7 +24,7 @@ class CommonStore {
         location: 0,
         threshold: 0.6,
         distance: 100,
-        ignoreLocation: false,
+        ignoreLocation: true,
 
     }
 
@@ -84,7 +90,9 @@ class CommonStore {
 
     appCompOpenConfig = {
         markdownAppOpen: true,
+        errorPageAppOpen: false,
         processAppOpen: false,
+        toolboxAppOpen: false,
     }
 
     updateAppCompOpenConfig(value) {
@@ -97,6 +105,12 @@ class CommonStore {
             temp.processAppOpen = value.processAppOpen
         }
 
+        if (value.toolboxAppOpen !== undefined) {
+            temp.toolboxAppOpen = value.toolboxAppOpen
+        }
+        if (value.errorPageAppOpen !== undefined) {
+            temp.errorPageAppOpen = value.errorPageAppOpen
+        }
         this.appCompOpenConfig = temp
     }
 

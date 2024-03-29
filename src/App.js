@@ -26,9 +26,13 @@ import useAppHook from "./useAppHook";
 import ErrorPage from "./components/ErrorPage/ErrorPage";
 import Utils from "./utils";
 import SearchComp from "./components/searchComp/searchComp";
+import ToolboxComp from "./components/toolboxComp/toolboxComp";
 
 function App() {
     const {commonStore} = useStore()
+
+
+    const [appOpenCache, setAppOpenCache] = useState({})
 
 
     const {updateMarkdownData} = useMarkdownHooks()
@@ -118,13 +122,12 @@ function App() {
                         <p className='ml-2 font-bold'>{commonStore.VERSION}</p>
                     </div>
 
-
-                    <SearchComp/>
+                    {commonStore.toolboxAppOpenIconState ? <SearchComp/> : null}
                 </div>
 
 
                 <div className='flex'>
-                    <div className={`font-bold mr-2 flex items-center`}>
+                    <div className={`font-bold mr-2 flex items-center ${commonStore.toolboxAppOpenIconState?null:'hidden'}`}>
                         {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: ' + commonStore.getCurrentDocumentObj().name}
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip="add document">
@@ -218,6 +221,8 @@ function App() {
                                                 commonStore.updateAppCompOpenConfig({
                                                     markdownAppOpen: true,
                                                     processAppOpen: false,
+                                                    errorPageAppOpen: false,
+                                                    toolboxAppOpen: false,
                                                 })
 
 
@@ -258,6 +263,8 @@ function App() {
                                     commonStore.updateAppCompOpenConfig({
                                         markdownAppOpen: false,
                                         processAppOpen: false,
+                                        errorPageAppOpen: true,
+                                        toolboxAppOpen: false,
                                     })
                                     return
                                 }
@@ -282,8 +289,12 @@ function App() {
                             commonStore.updateAppCompOpenConfig({
                                 markdownAppOpen: true,
                                 processAppOpen: false,
+                                errorPageAppOpen: false,
+                                toolboxAppOpen: false,
                             })
                             await initInterfaceData()
+
+                            commonStore.updateToolboxAppOpenIconState(true)
                         }}/>
                     </div>
 
@@ -294,9 +305,13 @@ function App() {
                             commonStore.updateAppCompOpenConfig({
                                 markdownAppOpen: false,
                                 processAppOpen: true,
+                                errorPageAppOpen: false,
+                                toolboxAppOpen: false,
                             })
 
                             await initInterfaceData()
+
+                            commonStore.updateToolboxAppOpenIconState(true)
                         }}/>
                     </div>
 
@@ -357,7 +372,7 @@ function App() {
                                           await Swal.fire({
                                               icon: "error",
                                               title: "Oops...",
-                                              text: "import failed:"+res.error
+                                              text: "import failed:" + res.error
                                           });
 
 
@@ -386,7 +401,7 @@ function App() {
                             commonStore.downloadAllData()
                         }}/>
                     </div>
-                    <div className="tooltip tooltip-left" data-tip='import backup documents'>
+                    <div className="tooltip tooltip-left   mr-2" data-tip='import backup documents'>
                         <ModalContainerComp>
                             <dialog id="ImportBackupData_modal" className="modal">
                                 <div className="modal-box">
@@ -395,12 +410,12 @@ function App() {
                                            className="file-input file-input-bordered w-full mt-3" multiple
                                            accept=".json" onChange={async e => {
 
-                                        const res  = await commonStore.parsingBackupData(e.target.files)
-                                        if (!res.state){
+                                        const res = await commonStore.parsingBackupData(e.target.files)
+                                        if (!res.state) {
                                             await Swal.fire({
                                                 icon: "error",
                                                 title: "Oops...",
-                                                text: "import failed:"+res.error
+                                                text: "import failed:" + res.error
                                             });
 
                                             return
@@ -416,6 +431,8 @@ function App() {
                                         commonStore.updateAppCompOpenConfig({
                                             markdownAppOpen: true,
                                             processAppOpen: false,
+                                            errorPageAppOpen: false,
+                                            toolboxAppOpen: false,
                                         })
 
                                         await Swal.fire({
@@ -444,11 +461,71 @@ function App() {
                                                   document.getElementById('ImportBackupData_modal').showModal()
                                               }}/>
                     </div>
+
+
+                    <div className="tooltip tooltip-left" data-tip='Open toolbox'>
+
+                        <svg onClick={() => {
+
+                            setAppOpenCache(_.cloneDeep(commonStore.appCompOpenConfig))
+
+
+                            commonStore.updateAppCompOpenConfig({
+                                markdownAppOpen: false,
+                                processAppOpen: false,
+                                errorPageAppOpen: false,
+                                toolboxAppOpen: true,
+                            })
+
+                            commonStore.updateToolboxAppOpenIconState(false)
+
+
+                            buttonGroupID.forEach(item => {
+                                Utils.setElementDisabled(item, true)
+                            })
+
+                        }} t="1711625812241"
+                             className={btnClass + 'cursor-pointer ' + `${commonStore.toolboxAppOpenIconState ? null : 'hidden'}`}
+                             viewBox="0 0 1024 1024" version="1.1"
+                             xmlns="http://www.w3.org/2000/svg" p-id="8023" width="1.5rem" height="1.5rem">
+                            <path
+                                d="M608 768h-192v-96H64v192a128 128 0 0 0 128 128h640a128 128 0 0 0 128-128v-192H608z m176-512H768V179.84a141.76 141.76 0 0 0-128-141.44 1354.56 1354.56 0 0 0-258.56 0A141.76 141.76 0 0 0 256 179.84V256h-16A208 208 0 0 0 32 464V608h384v-96h192v96h384v-144A208 208 0 0 0 784 256zM640 256h-256V179.84a14.4 14.4 0 0 1 12.8-14.4 1226.24 1226.24 0 0 1 230.4 0 14.4 14.4 0 0 1 12.8 14.4z"
+                                fill="#231F20" p-id="8024"></path>
+                        </svg>
+
+                    </div>
+
+
+                    <div className="tooltip tooltip-left" data-tip='Close toolbox'>
+
+                        <svg onClick={() => {
+                            commonStore.updateAppCompOpenConfig(appOpenCache)
+
+                            commonStore.updateToolboxAppOpenIconState(true)
+
+
+                            buttonGroupID.forEach(item => {
+                                Utils.setElementDisabled(item, false)
+                            })
+                        }}
+                             t="1711627062940"
+                             className={btnClass + 'cursor-pointer ' + `${!commonStore.toolboxAppOpenIconState ? null : 'hidden'}`}
+                             viewBox="0 0 1024 1024" version="1.1"
+                             xmlns="http://www.w3.org/2000/svg" p-id="8994" width="1.5rem" height="1.5rem">
+                            <path
+                                d="M509.262713 5.474574c281.272162 0 509.262713 228.02238 509.262713 509.262713 0 281.272162-227.990551 509.262713-509.262713 509.262713s-509.262713-227.990551-509.262713-509.262713c0-281.240333 227.990551-509.262713 509.262713-509.262713z m135.050106 278.725849L509.262713 419.250528l-135.050106-135.050105-90.012184 90.012184L419.186871 509.262713l-135.018277 135.081935 90.012184 90.012184L509.262713 599.274897l135.050106 135.050106 90.012184-90.012184L599.274897 509.262713l135.050106-135.050106-90.012184-90.012184z"
+                                fill="#4B4B4B" p-id="8995"></path>
+                        </svg>
+
+                    </div>
+
+
                 </div>
             </div>
             <MarkdownComp/>
             <ProcessComp/>
             <ErrorPage/>
+            <ToolboxComp/>
         </div>
     );
 }

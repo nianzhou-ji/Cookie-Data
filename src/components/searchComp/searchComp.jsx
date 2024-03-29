@@ -220,7 +220,7 @@ const SearchComp = () => {
                                 <span className="label-text tooltip tooltip-right"
                                       data-tip={'Indicates whether comparisons should be case sensitive.'}>Is Case Sensitive</span>
                                 <input type="checkbox"  className="checkbox"
-                                       value={commonStore.searchEngineConfig.isCaseSensitive}
+                                       checked={commonStore.searchEngineConfig.isCaseSensitive}
                                        onChange={e => commonStore.patchSearchEngineConfig({
                                            isCaseSensitive: e.target.checked
                                        })}
@@ -234,8 +234,7 @@ const SearchComp = () => {
                                 <span className="label-text tooltip tooltip-right"
                                       data-tip={'When true, the matching function will continue to the end of a search pattern even if a perfect match has already been located in the string.'}>Find All Matches</span>
                                 <input type="checkbox"  className="checkbox "
-
-                                       value={commonStore.searchEngineConfig.findAllMatches}
+                                       checked={commonStore.searchEngineConfig.findAllMatches}
                                        onChange={e => commonStore.patchSearchEngineConfig({
                                            findAllMatches: e.target.checked
                                        })}
@@ -313,7 +312,7 @@ const SearchComp = () => {
                                       data-tip={'When true, search will ignore location and distance, so it won\'t matter where in the string the pattern appears.'}>Ignore Location</span>
                                 <input type="checkbox" className="checkbox "
 
-                                       value={commonStore.searchEngineConfig.ignoreLocation}
+                                       checked={commonStore.searchEngineConfig.ignoreLocation}
                                        onChange={e => commonStore.patchSearchEngineConfig({
                                            ignoreLocation: e.target.checked
                                        })}

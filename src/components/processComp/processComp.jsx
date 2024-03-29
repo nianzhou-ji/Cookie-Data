@@ -4,11 +4,8 @@ import {useStore} from "../../stores";
 import _ from 'lodash'
 import {Tldraw} from "@tldraw/tldraw";
 import 'tldraw/tldraw.css'
-import { getAssetUrls } from '@tldraw/assets/selfHosted'
-// const assetUrls = getAssetUrls({
-//     // baseUrl:`${process.env.PUBLIC_URL}/assets`,
-//     baseUrl:`./assets`,
-// })
+import {getAssetUrls} from '@tldraw/assets/selfHosted'
+
 
 const ProcessComp = ({className}) => {
 
@@ -17,9 +14,21 @@ const ProcessComp = ({className}) => {
 
 
     const [editor, setEditor] = useState();
+    const [assetUrls, setaAssetUrls] = useState({});
 
     const setAppToState = useCallback((editor) => {
         setEditor(editor);
+
+
+    }, []);
+
+
+    useEffect(() => {
+        setaAssetUrls(getAssetUrls(
+            {
+                baseUrl: 'http://localhost:8082/assets'
+            }
+        ))
     }, []);
 
     const [storeEvents, setStoreEvents] = useState([]);
@@ -72,21 +81,22 @@ const ProcessComp = ({className}) => {
         });
 
 
-
         return () => {
             cleanupFunction();
         };
     }, [editor]);
 
     return (
-        <div className={`flex-grow  mt-3 ${commonStore.documentsGroup.length > 0 && commonStore.appCompOpenConfig.processAppOpen ? null : 'hidden'}`} style={{
-            height: '92vh',
-            overflow: "auto",
-            // backgroundColor:'blue'
-        }}>
+        <div
+            className={`flex-grow  mt-3 ${commonStore.documentsGroup.length > 0 && commonStore.appCompOpenConfig.processAppOpen ? null : 'hidden'}`}
+            style={{
+                height: '92vh',
+                overflow: "auto",
+                // backgroundColor:'blue'
+            }}>
             <div style={{width: '100%', height: '100%'}} className="tldraw__editor">
-                {/*<Tldraw onMount={setAppToState} assetUrls={assetUrls}/>*/}
-                <Tldraw onMount={setAppToState}/>
+                <Tldraw onMount={setAppToState} assetUrls={assetUrls}/>
+                {/*<Tldraw onMount={setAppToState}/>*/}
             </div>
         </div>
     )

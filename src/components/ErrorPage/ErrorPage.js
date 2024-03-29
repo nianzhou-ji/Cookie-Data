@@ -9,9 +9,7 @@ const ErrorPage = () => {
 
     return (
         <div
-            className={`grid flex-grow place-content-center bg-white px-4  ${commonStore.documentsGroup.length === 0 &&
-            !commonStore.appCompOpenConfig.processAppOpen &&
-            !commonStore.appCompOpenConfig.markdownAppOpen ? null : 'hidden'}`}>
+            className={`grid flex-grow place-content-center bg-white px-4  ${commonStore.appCompOpenConfig.errorPageAppOpen ? null : 'hidden'}`}>
             <div className="text-center">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"

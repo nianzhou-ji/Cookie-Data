@@ -12,8 +12,11 @@ const useAppHook = () => {
 
             if (commonStore.documentsGroup.length === 0) {
                 commonStore.updateAppCompOpenConfig({
+                    errorPageAppOpen:true,
+                    toolboxAppOpen:false,
                     markdownAppOpen: false,
                     processAppOpen: false,
+
                 })
 
                 return
