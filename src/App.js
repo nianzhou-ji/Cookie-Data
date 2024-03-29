@@ -29,7 +29,7 @@ import SearchComp from "./components/searchComp/searchComp";
 import ToolboxComp from "./components/toolboxComp/toolboxComp";
 
 function App() {
-    const {commonStore} = useStore()
+    const {commonStore,toolBoxStore} = useStore()
 
 
     const [appOpenCache, setAppOpenCache] = useState({})
@@ -122,12 +122,12 @@ function App() {
                         <p className='ml-2 font-bold'>{commonStore.VERSION}</p>
                     </div>
 
-                    {commonStore.toolboxAppOpenIconState ? <SearchComp/> : null}
+                    {toolBoxStore.toolboxAppOpenIconState ? <SearchComp/> : null}
                 </div>
 
 
                 <div className='flex'>
-                    <div className={`font-bold mr-2 flex items-center ${commonStore.toolboxAppOpenIconState?null:'hidden'}`}>
+                    <div className={`font-bold mr-2 flex items-center ${toolBoxStore.toolboxAppOpenIconState?null:'hidden'}`}>
                         {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: ' + commonStore.getCurrentDocumentObj().name}
                     </div>
                     <div className="tooltip tooltip-left mr-2" data-tip="add document">
@@ -294,7 +294,7 @@ function App() {
                             })
                             await initInterfaceData()
 
-                            commonStore.updateToolboxAppOpenIconState(true)
+                            toolBoxStore.updateToolboxAppOpenIconState(true)
                         }}/>
                     </div>
 
@@ -311,7 +311,7 @@ function App() {
 
                             await initInterfaceData()
 
-                            commonStore.updateToolboxAppOpenIconState(true)
+                            toolBoxStore.updateToolboxAppOpenIconState(true)
                         }}/>
                     </div>
 
@@ -477,7 +477,7 @@ function App() {
                                 toolboxAppOpen: true,
                             })
 
-                            commonStore.updateToolboxAppOpenIconState(false)
+                            toolBoxStore.updateToolboxAppOpenIconState(false)
 
 
                             buttonGroupID.forEach(item => {
@@ -485,7 +485,7 @@ function App() {
                             })
 
                         }} t="1711625812241"
-                             className={btnClass + 'cursor-pointer ' + `${commonStore.toolboxAppOpenIconState ? null : 'hidden'}`}
+                             className={btnClass + 'cursor-pointer ' + `${toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'}`}
                              viewBox="0 0 1024 1024" version="1.1"
                              xmlns="http://www.w3.org/2000/svg" p-id="8023" width="1.5rem" height="1.5rem">
                             <path
@@ -501,7 +501,7 @@ function App() {
                         <svg onClick={() => {
                             commonStore.updateAppCompOpenConfig(appOpenCache)
 
-                            commonStore.updateToolboxAppOpenIconState(true)
+                            toolBoxStore.updateToolboxAppOpenIconState(true)
 
 
                             buttonGroupID.forEach(item => {
@@ -509,7 +509,7 @@ function App() {
                             })
                         }}
                              t="1711627062940"
-                             className={btnClass + 'cursor-pointer ' + `${!commonStore.toolboxAppOpenIconState ? null : 'hidden'}`}
+                             className={btnClass + 'cursor-pointer ' + `${!toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'}`}
                              viewBox="0 0 1024 1024" version="1.1"
                              xmlns="http://www.w3.org/2000/svg" p-id="8994" width="1.5rem" height="1.5rem">
                             <path

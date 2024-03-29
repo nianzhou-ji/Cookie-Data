@@ -1,11 +1,13 @@
 import React from "react";
 
-import CommonStore from "./commonStore/commonStore";
+import CommonStore from "./commonStore";
+import ToolBoxStore from "./toolboxStore";
 
 
 class RootStore {
     constructor() {
         this.commonStore = new CommonStore(this)
+        this.toolBoxStore = new ToolBoxStore(this)
     }
 }
 

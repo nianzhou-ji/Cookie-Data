@@ -1,16 +1,10 @@
 import {makeAutoObservable} from "mobx";
 import _ from 'lodash'
-import indexedDBEngine from "../../indexDBUtils/indexDBUtils";
-import Utils from "../../utils";
+import indexedDBEngine from "../indexDBUtils/indexDBUtils";
+import Utils from "../utils";
 
 
 class CommonStore {
-
-    toolboxAppOpenIconState = true
-
-    updateToolboxAppOpenIconState = (value) => {
-        this.toolboxAppOpenIconState = value
-    }
 
 
     searchEngineConfig = {
