@@ -3,7 +3,7 @@ import {observer} from "mobx-react-lite";
 import {useStore} from "../../stores";
 import Utils from "../../utils";
 
-const ErrorPage = () => {
+const ErrorPageComp = () => {
 
     const {commonStore} = useStore()
 
@@ -64,4 +64,4 @@ const ErrorPage = () => {
     );
 };
 
-export default observer(ErrorPage);
+export default observer(ErrorPageComp);

@@ -23,7 +23,7 @@ import _ from "lodash";
 import ProcessComp from "./components/processComp/processComp";
 import useMarkdownHooks from "./components/MarkdownComp/useMarkdownHooks";
 import useAppHook from "./useAppHook";
-import ErrorPage from "./components/ErrorPage/ErrorPage";
+import ErrorPage from "./components/ErrorPageComp/ErrorPageComp";
 import Utils from "./utils";
 import SearchComp from "./components/searchComp/searchComp";
 import ToolboxComp from "./components/toolboxComp/toolboxComp";

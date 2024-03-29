@@ -11,13 +11,7 @@ import {useStore} from "../../../../stores";
 
 
 const baseURL = 'http://localhost:8080/assets/ffmpeg';
-const ffmpeg = createFFmpeg({
-    log: true,
-    corePath: `${baseURL}/ffmpeg-core.js`,
-    workerPath: `${baseURL}/ffmpeg-core.worker.js`,
-    wasmPath: `${baseURL}/ffmpeg-core.wasm`,
 
-})
 
 
 function VideoFormatTransformationComp() {
@@ -32,12 +26,27 @@ function VideoFormatTransformationComp() {
     const [gifUrl, setGifUrl] = useState()
     const [sliderValues, setSliderValues] = useState([0, 100])
     const [processing, setProcessing] = useState(false)
+    const [ffmpeg, setFfmpeg] = useState(null)
 
     useEffect(() => {
+
+        const ffmpeg = createFFmpeg({
+            log: true,
+            corePath: `${baseURL}/ffmpeg-core.js`,
+            workerPath: `${baseURL}/ffmpeg-core.worker.js`,
+            wasmPath: `${baseURL}/ffmpeg-core.wasm`,
+
+        })
+
+
+
         // loading ffmpeg on startup
         ffmpeg.load().then(() => {
             setFFmpegLoaded(true)
         })
+
+
+        setFfmpeg(ffmpeg)
     }, [])
 
     useEffect(() => {
@@ -80,7 +89,7 @@ function VideoFormatTransformationComp() {
     }, [videoFile])
 
     return (
-        <div className={`${toolBoxStore.appOpen.videoFormatTransformationComp?null:'hidden'}`}>
+        <div className={`${toolBoxStore.appOpen.videoTransformationComp?null:'hidden'}`}>
             <Spin
                 spinning={processing || !ffmpegLoaded}
                 tip={!ffmpegLoaded ? "Waiting for FFmpeg to load..." : "Processing..."}
