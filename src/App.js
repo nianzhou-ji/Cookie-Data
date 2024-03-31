@@ -115,7 +115,7 @@ function App() {
 
 
     return (
-        <div id={'app'} className="flex flex-col h-screen w-screen">
+        <div id={'app'} className="flex flex-col h-screen w-screen max-h-screen">
             <div style={{}} className=" w-screen h-[3rem] flex  flex-none items-center justify-between px-2">
 
                 <div className='flex'>
@@ -448,7 +448,7 @@ function App() {
 
                 </div>
             </div>
-            <div className='max-h-screen w-screen flex-grow  px-2'>
+            <div className='w-screen flex-auto  px-2  '>
                 <MarkdownComp/>
                 <ProcessComp/>
                 <ErrorPage/>

@@ -77,6 +77,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 
 
+  max-height: 100vh;
+  max-width: 100vw;
+
+
   #ModalContainer{
     z-index: 1000000;
     position: absolute;
@@ -86,6 +90,9 @@ body {
   .JpSearchHighlight{
     background-color: red;
   }
+
+
+  box-sizing:border-box
 
 
 

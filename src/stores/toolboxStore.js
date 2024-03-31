@@ -5,8 +5,93 @@ import _ from 'lodash'
 class ToolBoxStore {
 
     appOpen = {
-        audioRecognitionComp: false,
-        videoTransformationComp: true
+        audioRecognitionComp: true,
+        videoTransformationComp: false
+
+    }
+
+
+    audioRecognitionCompAttr = {
+        recognizing: false,
+        progress: 0,
+        whisperModel: 'default',
+        logs: [],
+
+        loadModelState: false,
+        loadAudioState: false,
+        audio: null,
+        audioSrcUrl: null,
+        audioDuration: 0,
+        downloadSrtUrl: null,
+        srtTexts: null,
+        srcStem:null
+
+
+    }
+
+    updateAudioRecognitionCompAttr(value) {
+        const temp = _.cloneDeep(this.audioRecognitionCompAttr)
+        if (value.srcStem !== undefined) {
+            temp.srcStem = value.srcStem
+        }
+
+        if (value.srtTexts !== undefined) {
+            temp.srtTexts = value.srtTexts
+        }
+
+        if (value.downloadSrtUrl !== undefined) {
+            temp.downloadSrtUrl = value.downloadSrtUrl
+        }
+
+
+        if (value.progress !== undefined) {
+            temp.progress = value.progress
+        }
+
+
+        if (value.recognizing !== undefined) {
+            temp.recognizing = value.recognizing
+        }
+
+        if (value.audioDuration !== undefined) {
+            temp.audioDuration = value.audioDuration
+        }
+
+        if (value.audioDuration !== undefined) {
+            temp.audioDuration = value.audioDuration
+        }
+
+        if (value.audioSrcUrl !== undefined) {
+            temp.audioSrcUrl = value.audioSrcUrl
+        }
+
+        if (value.audio !== undefined) {
+            temp.audio = value.audio
+        }
+
+
+        if (value.loadAudioState !== undefined) {
+            temp.loadAudioState = value.loadAudioState
+        }
+
+        if (value.loadModelState !== undefined) {
+            temp.loadModelState = value.loadModelState
+        }
+
+        if (value.whisperModel !== undefined) {
+            temp.whisperModel = value.whisperModel
+        }
+
+        if (value.log !== undefined) {
+            if (value.log.action === 'init') {
+                temp.logs = []
+            } else {
+                temp.logs.push(value.log.value)
+            }
+
+        }
+
+        this.audioRecognitionCompAttr = temp
 
     }
 
@@ -24,8 +109,8 @@ class ToolBoxStore {
         targetSrcName: null,
         srcType: null,
         progress: 0,
-        srcVideoContainerSize:null,
-        targetVideoContainerSize:null
+        srcVideoContainerSize: null,
+        targetVideoContainerSize: null
     }
 
 
@@ -49,14 +134,14 @@ class ToolBoxStore {
 
                 console.log("Total seconds:", totalSeconds);
 
-                const progress = totalSeconds/(this.videoTransformationCompAttr.endTime-this.videoTransformationCompAttr.startTime)
+                const progress = totalSeconds / (this.videoTransformationCompAttr.endTime - this.videoTransformationCompAttr.startTime)
 
                 this.updateVideoTransformationCompAttr({
-                    progress:(progress*100).toFixed(0)
+                    progress: (progress * 100).toFixed(0)
                 })
 
             }
-        }catch (e){
+        } catch (e) {
             return this.videoTransformationCompAttr.progress
         }
 

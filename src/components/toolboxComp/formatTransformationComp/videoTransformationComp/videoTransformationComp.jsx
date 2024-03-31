@@ -142,7 +142,7 @@ const VideoTransformationComp = () => {
                     <label className="form-control  ">
                         <div className="label">
                             <span
-                                className="label-text font-bold text-2xl">Start time[{commonStore.secondsToHMS(toolBoxStore.videoTransformationCompAttr.startTime)}]</span>
+                                className="label-text font-bold text-2xl">Start time[{Utils.secondsToHMS(toolBoxStore.videoTransformationCompAttr.startTime)}]</span>
                         </div>
                         <input type="range" min={0} max={toolBoxStore.videoTransformationCompAttr.duration}
                                value={toolBoxStore.videoTransformationCompAttr.startTime}
@@ -161,7 +161,7 @@ const VideoTransformationComp = () => {
                     <label className="form-control  ">
                         <div className="label">
                             <span
-                                className="label-text font-bold text-2xl">End time[{commonStore.secondsToHMS(toolBoxStore.videoTransformationCompAttr.endTime)}]</span>
+                                className="label-text font-bold text-2xl">End time[{Utils.secondsToHMS(toolBoxStore.videoTransformationCompAttr.endTime)}]</span>
                         </div>
                         <input type="range" min={0} max={toolBoxStore.videoTransformationCompAttr.duration}
                                value={toolBoxStore.videoTransformationCompAttr.endTime}
