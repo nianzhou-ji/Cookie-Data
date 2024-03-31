@@ -57,7 +57,7 @@ function useSidebarHook() {
             children: [
 
                 {
-                    id: 'eac31d7s',
+                    id: 'eac31tt7s',
                     title: 'Audio Recognition',
                     clickCallBack: () => {
 

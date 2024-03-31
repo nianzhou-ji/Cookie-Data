@@ -6,6 +6,73 @@ import Utils from "../utils";
 
 class CommonStore {
 
+
+    initMarkdownData = {
+        "time": 1711019875915,
+        "blocks": [],
+        "version": "2.29.0"
+    }
+    initProcessData = {
+        "store": {
+            "document:document": {
+                "gridSize": 10,
+                "name": "",
+                "meta": {},
+                "id": "document:document",
+                "typeName": "document"
+            },
+            "page:page": {
+                "meta": {},
+                "id": "page:page",
+                "name": "Page 1",
+                "index": "a1",
+                "typeName": "page"
+            }
+        },
+        "schema": {
+            "schemaVersion": 1,
+            "storeVersion": 4,
+            "recordVersions": {
+                "asset": {
+                    "version": 1,
+                    "subTypeKey": "type",
+                    "subTypeVersions": {
+                        "image": 3,
+                        "video": 3,
+                        "bookmark": 1
+                    }
+                },
+                "camera": {"version": 1},
+                "document": {"version": 2},
+                "instance": {"version": 24},
+                "instance_page_state": {"version": 5},
+                "page": {"version": 1},
+                "shape": {
+                    "version": 3,
+                    "subTypeKey": "type",
+                    "subTypeVersions": {
+                        "group": 0,
+                        "text": 1,
+                        "bookmark": 2,
+                        "draw": 1,
+                        "geo": 8,
+                        "note": 5,
+                        "line": 4,
+                        "frame": 0,
+                        "arrow": 3,
+                        "highlight": 0,
+                        "embed": 4,
+                        "image": 3,
+                        "video": 2
+                    }
+                },
+                "instance_presence": {"version": 5},
+                "pointer": {"version": 1}
+            }
+        }
+    }
+
+
     secondsToHMS(totalSeconds) {
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);

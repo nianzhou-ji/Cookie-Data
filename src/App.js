@@ -111,15 +111,18 @@ function App() {
     const btnClass = ' btn btn-ghost btn-square btn-sm hover:scale-125 hover:shadow-xl focus:outline-none focus:ring active:bg-gray-500'
 
 
+    const tooltipWrapperClass = 'tooltip tooltip-left tooltip tooltip-left mr-2 flex items-center'
+
+
     return (
-        <div id={'app'} className="flex flex-col p-2 h-screen ">
-            <div style={{}} className="w-full flex  items-center justify-between mb-4">
+        <div id={'app'} className="flex flex-col h-screen w-screen">
+            <div style={{}} className=" w-screen h-[3rem] flex  flex-none items-center justify-between px-2">
 
                 <div className='flex'>
                     <div className="flex items-center">
-                        <TitleIcon size={'2rem'} className='ml-1'/>
+                        <TitleIcon size={'2rem'} className=''/>
                         <div className='font-bold '>Cookie Data</div>
-                        <p className='ml-2 font-bold'>{commonStore.VERSION}</p>
+                        <p className=' font-bold'>{commonStore.VERSION}</p>
                     </div>
 
                     {toolBoxStore.toolboxAppOpenIconState ? <SearchComp/> : null}
@@ -127,10 +130,10 @@ function App() {
 
 
                 <div className='flex'>
-                    <div className={`font-bold mr-2 flex items-center ${toolBoxStore.toolboxAppOpenIconState?null:'hidden'}`}>
+                    <div className={`font-bold  flex items-center ${toolBoxStore.toolboxAppOpenIconState?null:'hidden'}`}>
                         {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: ' + commonStore.getCurrentDocumentObj().name}
                     </div>
-                    <div className="tooltip tooltip-left mr-2" data-tip="add document">
+                    <div className={tooltipWrapperClass} data-tip="add document">
                         <ModalContainerComp>
                             <dialog id="addDocument_modal" className="modal">
                                 <div className="modal-box">
@@ -145,70 +148,8 @@ function App() {
                                             <button className="btn" onClick={() => {
                                                 const id = crypto.randomUUID()
                                                 const name = commonStore.addDocumentName
-                                                const markdownData = {
-                                                    "time": 1711019875915,
-                                                    "blocks": [],
-                                                    "version": "2.29.0"
-                                                }
-                                                const processData = {
-                                                    "store": {
-                                                        "document:document": {
-                                                            "gridSize": 10,
-                                                            "name": "",
-                                                            "meta": {},
-                                                            "id": "document:document",
-                                                            "typeName": "document"
-                                                        },
-                                                        "page:page": {
-                                                            "meta": {},
-                                                            "id": "page:page",
-                                                            "name": "Page 1",
-                                                            "index": "a1",
-                                                            "typeName": "page"
-                                                        }
-                                                    },
-                                                    "schema": {
-                                                        "schemaVersion": 1,
-                                                        "storeVersion": 4,
-                                                        "recordVersions": {
-                                                            "asset": {
-                                                                "version": 1,
-                                                                "subTypeKey": "type",
-                                                                "subTypeVersions": {
-                                                                    "image": 3,
-                                                                    "video": 3,
-                                                                    "bookmark": 1
-                                                                }
-                                                            },
-                                                            "camera": {"version": 1},
-                                                            "document": {"version": 2},
-                                                            "instance": {"version": 24},
-                                                            "instance_page_state": {"version": 5},
-                                                            "page": {"version": 1},
-                                                            "shape": {
-                                                                "version": 3,
-                                                                "subTypeKey": "type",
-                                                                "subTypeVersions": {
-                                                                    "group": 0,
-                                                                    "text": 1,
-                                                                    "bookmark": 2,
-                                                                    "draw": 1,
-                                                                    "geo": 8,
-                                                                    "note": 5,
-                                                                    "line": 4,
-                                                                    "frame": 0,
-                                                                    "arrow": 3,
-                                                                    "highlight": 0,
-                                                                    "embed": 4,
-                                                                    "image": 3,
-                                                                    "video": 2
-                                                                }
-                                                            },
-                                                            "instance_presence": {"version": 5},
-                                                            "pointer": {"version": 1}
-                                                        }
-                                                    }
-                                                }
+                                                const markdownData = _.cloneDeep(commonStore.initMarkdownData)
+                                                const processData = _.cloneDeep(commonStore.initProcessData)
                                                 commonStore.addDocumentsGroup({
                                                     id, name, markdownData, processData
                                                 })
@@ -243,7 +184,7 @@ function App() {
                                      document.getElementById('addDocument_modal').showModal()
                                  }} id={'AddIconID'}/>
                     </div>
-                    <div className="tooltip tooltip-left mr-2" data-tip="delete document">
+                    <div className={tooltipWrapperClass} data-tip="delete document">
                         <DeleteIcon id={'DeleteIconID'} size={'1.5rem'}
                                     className={btnClass + 'cursor-pointer'} onClick={async () => {
                             commonStore.deleteDocumentsGroup(commonStore.currentDocumentID)
@@ -283,7 +224,7 @@ function App() {
                         }}/>
                     </div>
 
-                    <div className="tooltip tooltip-left mr-2" data-tip="markdown">
+                    <div className={tooltipWrapperClass} data-tip="markdown">
                         <MarkDownIcon id={'MarkDownIconID'} size={'1.5rem'}
                                       className={btnClass + 'cursor-pointer'} onClick={async () => {
                             commonStore.updateAppCompOpenConfig({
@@ -299,7 +240,7 @@ function App() {
                     </div>
 
 
-                    <div className="tooltip tooltip-left mr-2" data-tip="process">
+                    <div className={tooltipWrapperClass} data-tip="process">
                         <DrawICon id={'DrawIConID'} size={'1.5rem'}
                                   className={btnClass + 'cursor-pointer'} onClick={async () => {
                             commonStore.updateAppCompOpenConfig({
@@ -315,7 +256,7 @@ function App() {
                         }}/>
                     </div>
 
-                    <div className="tooltip tooltip-left mr-2" data-tip="view document list">
+                    <div className={tooltipWrapperClass} data-tip="view document list">
                         <DocumentsIcon id={'DocumentsIconID'} size={'1.5rem'}
                                        className={btnClass + 'cursor-pointer'} htmlFor="my-drawer-4"
                                        onClick={() => {
@@ -351,7 +292,7 @@ function App() {
                         </ModalContainerComp>
 
                     </div>
-                    <div className="tooltip tooltip-left mr-2" data-tip='save document'>
+                    <div className={tooltipWrapperClass} data-tip='save document'>
                         <SaveIcon id={'SaveIconID'} size={'1.5rem'}
                                   className={btnClass + 'cursor-pointer'}
                                   color={`${commonStore.isDocumentsGroupDataUpdate ? '#fa0404' : '#000'}`}
@@ -380,28 +321,13 @@ function App() {
                                   }}/>
                     </div>
 
-
-                    {/*<div className="tooltip tooltip-left  mr-2" data-tip='export current document'>*/}
-
-                    {/*    <SearchIcon size={'1.5rem'} className='cursor-pointer' onClick={() => {*/}
-
-                    {/*    }}/>*/}
-                    {/*</div>*/}
-
-                    {/*<div className="tooltip tooltip-left  mr-2" data-tip='export current document to local desktop'>*/}
-                    {/*    <ExportIcon size={'1.5rem'} className='cursor-pointer' onClick={() => {*/}
-                    {/*        commonStore.downloadMarkdown()*/}
-                    {/*    }}/>*/}
-                    {/*</div>*/}
-
-
-                    <div className="tooltip tooltip-left  mr-2" data-tip='backup all documents to local desktop'>
+                    <div className={tooltipWrapperClass} data-tip='backup all documents to local desktop'>
                         <BackupIcon id={'BackupIconID'} size={'1.5rem'}
                                     className={btnClass + 'cursor-pointer'} onClick={() => {
                             commonStore.downloadAllData()
                         }}/>
                     </div>
-                    <div className="tooltip tooltip-left   mr-2" data-tip='import backup documents'>
+                    <div className={tooltipWrapperClass} data-tip='import backup documents'>
                         <ModalContainerComp>
                             <dialog id="ImportBackupData_modal" className="modal">
                                 <div className="modal-box">
@@ -463,7 +389,7 @@ function App() {
                     </div>
 
 
-                    <div className="tooltip tooltip-left" data-tip='Open toolbox'>
+                    <div className={`${tooltipWrapperClass} ${toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'}`} data-tip='Open toolbox'>
 
                         <svg onClick={() => {
 
@@ -485,7 +411,7 @@ function App() {
                             })
 
                         }} t="1711625812241"
-                             className={btnClass + 'cursor-pointer ' + `${toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'}`}
+                             className={btnClass + 'cursor-pointer '}
                              viewBox="0 0 1024 1024" version="1.1"
                              xmlns="http://www.w3.org/2000/svg" p-id="8023" width="1.5rem" height="1.5rem">
                             <path
@@ -496,7 +422,7 @@ function App() {
                     </div>
 
 
-                    <div className="tooltip tooltip-left" data-tip='Close toolbox'>
+                    <div className={`${tooltipWrapperClass} ${!toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'}`} data-tip='Close toolbox'>
 
                         <svg onClick={() => {
                             commonStore.updateAppCompOpenConfig(appOpenCache)
@@ -522,10 +448,13 @@ function App() {
 
                 </div>
             </div>
-            <MarkdownComp/>
-            <ProcessComp/>
-            <ErrorPage/>
-            <ToolboxComp/>
+            <div className='max-h-screen w-screen flex-grow  px-2'>
+                <MarkdownComp/>
+                <ProcessComp/>
+                <ErrorPage/>
+                <ToolboxComp/>
+            </div>
+
         </div>
     );
 }

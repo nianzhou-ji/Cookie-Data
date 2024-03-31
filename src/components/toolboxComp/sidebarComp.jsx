@@ -9,9 +9,9 @@ const SidebarComp = () => {
     const {toolBoxStore} = useStore()
 
     return (
-        <div className='w-80 overflow-auto flex-none '>
+        <div className='w-80 overflow-auto flex-none'>
             <ul className="menu ">
-                {SidebarConfig.map(item1 => {
+                {SidebarConfig.map((item1,index1 ) => {
                     if (item1.type === 'firstGrade') {
                         return <>
                             <li key={item1.id} className='menu-dropdown-toggle'>
@@ -33,7 +33,7 @@ const SidebarComp = () => {
                                     </ul>
                                 </details>
                             </li>
-                            <li key={item1.id+'sssssss'}></li>
+                            <li key={item1.id+index1}></li>
                         </>
 
                     } else {

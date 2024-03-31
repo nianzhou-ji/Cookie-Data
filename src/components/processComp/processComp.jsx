@@ -88,9 +88,8 @@ const ProcessComp = ({className}) => {
 
     return (
         <div
-            className={`flex-grow  mt-3 ${commonStore.documentsGroup.length > 0 && commonStore.appCompOpenConfig.processAppOpen ? null : 'hidden'}`}
+            className={`flex-grow  h-full ${commonStore.documentsGroup.length > 0 && commonStore.appCompOpenConfig.processAppOpen ? null : 'hidden'}`}
             style={{
-                height: '92vh',
                 overflow: "auto",
                 // backgroundColor:'blue'
             }}>

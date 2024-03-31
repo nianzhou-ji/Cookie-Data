@@ -19,15 +19,63 @@ class ToolBoxStore {
         duration: 0,
         ffmpeg: null,
         targetSrc: null,
-        converting: false ,
-        srcName:null,
-        targetSrcName:null,
-        srcType:null
+        converting: false,
+        srcName: null,
+        targetSrcName: null,
+        srcType: null,
+        progress: 0,
+        srcVideoContainerSize:null,
+        targetVideoContainerSize:null
+    }
+
+
+    getProgress(inputString) {
+
+        try {
+
+// Regular expression to match the time pattern
+            let timePattern = /time=(\d{2}):(\d{2}):(\d{2}\.\d{2})/;
+
+// Extracting time substring using regular expression
+            let match = inputString.match(timePattern);
+
+            if (match) {
+                let hours = parseInt(match[1]);
+                let minutes = parseInt(match[2]);
+                let seconds = parseFloat(match[3]);
+
+                // Convert time to seconds
+                let totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+                console.log("Total seconds:", totalSeconds);
+
+                const progress = totalSeconds/(this.videoTransformationCompAttr.endTime-this.videoTransformationCompAttr.startTime)
+
+                this.updateVideoTransformationCompAttr({
+                    progress:(progress*100).toFixed(0)
+                })
+
+            }
+        }catch (e){
+            return this.videoTransformationCompAttr.progress
+        }
+
     }
 
 
     updateVideoTransformationCompAttr(value) {
         const temp = _.cloneDeep(this.videoTransformationCompAttr)
+        if (value.targetVideoContainerSize !== undefined) {
+            temp.targetVideoContainerSize = value.targetVideoContainerSize
+        }
+
+        if (value.srcVideoContainerSize !== undefined) {
+            temp.srcVideoContainerSize = value.srcVideoContainerSize
+        }
+
+        if (value.progress !== undefined) {
+            temp.progress = value.progress
+        }
 
         if (value.srcType !== undefined) {
             temp.srcType = value.srcType

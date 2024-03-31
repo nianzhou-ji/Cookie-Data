@@ -2,7 +2,8 @@ import React, {useEffect, useRef} from 'react';
 import {observer} from "mobx-react-lite";
 import {useStore} from "../../../../stores";
 import _ from 'lodash'
-import {createFFmpeg, fetchFile} from "@ffmpeg/ffmpeg";
+import {FFmpeg} from '@ffmpeg/ffmpeg'
+import {fetchFile, toBlobURL} from '@ffmpeg/util'
 import Utils from "../../../../utils";
 
 const VideoTransformationComp = () => {
@@ -12,37 +13,51 @@ const VideoTransformationComp = () => {
     const videoRef = useRef(null)
 
 
-    useEffect(() => {
+    const loadFfmpeg = async () => {
+        const ffmpeg = new FFmpeg()
         const baseURL = 'http://localhost:8080/assets/ffmpeg';
+        // const baseURL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/umd'
+        ffmpeg.on('log', ({message}) => {
+            console.log('log:', message)
+            toolBoxStore.getProgress(message)
+        });
 
-        const ffmpeg = createFFmpeg({
-            log: true,
-            corePath: `${baseURL}/ffmpeg-core.js`,
-            workerPath: `${baseURL}/ffmpeg-core.worker.js`,
-            wasmPath: `${baseURL}/ffmpeg-core.wasm`,
 
+        // toBlobURL is used to bypass CORS issue, urls with the same
+        // domain can be used directly.
+        await ffmpeg.load({
+            coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+            wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+            workerURL: await toBlobURL(`${baseURL}/ffmpeg-core.worker.js`, 'text/javascript'),
+        });
+
+        toolBoxStore.updateVideoTransformationCompAttr({
+            ffmpeg: ffmpeg
         })
 
 
-        // loading ffmpeg on startup
-        ffmpeg.load().then(() => {
-            toolBoxStore.updateVideoTransformationCompAttr({
-                ffmpeg: ffmpeg
-            })
-        })
+        console.log('ffmpeg init success')
 
+    }
 
+    useEffect(() => {
+        loadFfmpeg()
     }, []);
 
-    return (
-        <div className={`flex h-full p-6 ${toolBoxStore.appOpen.videoTransformationComp ? null : 'hidden'}`}>
 
-            <div>
-                <label className="form-control w-[32rem] ">
+    const getContainerSize = (id)=>{
+        return document.getElementById(id)?.getBoundingClientRect()
+    }
+
+    return (
+        <div className={`flex h-full ${toolBoxStore.appOpen.videoTransformationComp ? null : 'hidden'}`}>
+
+            <div className='h-full flex flex-col w-[50%]'>
+                <label className="form-control">
                     <div className="label">
                         <span className="label-text font-bold text-2xl">Upload a video</span>
                     </div>
-                    <input type="file" className="mb-3 file-input file-input-bordered w-[32rem]"
+                    <input type="file" className="mb-3 file-input file-input-bordered w-[100%]"
                            accept={".mp4, .avi"}
                            onChange={(event) => {
                                const file = event.target.files[0];
@@ -59,6 +74,20 @@ const VideoTransformationComp = () => {
                                        srcType: file.type
                                    });
 
+                                   if(toolBoxStore.videoTransformationCompAttr.srcVideoContainerSize===null) {
+                                       toolBoxStore.updateVideoTransformationCompAttr({
+                                           srcVideoContainerSize:getContainerSize('srcVideoContainer')
+                                       });
+                                   }
+
+
+
+                                   if(toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize===null) {
+                                       toolBoxStore.updateVideoTransformationCompAttr({
+                                           targetVideoContainerSize:getContainerSize('targetVideoContainer')
+                                       });
+                                   }
+
 
                                    const reader = new FileReader();
                                    reader.onloadend = () => {
@@ -73,20 +102,19 @@ const VideoTransformationComp = () => {
                                }
                            }}/>
                 </label>
-
-
-                <div
-                    className={`skeleton w-[48rem] h-[32rem] 
+                <div id={'srcVideoContainer'}
+                    className={`skeleton flex-grow
                     ${toolBoxStore.videoTransformationCompAttr.srcType === 'video/avi' || toolBoxStore.videoTransformationCompAttr.src === null ? null : 'hidden'}`}/>
 
 
                 <video
+
                     ref={videoRef}
                     src={toolBoxStore.videoTransformationCompAttr.src}
                     muted
                     controls
 
-                    className={`w-[48rem] max-w-[64rem] max-h-[48rem] ${(toolBoxStore.videoTransformationCompAttr.srcType === 'video/mp4' && toolBoxStore.videoTransformationCompAttr.src !== null) ? null : 'hidden'}`}
+                    className={`object-contain ${(toolBoxStore.videoTransformationCompAttr.srcType === 'video/mp4' && toolBoxStore.videoTransformationCompAttr.src !== null) ? null : 'hidden'}`}
 
                     onLoadedMetadata={e => {
                         toolBoxStore.updateVideoTransformationCompAttr({
@@ -94,6 +122,10 @@ const VideoTransformationComp = () => {
                         });
                     }}
 
+                    style={{
+                        maxHeight:toolBoxStore.videoTransformationCompAttr.srcVideoContainerSize?.height,
+                        maxWidth:toolBoxStore.videoTransformationCompAttr.srcVideoContainerSize?.width
+                    }}
 
                 />
 
@@ -101,12 +133,13 @@ const VideoTransformationComp = () => {
             </div>
 
 
-            <div className="divider divider-horizontal h-full"/>
+            <div className=" divider divider-horizontal h-full"/>
 
 
-            <div className='mb-4'>
-                <div className={`${toolBoxStore.videoTransformationCompAttr.srcType === 'video/avi'?'hidden':null}`}>
-                    <label className="form-control w-[32rem] ">
+            <div className='h-full flex-grow flex flex-col'>
+                <div
+                    className={`${toolBoxStore.videoTransformationCompAttr.srcType === 'video/avi' ? 'hidden' : null}`}>
+                    <label className="form-control  ">
                         <div className="label">
                             <span
                                 className="label-text font-bold text-2xl">Start time[{commonStore.secondsToHMS(toolBoxStore.videoTransformationCompAttr.startTime)}]</span>
@@ -125,7 +158,7 @@ const VideoTransformationComp = () => {
                                }}/>
                     </label>
 
-                    <label className="form-control w-[32rem] ">
+                    <label className="form-control  ">
                         <div className="label">
                             <span
                                 className="label-text font-bold text-2xl">End time[{commonStore.secondsToHMS(toolBoxStore.videoTransformationCompAttr.endTime)}]</span>
@@ -147,10 +180,9 @@ const VideoTransformationComp = () => {
                         />
                     </label>
                 </div>
+                <div className='flex-grow flex flex-col'>
 
-                <div className=''>
-
-                    <label className="form-control w-[32rem] mb-2 ">
+                    <label className="form-control ">
                         <div className="label">
                             <span className="label-text font-bold text-2xl">Target Format</span>
                         </div>
@@ -167,10 +199,11 @@ const VideoTransformationComp = () => {
                     </label>
 
 
-                    <div className='flex '>
-                        <button className="btn btn-neutral mr-3" onClick={async () => {
+                    <div className='flex items-center mt-3'>
+                        <button className="btn btn-neutral mr-3 " onClick={async () => {
 
-                            if (toolBoxStore.videoTransformationCompAttr.endTime < toolBoxStore.videoTransformationCompAttr.startTime) {
+                            if (toolBoxStore.videoTransformationCompAttr.endTime === toolBoxStore.videoTransformationCompAttr.startTime
+                                || toolBoxStore.videoTransformationCompAttr.endTime < toolBoxStore.videoTransformationCompAttr.startTime) {
                                 alert('Start time must greater than start time')
                                 return
                             }
@@ -183,40 +216,44 @@ const VideoTransformationComp = () => {
 
 
                             toolBoxStore.updateVideoTransformationCompAttr({
-                                converting: true
+                                converting: true,
+                                targetSrc: null,
+                                progress:0
                             });
 
 
-                            const inputFileName = toolBoxStore.videoTransformationCompAttr.srcName
+                            const inputFileName = `${toolBoxStore.videoTransformationCompAttr.srcType === 'video/mp4' ? 'input.mp4' : 'input.avi'}`
                             const outputFileName = `output.${toolBoxStore.videoTransformationCompAttr.targetFormat.toLowerCase()}`
 
+                            console.log(inputFileName, outputFileName)
+
                             // writing the video file to memory
-                            toolBoxStore.videoTransformationCompAttr.ffmpeg.FS("writeFile", inputFileName, await fetchFile(toolBoxStore.videoTransformationCompAttr.src))
+                            await toolBoxStore.videoTransformationCompAttr.ffmpeg.writeFile(inputFileName, await fetchFile(toolBoxStore.videoTransformationCompAttr.src))
 
                             const startTime = toolBoxStore.videoTransformationCompAttr.startTime
                             const endTime = toolBoxStore.videoTransformationCompAttr.endTime
 
                             // cutting the video and converting it to GIF with a FFMpeg command
                             if (toolBoxStore.videoTransformationCompAttr.srcType === 'video/avi' && toolBoxStore.videoTransformationCompAttr.targetFormat === 'MP4') {
-                                await toolBoxStore.videoTransformationCompAttr.ffmpeg.run("-i", inputFileName, '-c:v', 'libx264', '-c:a', 'aac', outputFileName)
+                                await toolBoxStore.videoTransformationCompAttr.ffmpeg.exec(["-i", inputFileName, '-c:v', 'libx264', '-c:a', 'aac', outputFileName])
                             }
 
 
                             if (toolBoxStore.videoTransformationCompAttr.srcType === 'video/mp4' && toolBoxStore.videoTransformationCompAttr.targetFormat === 'MP4') {
-                                await toolBoxStore.videoTransformationCompAttr.ffmpeg.run("-i", inputFileName, "-ss", `${startTime}`, "-to", `${endTime}`, outputFileName)
+                                await toolBoxStore.videoTransformationCompAttr.ffmpeg.exec(["-i", inputFileName, "-ss", `${startTime}`, "-to", `${endTime}`, outputFileName])
                             }
 
                             if (toolBoxStore.videoTransformationCompAttr.srcType === 'video/avi' && toolBoxStore.videoTransformationCompAttr.targetFormat === 'GIF') {
-                                await toolBoxStore.videoTransformationCompAttr.ffmpeg.run("-i", inputFileName, outputFileName)
+                                await toolBoxStore.videoTransformationCompAttr.ffmpeg.exec(["-i", inputFileName, outputFileName])
                             }
 
                             if (toolBoxStore.videoTransformationCompAttr.srcType === 'video/mp4' && toolBoxStore.videoTransformationCompAttr.targetFormat === 'GIF') {
-                                await toolBoxStore.videoTransformationCompAttr.ffmpeg.run("-i", inputFileName, "-ss", `${startTime}`, "-to", `${endTime}`, "-f", "gif", outputFileName)
+                                await toolBoxStore.videoTransformationCompAttr.ffmpeg.exec(["-i", inputFileName, "-ss", `${startTime}`, "-to", `${endTime}`, "-f", "gif", outputFileName])
                             }
 
 
                             // reading the resulting file
-                            const data = toolBoxStore.videoTransformationCompAttr.ffmpeg.FS("readFile", outputFileName)
+                            const data = await toolBoxStore.videoTransformationCompAttr.ffmpeg.readFile(outputFileName)
 
 
                             let targetUrl = null
@@ -230,17 +267,23 @@ const VideoTransformationComp = () => {
                             }
 
                             toolBoxStore.updateVideoTransformationCompAttr({
-                                targetSrc: targetUrl
-                            });
-
-
-                            toolBoxStore.updateVideoTransformationCompAttr({
+                                targetSrc: targetUrl,
                                 converting: false
-                            });
+                            })
 
+
+                            const res1 = await toolBoxStore.videoTransformationCompAttr.ffmpeg.deleteFile(inputFileName)
+                            const res2 = await toolBoxStore.videoTransformationCompAttr.ffmpeg.deleteFile(outputFileName)
 
                         }}>Convert
                         </button>
+
+                        {/*<button className='btn btn-neutral mr-3' onClick={async () => {*/}
+                        {/*    if (toolBoxStore.videoTransformationCompAttr.ffmpeg !== null) {*/}
+                        {/*        await toolBoxStore.videoTransformationCompAttr.ffmpeg.terminate()*/}
+                        {/*    }*/}
+                        {/*}}>Stop*/}
+                        {/*</button>*/}
 
 
                         <button
@@ -266,18 +309,20 @@ const VideoTransformationComp = () => {
 
 
                         {toolBoxStore.videoTransformationCompAttr.converting ?
-                            <span className="loading loading-bars loading-md"/> : null}
+                            <div className="radial-progress"
+                                 style={{"--value": toolBoxStore.videoTransformationCompAttr.progress ,"--size": "3rem", "--thickness": "4px" }}
+                                 role="progressbar">{toolBoxStore.videoTransformationCompAttr.progress}%</div> : null}
                     </div>
 
 
-                    <label className="form-control w-[32rem] mb-2 ">
+                    <label className="form-control flex-grow flex flex-col">
                         <div className="label">
                             <span
                                 className="label-text font-bold text-2xl">{toolBoxStore.videoTransformationCompAttr.targetFormat} Format Transformation Result</span>
                         </div>
                         {
                             toolBoxStore.videoTransformationCompAttr.targetSrc === null ?
-                                <div className="skeleton w-[32rem] h-[24rem]"></div> : null
+                                <div id={'targetVideoContainer'} className="skeleton flex-grow"></div> : null
                         }
 
                         {
@@ -285,7 +330,12 @@ const VideoTransformationComp = () => {
 
                                 <img alt={''}
                                      src={toolBoxStore.videoTransformationCompAttr.targetSrc}
-                                     className='w-[32rem] max-w-[32rem] max-h-[24rem]'
+                                     className='object-contain'
+
+                                     style={{
+                                         maxHeight:toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.height,
+                                         maxWidth:toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.width
+                                     }}
                                 /> : null
 
                         }
@@ -295,7 +345,11 @@ const VideoTransformationComp = () => {
                             toolBoxStore.videoTransformationCompAttr.targetSrc !== null && toolBoxStore.videoTransformationCompAttr.targetFormat === 'MP4' ?
                                 <video muted controls autoPlay
                                        src={toolBoxStore.videoTransformationCompAttr.targetSrc}
-                                       className='w-[32rem] max-w-[32rem] max-h-[24rem]'
+                                       className='object-contain'
+                                       style={{
+                                           maxHeight:toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.height,
+                                           maxWidth:toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.width
+                                       }}
                                 /> : null
 
                         }
@@ -303,7 +357,6 @@ const VideoTransformationComp = () => {
 
 
                 </div>
-
             </div>
 
 

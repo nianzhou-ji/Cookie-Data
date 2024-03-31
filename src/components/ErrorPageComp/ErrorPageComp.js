@@ -9,7 +9,7 @@ const ErrorPageComp = () => {
 
     return (
         <div
-            className={`grid flex-grow place-content-center bg-white px-4  ${commonStore.appCompOpenConfig.errorPageAppOpen ? null : 'hidden'}`}>
+            className={`grid h-full place-content-center bg-white   ${commonStore.appCompOpenConfig.errorPageAppOpen ? null : 'hidden'}`}>
             <div className="text-center">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
