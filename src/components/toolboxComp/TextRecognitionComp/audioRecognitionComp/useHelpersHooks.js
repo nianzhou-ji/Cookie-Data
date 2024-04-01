@@ -275,9 +275,9 @@ const useHelpersHooks = () => {
             console.log('');
 
 
-            setTimeout(function () {
+            setTimeout(async ()=> {
                 // eslint-disable-next-line no-undef
-                const ret = Module.full_default(instance, toolBoxStore.audioRecognitionCompAttr.audio, 'en', nthreads, translate);
+                const ret =await Module.full_default(instance, toolBoxStore.audioRecognitionCompAttr.audio, 'en', nthreads, translate);
                 console.log('js: full_default returned: ' + ret);
                 if (ret) {
                     console.log("js: whisper returned: " + ret);

@@ -20,12 +20,15 @@ function useSidebarHook() {
             children: [
 
                 {
+
+
                     id: 'eac31d7d',
                     title: 'Video Format Transformation',
                     clickCallBack: () => {
                         toolBoxStore.updateAppOpen({
                             audioRecognitionComp:false,
-                            videoFormatTransformationComp:true
+                            videoFormatTransformationComp:true,
+                            imageRecognitionComp:false
                         })
                     },
 
@@ -41,7 +44,9 @@ function useSidebarHook() {
                 },
 
 
-            ]
+            ],
+
+
         },
 
         {
@@ -63,7 +68,8 @@ function useSidebarHook() {
 
                         toolBoxStore.updateAppOpen({
                             audioRecognitionComp:true,
-                            videoFormatTransformationComp:false
+                            videoFormatTransformationComp:false,
+                            imageRecognitionComp:false
                         })
 
                     },
@@ -75,13 +81,19 @@ function useSidebarHook() {
                     id: 'ea831d7s',
                     title: 'Image Recognition',
                     clickCallBack: () => {
+                        toolBoxStore.updateAppOpen({
+                            audioRecognitionComp:false,
+                            videoFormatTransformationComp:false,
+                            imageRecognitionComp:true
+                        })
 
                     },
 
                 },
 
 
-            ]
+            ],
+            defaultOpen:true
         },
         // {
         //     id: '901dd1e1',

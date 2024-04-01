@@ -42,7 +42,12 @@ const VideoTransformationComp = () => {
 
     useEffect(() => {
         loadFfmpeg()
+
+        Utils.setElementDisabled('videoContainer', true)
     }, []);
+
+
+
 
 
     const getContainerSize = (id)=>{
@@ -96,6 +101,9 @@ const VideoTransformationComp = () => {
                                        toolBoxStore.updateVideoTransformationCompAttr({
                                            src: reader.result
                                        });
+
+                                       Utils.setElementDisabled('videoContainer', false)
+
                                    };
                                    // 读取文件内容
                                    reader.readAsDataURL(file);
@@ -136,7 +144,7 @@ const VideoTransformationComp = () => {
             <div className=" divider divider-horizontal h-full"/>
 
 
-            <div className='h-full flex-grow flex flex-col'>
+            <div id={'videoContainer'} className='h-full flex-grow flex flex-col'>
                 <div
                     className={`${toolBoxStore.videoTransformationCompAttr.srcType === 'video/avi' ? 'hidden' : null}`}>
                     <label className="form-control  ">

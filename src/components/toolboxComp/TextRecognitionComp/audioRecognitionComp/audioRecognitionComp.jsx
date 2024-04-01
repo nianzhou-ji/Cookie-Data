@@ -3,6 +3,7 @@ import {observer} from "mobx-react-lite";
 import {useStore} from "../../../../stores";
 import useHelpersHooks from "./useHelpersHooks";
 import Utils from "../../../../utils";
+import _ from 'lodash'
 
 const AudioRecognitionComp = () => {
     const {toolBoxStore} = useStore()
@@ -10,7 +11,14 @@ const AudioRecognitionComp = () => {
 
     const baseURL = 'http://localhost:8080/assets';
 
-    const {onProcess, loadDefaultModel, loadModelFile, loadAudio, convertTimestampToSeconds, convertSrt} = useHelpersHooks()
+    const {
+        onProcess,
+        loadDefaultModel,
+        loadModelFile,
+        loadAudio,
+        convertTimestampToSeconds,
+        convertSrt
+    } = useHelpersHooks()
 
 
     useEffect(() => {
@@ -43,10 +51,12 @@ const AudioRecognitionComp = () => {
             }
 
 
-            if (toolBoxStore.audioRecognitionCompAttr.progress > 100 || toolBoxStore.audioRecognitionCompAttr.progress === 100) {
+            // console.log(_.cloneDeep((toolBoxStore.audioRecognitionCompAttr.progress - 100) < 0.1), _.cloneDeep(toolBoxStore.audioRecognitionCompAttr.progress) === 100, 'toolBoxStore.audioRecognitionCompAttr.progress ')
+
+            if (Math.abs(toolBoxStore.audioRecognitionCompAttr.progress - 100) < 0.1) {
+
                 toolBoxStore.updateAudioRecognitionCompAttr(
                     {
-
                         recognizing: false,
                     }
                 )
@@ -175,6 +185,7 @@ const AudioRecognitionComp = () => {
                                 recognizing: true,
                                 downloadSrtUrl: null,
                                 srtTexts: null,
+                                progress: 0
                             }
                         )
 
@@ -218,7 +229,7 @@ const AudioRecognitionComp = () => {
 
 
                 <div
-                    className='bg-black flex-auto  max-h-[30rem] mt-3  rounded-2xl text-white p-3 flex flex-col  overflow-y-auto'>
+                    className='bg-black flex-auto   mt-3  m-h-0 rounded-2xl text-white p-3 flex flex-col  overflow-y-scroll basis-0'>
 
                     {toolBoxStore.audioRecognitionCompAttr.logs.map((value, index) => <div key={index}
                                                                                            className='mt-3'>

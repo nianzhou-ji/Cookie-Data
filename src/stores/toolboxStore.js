@@ -5,9 +5,29 @@ import _ from 'lodash'
 class ToolBoxStore {
 
     appOpen = {
-        audioRecognitionComp: true,
-        videoTransformationComp: false
+        audioRecognitionComp: false,
+        videoTransformationComp: false,
+        imageRecognitionComp: true
 
+    }
+
+
+    updateAppOpen(value) {
+        const temp = _.cloneDeep(this.appOpen)
+
+        if (value.imageRecognitionComp !== undefined) {
+            temp.imageRecognitionComp = value.imageRecognitionComp
+        }
+
+        if (value.audioRecognitionComp !== undefined) {
+            temp.audioRecognitionComp = value.audioRecognitionComp
+        }
+
+        if (value.videoFormatTransformationComp !== undefined) {
+            temp.videoTransformationComp = value.videoFormatTransformationComp
+        }
+
+        this.appOpen = temp
     }
 
 
@@ -15,7 +35,9 @@ class ToolBoxStore {
         recognizing: false,
         progress: 0,
         whisperModel: 'default',
-        logs: [],
+        logs: [
+
+        ],
 
         loadModelState: false,
         loadAudioState: false,
@@ -110,7 +132,8 @@ class ToolBoxStore {
         srcType: null,
         progress: 0,
         srcVideoContainerSize: null,
-        targetVideoContainerSize: null
+        targetVideoContainerSize: null,
+        loadVideoState:false
     }
 
 
@@ -150,6 +173,11 @@ class ToolBoxStore {
 
     updateVideoTransformationCompAttr(value) {
         const temp = _.cloneDeep(this.videoTransformationCompAttr)
+
+        if (value.loadVideoState !== undefined) {
+            temp.loadVideoState = value.loadVideoState
+        }
+
         if (value.targetVideoContainerSize !== undefined) {
             temp.targetVideoContainerSize = value.targetVideoContainerSize
         }
@@ -218,18 +246,7 @@ class ToolBoxStore {
     }
 
 
-    updateAppOpen(value) {
-        const temp = _.cloneDeep(this.appOpen)
-        if (value.audioRecognitionComp !== undefined) {
-            temp.audioRecognitionComp = value.audioRecognitionComp
-        }
 
-        if (value.videoFormatTransformationComp !== undefined) {
-            temp.videoTransformationComp = value.videoFormatTransformationComp
-        }
-
-        this.appOpen = temp
-    }
 
 
     sidebarItemCurrentID = ''

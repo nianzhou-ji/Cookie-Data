@@ -15,7 +15,7 @@ const SidebarComp = () => {
                     if (item1.type === 'firstGrade') {
                         return <>
                             <li key={item1.id} className='menu-dropdown-toggle'>
-                                <details id={item1.id}>
+                                <details id={item1.id} open={item1.defaultOpen}>
                                     <summary className="group font-bold"><span>{item1.icon}</span> {item1.title}
                                     </summary>
                                     <ul>
@@ -40,7 +40,7 @@ const SidebarComp = () => {
                         return <>
 
                             <li key={item1.id}>
-                                <details id={item1.id}>
+                                <details id={item1.id} open={item1.defaultOpen}>
                                     <summary className="group font-bold">
                                         <span>{item1.icon}</span>
                                         {item1.title}
