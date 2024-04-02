@@ -26,7 +26,7 @@ const ProcessComp = ({className}) => {
     useEffect(() => {
         setaAssetUrls(getAssetUrls(
             {
-                baseUrl: 'http://localhost:8082/assets'
+                baseUrl: 'http://localhost:8082/assets/tldraw'
             }
         ))
     }, []);

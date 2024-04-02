@@ -9,7 +9,7 @@ const AudioRecognitionComp = () => {
     const {toolBoxStore} = useStore()
 
 
-    const baseURL = 'http://localhost:8080/assets';
+    const baseURL = 'http://localhost:8082/assets/whisper';
 
     const {
         onProcess,
@@ -114,7 +114,7 @@ const AudioRecognitionComp = () => {
                         <button
                             className={`${toolBoxStore.audioRecognitionCompAttr.whisperModel === 'default' ? null : 'hidden'} btn btn-neutral ml-2`}
                             onClick={async () => {
-                                await loadDefaultModel(`${baseURL}/SampleDemo/ggml-tiny.en.bin`, 'whisper.bin')
+                                await loadDefaultModel(`${baseURL}/ggml-tiny.en.bin`, 'whisper.bin')
 
                             }}>Load Modal
                         </button>

@@ -15,7 +15,7 @@ const VideoTransformationComp = () => {
 
     const loadFfmpeg = async () => {
         const ffmpeg = new FFmpeg()
-        const baseURL = 'http://localhost:8080/assets/ffmpeg';
+        const baseURL = 'http://localhost:8082/assets/ffmpeg';
         // const baseURL = 'https://unpkg.com/@ffmpeg/core-mt@0.12.6/dist/umd'
         ffmpeg.on('log', ({message}) => {
             console.log('log:', message)
@@ -50,9 +50,6 @@ const VideoTransformationComp = () => {
 
 
 
-    const getContainerSize = (id)=>{
-        return document.getElementById(id)?.getBoundingClientRect()
-    }
 
     return (
         <div className={`flex h-full ${toolBoxStore.appOpen.videoTransformationComp ? null : 'hidden'}`}>
@@ -81,7 +78,7 @@ const VideoTransformationComp = () => {
 
                                    if(toolBoxStore.videoTransformationCompAttr.srcVideoContainerSize===null) {
                                        toolBoxStore.updateVideoTransformationCompAttr({
-                                           srcVideoContainerSize:getContainerSize('srcVideoContainer')
+                                           srcVideoContainerSize:Utils.getContainerSize('srcVideoContainer')
                                        });
                                    }
 
@@ -89,7 +86,7 @@ const VideoTransformationComp = () => {
 
                                    if(toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize===null) {
                                        toolBoxStore.updateVideoTransformationCompAttr({
-                                           targetVideoContainerSize:getContainerSize('targetVideoContainer')
+                                           targetVideoContainerSize:Utils.getContainerSize('targetVideoContainer')
                                        });
                                    }
 

@@ -1,6 +1,14 @@
 class Utils {
 
-   static secondsToHMS(totalSeconds) {
+
+
+
+
+    static     getContainerSize = (id) => {
+        return document.getElementById(id)?.getBoundingClientRect()
+    }
+
+    static secondsToHMS(totalSeconds) {
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;

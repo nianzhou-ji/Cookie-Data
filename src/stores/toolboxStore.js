@@ -1,8 +1,90 @@
 import {makeAutoObservable} from "mobx";
 import _ from 'lodash'
+import {loopToHtmlElement} from "@tldraw/tldraw";
 
 
 class ToolBoxStore {
+
+
+
+
+
+    imageRecognitionCompAttr = {
+        recognizing: false,
+        progress: 0,
+        lang: 'chi_sim',
+        srcImageUrl: null,
+        srcImageInternalSize: null,
+        imageContainerSize: null,
+        result: null,
+        imageRecognitionCompImageElSize: null
+
+
+    }
+
+
+    updateImageRecognitionCompAttr(value) {
+
+        console.log('before updateImageRecognitionCompAttr', value)
+        const temp = _.cloneDeep(this.imageRecognitionCompAttr)
+
+        if (value.result !== undefined) {
+
+            console.log('before updateImageRecognitionCompAttr.result')
+            temp.result = value.result
+            console.log('after updateImageRecognitionCompAttr.result')
+        }
+
+
+        if (value.srcImageInternalSize !== undefined) {
+            console.log('before updateImageRecognitionCompAttr.srcImageInternalSize')
+            temp.srcImageInternalSize = value.srcImageInternalSize
+            console.log('after updateImageRecognitionCompAttr.srcImageInternalSize')
+        }
+
+        if (value.imageRecognitionCompImageElSize !== undefined) {
+            console.log('before updateImageRecognitionCompAttr.imageRecognitionCompImageElSize')
+            temp.imageRecognitionCompImageElSize = value.imageRecognitionCompImageElSize
+            console.log('after updateImageRecognitionCompAttr.imageRecognitionCompImageElSize')
+        }
+
+        if (value.imageContainerSize !== undefined) {
+            console.log('before updateImageRecognitionCompAttr.imageContainerSize')
+            temp.imageContainerSize = value.imageContainerSize
+            console.log('after updateImageRecognitionCompAttr.imageContainerSize')
+        }
+
+        if (value.srcImageUrl !== undefined) {
+            console.log('before updateImageRecognitionCompAttr.srcImageUrl')
+            temp.srcImageUrl = value.srcImageUrl
+            console.log('after updateImageRecognitionCompAttr.srcImageUrl')
+        }
+        if (value.lang !== undefined) {
+            console.log('before updateImageRecognitionCompAttr.lang')
+            temp.lang = value.lang
+            console.log('after updateImageRecognitionCompAttr.lang')
+        }
+
+        if (value.recognizing !== undefined) {
+            console.log('before updateImageRecognitionCompAttr.recognizing')
+            temp.recognizing = value.recognizing
+            console.log('after updateImageRecognitionCompAttr.recognizing')
+        }
+
+        if (value.progress !== undefined) {
+            console.log('before updateImageRecognitionCompAttr.progress')
+            temp.progress = value.progress
+            console.log('after updateImageRecognitionCompAttr.progress')
+        }
+
+
+        this.imageRecognitionCompAttr = temp
+
+
+
+    }
+
+
 
     appOpen = {
         audioRecognitionComp: false,
@@ -35,9 +117,7 @@ class ToolBoxStore {
         recognizing: false,
         progress: 0,
         whisperModel: 'default',
-        logs: [
-
-        ],
+        logs: [],
 
         loadModelState: false,
         loadAudioState: false,
@@ -46,10 +126,11 @@ class ToolBoxStore {
         audioDuration: 0,
         downloadSrtUrl: null,
         srtTexts: null,
-        srcStem:null
+        srcStem: null
 
 
     }
+
 
     updateAudioRecognitionCompAttr(value) {
         const temp = _.cloneDeep(this.audioRecognitionCompAttr)
@@ -133,7 +214,7 @@ class ToolBoxStore {
         progress: 0,
         srcVideoContainerSize: null,
         targetVideoContainerSize: null,
-        loadVideoState:false
+        loadVideoState: false
     }
 
 
@@ -244,9 +325,6 @@ class ToolBoxStore {
         this.videoTransformationCompAttr = temp
 
     }
-
-
-
 
 
     sidebarItemCurrentID = ''
