@@ -1,10 +1,29 @@
 import _ from "lodash";
 import {useStore} from "./stores";
 import useMarkdownHooks from "./components/MarkdownComp/useMarkdownHooks";
+import Utils from "./utils";
 
 const useAppHook = () => {
     const {commonStore} = useStore()
     const {updateMarkdownData} = useMarkdownHooks()
+
+    const buttonGroupID = ['AddIconID', 'DeleteIconID', 'MarkDownIconID', 'DrawIConID', 'DocumentsIconID',
+        'SaveIconID', 'BackupIconID', 'ImportBackupDataIconID']
+
+
+    const initAppIconState=()=>{
+        if (commonStore.documentsGroup.length === 0) {
+            buttonGroupID.forEach(item => {
+                if (!['AddIconID', 'ImportBackupDataIconID'].includes(item)) {
+                    Utils.setElementDisabled(item, true)
+                }
+            })
+        } else {
+            buttonGroupID.forEach(item => {
+                Utils.setElementDisabled(item, false)
+            })
+        }
+    }
 
 
     const initInterfaceData = async (editorJSOnReady=()=>{}) => {
@@ -39,7 +58,7 @@ const useAppHook = () => {
     }
 
 
-    return {initInterfaceData}
+    return {initInterfaceData, initAppIconState, buttonGroupID}
 
 }
 

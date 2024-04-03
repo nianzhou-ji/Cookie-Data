@@ -5,8 +5,6 @@ function useSidebarHook() {
     const {toolBoxStore} = useStore()
 
     const SidebarConfig = [
-        // id 前20
-
         {
             id: '50f6f4fa',
             type: 'firstGrade',
@@ -35,13 +33,13 @@ function useSidebarHook() {
                 },
 
 
-                {
-                    id: '46424feb',
-                    title: 'Image Format Transformation',
-                    clickCallBack: () => {
-
-                    }
-                },
+                // {
+                //     id: '46424feb',
+                //     title: 'Image Format Transformation',
+                //     clickCallBack: () => {
+                //
+                //     }
+                // },
 
 
             ],

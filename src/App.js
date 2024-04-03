@@ -37,11 +37,10 @@ function App() {
 
     const {updateMarkdownData} = useMarkdownHooks()
 
-    const buttonGroupID = ['AddIconID', 'DeleteIconID', 'MarkDownIconID', 'DrawIConID', 'DocumentsIconID',
-        'SaveIconID', 'BackupIconID', 'ImportBackupDataIconID']
 
 
-    const {initInterfaceData} = useAppHook()
+
+    const {initInterfaceData, initAppIconState, buttonGroupID} = useAppHook()
 
 
     useEffect(() => {
@@ -54,17 +53,7 @@ function App() {
 
 
     useEffect(() => {
-        if (commonStore.documentsGroup.length === 0) {
-            buttonGroupID.forEach(item => {
-                if (!['AddIconID', 'ImportBackupDataIconID'].includes(item)) {
-                    Utils.setElementDisabled(item, true)
-                }
-            })
-        } else {
-            buttonGroupID.forEach(item => {
-                Utils.setElementDisabled(item, false)
-            })
-        }
+        initAppIconState()
 
 
     }, [commonStore.documentsGroup])
@@ -108,6 +97,30 @@ function App() {
     });
 
 
+    const getAbbreviateStr=(str, maxLength=10)=>{
+        try {
+            if(str.length>maxLength){
+                return{
+                    text:str.substring(0, maxLength)+'...',
+                    tooltip:str
+                }
+            }else {
+                return{
+                    text:str,
+                    tooltip:null
+                }
+            }
+        }catch (e){
+            return{
+                text:null,
+                tooltip:null
+            }
+        }
+
+
+    }
+
+
     const btnClass = ' btn btn-ghost btn-square btn-sm hover:scale-125 hover:shadow-xl focus:outline-none focus:ring active:bg-gray-500'
 
 
@@ -130,8 +143,10 @@ function App() {
 
 
                 <div className='flex'>
-                    <div className={`font-bold  flex items-center ${toolBoxStore.toolboxAppOpenIconState?null:'hidden'}`}>
-                        {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: ' + commonStore.getCurrentDocumentObj().name}
+                    <div className={`font-bold  flex items-center ${toolBoxStore.toolboxAppOpenIconState?null:'hidden'} 
+                    ${getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip===null?null:'tooltip tooltip-bottom'}
+                    `} data-tip={getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip}>
+                        {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: ' + getAbbreviateStr(commonStore.getCurrentDocumentObj().name).text}
                     </div>
                     <div className={tooltipWrapperClass} data-tip="add document">
                         <ModalContainerComp>
@@ -406,9 +421,7 @@ function App() {
                             toolBoxStore.updateToolboxAppOpenIconState(false)
 
 
-                            buttonGroupID.forEach(item => {
-                                Utils.setElementDisabled(item, true)
-                            })
+                            initAppIconState()
 
                         }} t="1711625812241"
                              className={btnClass + 'cursor-pointer '}
@@ -430,9 +443,7 @@ function App() {
                             toolBoxStore.updateToolboxAppOpenIconState(true)
 
 
-                            buttonGroupID.forEach(item => {
-                                Utils.setElementDisabled(item, false)
-                            })
+                            initAppIconState()
                         }}
                              t="1711627062940"
                              className={btnClass + 'cursor-pointer ' + `${!toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'}`}

@@ -258,11 +258,11 @@ const ImageRecognitionComp = () => {
                             <span
                                 className="label-text font-bold text-2xl">Result</span>
 
-                            <div className='flex-none flex '>
-                                <button className='btn btn-neutral mr-2'>Copy</button>
-                                <button className='btn btn-neutral'>Clear</button>
+                            {/*<div className='flex-none flex '>*/}
+                            {/*    <button className='btn btn-neutral mr-2'>Copy</button>*/}
+                            {/*    <button className='btn btn-neutral'>Clear</button>*/}
 
-                            </div>
+                            {/*</div>*/}
                         </div>
 
                         <div
