@@ -256,7 +256,7 @@ const ImageRecognitionComp = () => {
                     <label className="h-[100%] form-control  flex  flex-col ">
                         <div className="label flex-none flex ">
                             <span
-                                className="label-text font-bold text-2xl">Result</span>
+                                className="label-text font-bold text-2xl">Recognition Result</span>
 
                             {/*<div className='flex-none flex '>*/}
                             {/*    <button className='btn btn-neutral mr-2'>Copy</button>*/}
