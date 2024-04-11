@@ -29,15 +29,13 @@ import SearchComp from "./components/searchComp/searchComp";
 import ToolboxComp from "./components/toolboxComp/toolboxComp";
 
 function App() {
-    const {commonStore,toolBoxStore} = useStore()
+    const {commonStore, toolBoxStore} = useStore()
 
 
     const [appOpenCache, setAppOpenCache] = useState({})
 
 
     const {updateMarkdownData} = useMarkdownHooks()
-
-
 
 
     const {initInterfaceData, initAppIconState, buttonGroupID} = useAppHook()
@@ -97,23 +95,23 @@ function App() {
     });
 
 
-    const getAbbreviateStr=(str, maxLength=10)=>{
+    const getAbbreviateStr = (str, maxLength = 10) => {
         try {
-            if(str.length>maxLength){
-                return{
-                    text:str.substring(0, maxLength)+'...',
-                    tooltip:str
+            if (str.length > maxLength) {
+                return {
+                    text: str.substring(0, maxLength) + '...',
+                    tooltip: str
                 }
-            }else {
-                return{
-                    text:str,
-                    tooltip:null
+            } else {
+                return {
+                    text: str,
+                    tooltip: null
                 }
             }
-        }catch (e){
-            return{
-                text:null,
-                tooltip:null
+        } catch (e) {
+            return {
+                text: null,
+                tooltip: null
             }
         }
 
@@ -135,7 +133,7 @@ function App() {
                     <div className="flex items-center">
                         <TitleIcon size={'2rem'} className=''/>
                         <div className='font-bold '>Cookie Data</div>
-                        <p className=' font-bold'>{commonStore.VERSION}</p>
+                        <p className='ml-3'>{commonStore.VERSION}</p>
                     </div>
 
                     {toolBoxStore.toolboxAppOpenIconState ? <SearchComp/> : null}
@@ -143,8 +141,9 @@ function App() {
 
 
                 <div className='flex'>
-                    <div className={`font-bold  flex items-center ${toolBoxStore.toolboxAppOpenIconState?null:'hidden'} 
-                    ${getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip===null?null:'tooltip tooltip-bottom'}
+                    <div
+                        className={`font-bold  flex items-center ${toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'} 
+                    ${getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip === null ? null : 'tooltip tooltip-bottom'}
                     `} data-tip={getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip}>
                         {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: ' + getAbbreviateStr(commonStore.getCurrentDocumentObj().name).text}
                     </div>
@@ -312,14 +311,26 @@ function App() {
                                   className={btnClass + 'cursor-pointer'}
                                   color={`${commonStore.isDocumentsGroupDataUpdate ? '#fa0404' : '#000'}`}
                                   onClick={async () => {
+
+                                      // Swal.fire({
+                                      //     title: 'Collecting data  ...',
+                                      //     didOpen: () => {
+                                      //         Swal.showLoading();
+                                      //     },
+                                      //
+                                      //     allowOutsideClick: false
+                                      // })
+
+
                                       const res = await commonStore.saveIndexedDB()
                                       if (res.state) {
+                                          // Swal.close()
                                           await Swal.fire({
                                               position: "top-end",
                                               icon: "success",
                                               title: "data save success",
                                               showConfirmButton: false,
-                                              timer: 1500
+                                              timer: 3000
                                           });
                                           commonStore.setIsDocumentsGroupDataUpdate(false)
 
@@ -347,47 +358,53 @@ function App() {
                             <dialog id="ImportBackupData_modal" className="modal">
                                 <div className="modal-box">
                                     <h3 className="font-bold text-lg">Import backup data</h3>
-                                    <input id="fileInput" type="file"
+                                    <input id="importBackupFileInputEl" type="file"
                                            className="file-input file-input-bordered w-full mt-3" multiple
-                                           accept=".json" onChange={async e => {
+                                           accept=".json"
 
-                                        const res = await commonStore.parsingBackupData(e.target.files)
-                                        if (!res.state) {
-                                            await Swal.fire({
-                                                icon: "error",
-                                                title: "Oops...",
-                                                text: "import failed:" + res.error
-                                            });
-
-                                            return
-                                        }
-
-                                        if (commonStore.documentsGroup !== undefined && commonStore.documentsGroup.length > 0) {
-                                            commonStore.updateCurrentDocumentID(commonStore.documentsGroup[0].id)
-                                        }
-
-                                        await initInterfaceData()
-
-
-                                        commonStore.updateAppCompOpenConfig({
-                                            markdownAppOpen: true,
-                                            processAppOpen: false,
-                                            errorPageAppOpen: false,
-                                            toolboxAppOpen: false,
-                                        })
-
-                                        await Swal.fire({
-                                            position: "top-end",
-                                            icon: "success",
-                                            title: "Import backup data success",
-                                            showConfirmButton: false,
-                                            timer: 1500
-                                        });
-
-
-                                    }}/>
+                                    />
                                     <div className="modal-action">
                                         <form method="dialog">
+                                            <button className="btn mr-3" onClick={async () => {
+
+                                                if(document.getElementById('importBackupFileInputEl').files.length===0)return
+                                                const res = await commonStore.parsingBackupData(document.getElementById('importBackupFileInputEl').files)
+                                                if (!res.state) {
+                                                    await Swal.fire({
+                                                        icon: "error",
+                                                        title: "Oops...",
+                                                        text: "import failed:" + res.error
+                                                    });
+
+                                                    return
+                                                }
+
+                                                if (commonStore.documentsGroup !== undefined && commonStore.documentsGroup.length > 0) {
+                                                    commonStore.updateCurrentDocumentID(commonStore.documentsGroup[0].id)
+                                                }
+
+                                                await initInterfaceData()
+
+
+                                                commonStore.updateAppCompOpenConfig({
+                                                    markdownAppOpen: true,
+                                                    processAppOpen: false,
+                                                    errorPageAppOpen: false,
+                                                    toolboxAppOpen: false,
+                                                })
+
+                                                await Swal.fire({
+                                                    position: "top-end",
+                                                    icon: "success",
+                                                    title: "Import backup data success",
+                                                    showConfirmButton: false,
+                                                    timer: 1500
+                                                });
+
+                                            }}>Confirm
+                                            </button>
+
+
                                             {/* if there is a button in form, it will close the modal */}
                                             <button className="btn">Close</button>
                                         </form>
@@ -400,11 +417,13 @@ function App() {
                                               className={btnClass + 'cursor-pointer'}
                                               onClick={() => {
                                                   document.getElementById('ImportBackupData_modal').showModal()
+
                                               }}/>
                     </div>
 
 
-                    <div className={`${tooltipWrapperClass} ${toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'}`} data-tip='Open toolbox'>
+                    <div className={`${tooltipWrapperClass} ${toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'}`}
+                         data-tip='Open toolbox'>
 
                         <svg onClick={() => {
 
@@ -421,7 +440,7 @@ function App() {
                             toolBoxStore.updateToolboxAppOpenIconState(false)
 
 
-                            initAppIconState()
+                            buttonGroupID.forEach(item => Utils.setElementDisabled(item, true))
 
                         }} t="1711625812241"
                              className={btnClass + 'cursor-pointer '}
@@ -435,7 +454,8 @@ function App() {
                     </div>
 
 
-                    <div className={`${tooltipWrapperClass} ${!toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'}`} data-tip='Close toolbox'>
+                    <div className={`${tooltipWrapperClass} ${!toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'}`}
+                         data-tip='Close toolbox'>
 
                         <svg onClick={() => {
                             commonStore.updateAppCompOpenConfig(appOpenCache)
