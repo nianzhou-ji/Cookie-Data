@@ -13,13 +13,21 @@ const ProcessComp = ({className}) => {
     const {commonStore} = useStore()
 
 
-    const [editor, setEditor] = useState();
-    const [assetUrls, setaAssetUrls] = useState({});
+    const [processDrawObj, setProcessDrawObj] = useState(null);
+    const [assetUrls, setAssetUrls] = useState({});
+
+
+    useEffect(() => {
+        commonStore.updateProcessDrawObj(processDrawObj)
+    }, [processDrawObj]);
 
     const setAppToState = useCallback((editor) => {
-        commonStore.updateProcessDrawObj(editor)
-
+        setProcessDrawObj(editor)
         const handleChangeEvent = (change) => {
+
+            editor.updateInstanceState({ isFocused: true })
+
+
             // Added
             for (const record of Object.values(change.changes.added)) {
                 if (record.typeName === 'shape') {
@@ -31,13 +39,13 @@ const ProcessComp = ({className}) => {
             for (const [from, to] of Object.values(change.changes.updated)) {
                 if (from.typeName === 'instance' && to.typeName === 'instance' && from.currentPageId !== to.currentPageId) {
                     console.log('changed page ')
+                    commonStore.setIsDocumentsGroupDataUpdate(true)
                 } else if (from.id.startsWith('shape') && to.id.startsWith('shape')) {
                     console.log('updated shape')
                     commonStore.setIsDocumentsGroupDataUpdate(true)
                 }
             }
             // Removed
-
             for (const record of Object.values(change.changes.removed)) {
                 if (record.typeName === 'shape') {
                     console.log('deleted shape')
@@ -54,7 +62,7 @@ const ProcessComp = ({className}) => {
 
 
     useEffect(() => {
-        setaAssetUrls(getAssetUrls(
+        setAssetUrls(getAssetUrls(
             {
                 baseUrl: 'http://localhost:8082/assets/tldraw'
             }
