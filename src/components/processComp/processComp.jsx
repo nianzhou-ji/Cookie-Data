@@ -17,9 +17,39 @@ const ProcessComp = ({className}) => {
     const [assetUrls, setaAssetUrls] = useState({});
 
     const setAppToState = useCallback((editor) => {
-        setEditor(editor);
+        commonStore.updateProcessDrawObj(editor)
+
+        const handleChangeEvent = (change) => {
+            // Added
+            for (const record of Object.values(change.changes.added)) {
+                if (record.typeName === 'shape') {
+                    console.log('Added shape')
+                    commonStore.setIsDocumentsGroupDataUpdate(true)
+                }
+            }
+            // Updated
+            for (const [from, to] of Object.values(change.changes.updated)) {
+                if (from.typeName === 'instance' && to.typeName === 'instance' && from.currentPageId !== to.currentPageId) {
+                    console.log('changed page ')
+                } else if (from.id.startsWith('shape') && to.id.startsWith('shape')) {
+                    console.log('updated shape')
+                    commonStore.setIsDocumentsGroupDataUpdate(true)
+                }
+            }
+            // Removed
+
+            for (const record of Object.values(change.changes.removed)) {
+                if (record.typeName === 'shape') {
+                    console.log('deleted shape')
+                    commonStore.setIsDocumentsGroupDataUpdate(true)
+                }
+            }
+        };
+        // editor.store.listen(handleChangeEvent, {source: 'user', scope: 'all'});
+        editor.store.listen(handleChangeEvent);
 
 
+        console.log(_.eq(commonStore.processDrawObj, editor), 'compare')
     }, []);
 
 
@@ -33,58 +63,58 @@ const ProcessComp = ({className}) => {
 
     const [storeEvents, setStoreEvents] = useState([]);
 
-    useEffect(() => {
-        if (!editor) return;
-
-
-        commonStore.updateProcessDrawObj(editor)
-
-        function logChangeEvent(eventName) {
-            setStoreEvents((events) => [...events, eventName]);
-            commonStore.setIsDocumentsGroupDataUpdate(true)
-        }
-
-        //[1]
-        const handleChangeEvent = (change) => {
-            // Added
-            for (const record of Object.values(change.changes.added)) {
-                if (record.typeName === 'shape') {
-                    logChangeEvent(`created shape (${record.type})\n`);
-                }
-            }
-
-            // Updated
-            for (const [from, to] of Object.values(change.changes.updated)) {
-                if (
-                    from.typeName === 'instance' &&
-                    to.typeName === 'instance' &&
-                    from.currentPageId !== to.currentPageId
-                ) {
-                    logChangeEvent(`changed page (${from.currentPageId}, ${to.currentPageId})`);
-                } else if (from.id.startsWith('shape') && to.id.startsWith('shape')) {
-                    logChangeEvent(`updated shape (${JSON.stringify('diff')})\n`);
-                }
-            }
-
-            // Removed
-            for (const record of Object.values(change.changes.removed)) {
-                if (record.typeName === 'shape') {
-                    logChangeEvent(`deleted shape (${record.type})\n`);
-                }
-            }
-        };
-
-        // [2]
-        const cleanupFunction = editor.store.listen(handleChangeEvent, {
-            source: 'user',
-            scope: 'all'
-        });
-
-
-        return () => {
-            cleanupFunction();
-        };
-    }, [editor]);
+    // useEffect(() => {
+    //     if (!editor) return;
+    //
+    //
+    //     commonStore.updateProcessDrawObj(editor)
+    //
+    //     function logChangeEvent(eventName) {
+    //         setStoreEvents((events) => [...events, eventName]);
+    //         commonStore.setIsDocumentsGroupDataUpdate(true)
+    //     }
+    //
+    //     //[1]
+    //     const handleChangeEvent = (change) => {
+    //         // Added
+    //         for (const record of Object.values(change.changes.added)) {
+    //             if (record.typeName === 'shape') {
+    //                 logChangeEvent(`created shape (${record.type})\n`);
+    //             }
+    //         }
+    //
+    //         // Updated
+    //         for (const [from, to] of Object.values(change.changes.updated)) {
+    //             if (
+    //                 from.typeName === 'instance' &&
+    //                 to.typeName === 'instance' &&
+    //                 from.currentPageId !== to.currentPageId
+    //             ) {
+    //                 logChangeEvent(`changed page (${from.currentPageId}, ${to.currentPageId})`);
+    //             } else if (from.id.startsWith('shape') && to.id.startsWith('shape')) {
+    //                 logChangeEvent(`updated shape (${JSON.stringify('diff')})\n`);
+    //             }
+    //         }
+    //
+    //         // Removed
+    //         for (const record of Object.values(change.changes.removed)) {
+    //             if (record.typeName === 'shape') {
+    //                 logChangeEvent(`deleted shape (${record.type})\n`);
+    //             }
+    //         }
+    //     };
+    //
+    //     // [2]
+    //     const cleanupFunction = editor.store.listen(handleChangeEvent, {
+    //         source: 'user',
+    //         scope: 'all'
+    //     });
+    //
+    //
+    //     return () => {
+    //         cleanupFunction();
+    //     };
+    // }, [editor]);
 
     return (
         <div
