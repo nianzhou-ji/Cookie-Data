@@ -90,9 +90,6 @@ class CommonStore {
     }
 
 
-
-
-
     patchSearchEngineConfig(value) {
         const temp = _.cloneDeep(this.searchEngineConfig)
         if (value.searchResultMenuOpen !== undefined) {
@@ -352,7 +349,7 @@ class CommonStore {
             }
 
             if (this.processDrawObj !== null) {
-                const snapshot = this.processDrawObj.store.getSnapshot()
+                const snapshot = this.processDrawObj.store.getSnapshot('all')
                 // this.patchDocumentsGroup(JSON.parse(snapshot), 'processData')
                 this.patchDocumentsGroup(snapshot, 'processData')
             }

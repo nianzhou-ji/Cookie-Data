@@ -264,9 +264,8 @@ function App() {
                                 toolboxAppOpen: false,
                             })
 
-                            await initInterfaceData()
-
                             toolBoxStore.updateToolboxAppOpenIconState(true)
+                            await initInterfaceData()
                         }}/>
                     </div>
 

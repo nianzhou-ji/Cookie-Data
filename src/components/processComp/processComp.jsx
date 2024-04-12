@@ -22,6 +22,9 @@ const ProcessComp = ({className}) => {
     }, [processDrawObj]);
 
     const setAppToState = useCallback((editor) => {
+
+
+
         setProcessDrawObj(editor)
         const handleChangeEvent = (change) => {
 
