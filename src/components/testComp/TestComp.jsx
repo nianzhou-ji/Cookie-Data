@@ -55,43 +55,37 @@ export default function TestComp({url = baseURL + '/test.pdf'}) {
                 const pageDivEl = viewerDivEl.querySelector('[data-page-number="1"]')
                 const canvasAnnotationEl = document.createElement('canvas');
                 const pageDivElSize = pageDivEl.querySelector('.canvasWrapper').getBoundingClientRect()
+
                 canvasAnnotationEl.id = 'JpCanvasAnnotationEl'
-                canvasAnnotationEl.style.zIndex = '2000'
-                canvasAnnotationEl.style.width = `${pageDivElSize.width}px`
-                canvasAnnotationEl.style.height = `${pageDivElSize.height}px`
-                // canvasAnnotationEl.style.backgroundColor = 'red'
-                canvasAnnotationEl.style.position = 'absolute'
-                canvasAnnotationEl.style.top = '0'
-                canvasAnnotationEl.style.left = '0'
-
-
 
                 if (!viewerDivEl.querySelector('#JpCanvasAnnotationEl')) {
                     pageDivEl.appendChild(canvasAnnotationEl)
 
                     fabric.window = viewer.shadowRoot.querySelector('iframe').contentWindow;
                     fabric.document = viewer.shadowRoot.querySelector('iframe').contentWindow.document;
-
-                    const canvas = new fabric.Canvas(canvasAnnotationEl);
-
-
-                    const fabricCanvas = pageDivEl.querySelector('.canvas-container')
-                    fabricCanvas.style.zIndex = '3000'
-                    // fabricCanvas.style.width = `${pageDivElSize.width}px`
-                    // fabricCanvas.style.height = `${pageDivElSize.height}px`
-                    canvasAnnotationEl.style.backgroundColor = 'red'
-                    fabricCanvas.style.position = 'absolute'
-                    fabricCanvas.style.top = '0'
-                    fabricCanvas.style.left = '0'
-                    console.log(fabricCanvas,'fabricCanvas')
+                    //
+                    const canvas = new fabric.Canvas(canvasAnnotationEl, {
+                        containerClass:'JpCanvasAnnotationWrapper',
+                        width: pageDivElSize.width,
+                        height: pageDivElSize.height
+                    });
 
 
+                    const wrapperEl = pageDivEl.querySelector('.JpCanvasAnnotationWrapper')
 
-                    console.log(canvas, 'fabric.Canvas')
+                    wrapperEl.style.zIndex = '2000'
+                    // wrapperEl.style.backgroundColor = 'red'
+                    wrapperEl.style.top = `0`
+                    wrapperEl.style.left = `0`
+                    wrapperEl.style.position = 'absolute'
+
+
                     // 启用绘图模式
                     canvas.isDrawingMode = true;
                     canvas.freeDrawingBrush.color = 'purple';  // 设置绘图颜色
                     canvas.freeDrawingBrush.width = 5;         // 设置画笔宽度
+
+
 
                     canvas.loadFromJSON(canvasData, () => {
                         canvas.renderAll();
@@ -117,19 +111,6 @@ export default function TestComp({url = baseURL + '/test.pdf'}) {
 
 
     useEffect(() => {
-        const canvas = new fabric.Canvas('JpCanvasAnnotationEl');
-        // 启用绘图模式
-        canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush.color = 'purple';  // 设置绘图颜色
-        canvas.freeDrawingBrush.width = 5;         // 设置画笔宽度
-
-
-        setCanvasObj(canvas)
-
-
-        return () => {
-            canvas.dispose();
-        };
 
 
     }, []);
