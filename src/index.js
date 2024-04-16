@@ -4,12 +4,13 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import TestComp from "./components/testComp/TestComp";
+import PdfReaderComp from "./components/PDFReaderComp/PDFReaderComp";
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <TestComp />
+    <PdfReaderComp />
   </React.StrictMode>
 );
 

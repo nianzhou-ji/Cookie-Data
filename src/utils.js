@@ -83,6 +83,20 @@ class Utils {
             console.error('Error converting MP4 to Blob:', error);
         }
     }
+
+
+    static async urlToUint8Array(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const buffer = await response.arrayBuffer();
+            return new Uint8Array(buffer);
+        } catch (error) {
+            console.error('Error fetching and converting the data:', error);
+        }
+    }
 }
 
 export default Utils

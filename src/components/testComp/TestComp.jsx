@@ -2,10 +2,22 @@ import React, {useEffect, useState, useRef, useCallback} from 'react';
 import 'pdfjs-viewer-element'
 import {toBlobURL} from "@ffmpeg/util";
 import {fabric} from 'fabric';
+import ReactDOM from "react-dom";
 
 const baseURL = 'http://localhost:8082/assets/pdfjs';
 
 export default function TestComp({url = baseURL + '/test.pdf'}) {
+
+
+    const ToolbarViewerRightComp = ({container}) => {
+        console.log(container, 'container')
+        container.innerHTML = '';
+        return ReactDOM.createPortal(
+            <button className='btn'>Test</button>,
+            container
+        );
+    };
+
 
     async function urlToUint8Array(url) {
         try {
@@ -27,16 +39,7 @@ export default function TestComp({url = baseURL + '/test.pdf'}) {
 
     const [canvasObj, setCanvasObj] = useState(null)
 
-    // useEffect(() => {
-    //     const initData = async () => {
-    //         const pdfurl = await toBlobURL(url, 'application/pdf')
-    //         setPdfURL(pdfurl)
-    //     }
-    //
-    //     initData()
-    //
-    //
-    // }, []);
+    const [toolbarViewerRightElement, setToolbarViewerRightElement] = useState(null)
 
 
     useEffect(() => {
@@ -49,7 +52,10 @@ export default function TestComp({url = baseURL + '/test.pdf'}) {
 
             const iframeDocument = viewer.shadowRoot.querySelector('iframe').contentDocument
             const viewerDivEl = iframeDocument.querySelector("#viewer")
-            console.log(viewerDivEl, 'viewerApp')
+
+            const toolbarViewerRightEl = iframeDocument.getElementById('toolbarViewerRight');
+
+            setToolbarViewerRightElement(toolbarViewerRightEl)
 
             viewerApp.eventBus.on('pagesloaded', (event) => {
                 const pageDivEl = viewerDivEl.querySelector('[data-page-number="1"]')
@@ -63,18 +69,16 @@ export default function TestComp({url = baseURL + '/test.pdf'}) {
 
                     fabric.window = viewer.shadowRoot.querySelector('iframe').contentWindow;
                     fabric.document = viewer.shadowRoot.querySelector('iframe').contentWindow.document;
-                    //
+
                     const canvas = new fabric.Canvas(canvasAnnotationEl, {
-                        containerClass:'JpCanvasAnnotationWrapper',
+                        containerClass: 'JpCanvasAnnotationWrapper',
                         width: pageDivElSize.width,
                         height: pageDivElSize.height
                     });
 
 
                     const wrapperEl = pageDivEl.querySelector('.JpCanvasAnnotationWrapper')
-
                     wrapperEl.style.zIndex = '2000'
-                    // wrapperEl.style.backgroundColor = 'red'
                     wrapperEl.style.top = `0`
                     wrapperEl.style.left = `0`
                     wrapperEl.style.position = 'absolute'
@@ -84,21 +88,13 @@ export default function TestComp({url = baseURL + '/test.pdf'}) {
                     canvas.isDrawingMode = true;
                     canvas.freeDrawingBrush.color = 'purple';  // 设置绘图颜色
                     canvas.freeDrawingBrush.width = 5;         // 设置画笔宽度
-
-
-
                     canvas.loadFromJSON(canvasData, () => {
                         canvas.renderAll();
                     });
 
 
-
-
-
-
                 }
 
-                console.log(iframeDocument.querySelector("#viewer"), 'viewerDivEl')
             });
 
 
@@ -143,7 +139,9 @@ export default function TestComp({url = baseURL + '/test.pdf'}) {
     return <pdfjs-viewer-element style={{
         height: '100vh',
         width: '100vw',
-    }} viewer-path={'/pdfjs-4.0.189-dist'}></pdfjs-viewer-element>;
+    }} viewer-path={'/pdfjs-4.0.189-dist'}>
+        {toolbarViewerRightElement!==null?<ToolbarViewerRightComp container={toolbarViewerRightElement}/>:null}
+    </pdfjs-viewer-element>;
 
 }
 
