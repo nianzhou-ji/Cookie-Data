@@ -22,7 +22,13 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
     const [toolbarViewerRightElement, setToolbarViewerRightElement] = useState(null)
 
 
-    const {createFabricCanvas, annotationPencilCanvasConfigFunc, annotationStraightLineCanvasConfigFunc} = usePDFReaderCompHooks()
+    const {
+        createFabricCanvas,
+        annotationPencilCanvasConfigFunc,
+        annotationStraightLineCanvasConfigFunc,
+        annotationWaveLineCanvasConfigFunc,
+        annotationTextCanvasConfigFunc
+    } = usePDFReaderCompHooks()
 
 
     useEffect(() => {
@@ -84,7 +90,8 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                             value: {
                                 pageDivElSize,
                                 canvasAnnotationEl,
-                                pageDivEl
+                                pageDivEl,
+                                pageNum: `${pageNum}`
                             }
                         }
                     })
@@ -93,13 +100,23 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                     const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
                     if (!values.fabricRendered) {
 
-                        if(commonStore.annotationIconConfig.clicked['PencilIconContainer']){
+                        if (commonStore.annotationIconConfig.clicked['PencilIconContainer']) {
                             createFabricCanvas(values, annotationPencilCanvasConfigFunc)
                         }
 
 
-                        if(commonStore.annotationIconConfig.clicked['LineIconContainer']){
+                        if (commonStore.annotationIconConfig.clicked['LineIconContainer']) {
                             createFabricCanvas(values, annotationStraightLineCanvasConfigFunc)
+                        }
+
+
+                        if (commonStore.annotationIconConfig.clicked['WaveIconContainer']) {
+                            createFabricCanvas(values, annotationWaveLineCanvasConfigFunc)
+                        }
+
+
+                        if (commonStore.annotationIconConfig.clicked['TextIconContainer']) {
+                            createFabricCanvas(values, annotationTextCanvasConfigFunc)
                         }
 
                     }

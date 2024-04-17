@@ -18,7 +18,9 @@ class CommonStore {
         clicked: {},
         iframeDocument: null,
         pagesCount:0,
-        canvasAnnotationElGroup:{}
+        canvasAnnotationElGroup:{} ,
+        history:{},
+        canvasObjSelectionState:false
     }
 
 
@@ -36,6 +38,12 @@ class CommonStore {
 
     updateAnnotationIconConfig(value) {
         const temp = _.cloneDeep(this.annotationIconConfig)
+        if (value.canvasObjSelectionState !== undefined) {
+            temp.canvasObjSelectionState = value.canvasObjSelectionState
+        }
+        if (value.history !== undefined) {
+            temp.history[value.history.key] = value.history.value
+        }
 
         if (value.canvasAnnotationElGroup !== undefined) {
             temp.canvasAnnotationElGroup[value.canvasAnnotationElGroup.key] = value.canvasAnnotationElGroup.value

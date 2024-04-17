@@ -4,6 +4,7 @@ import {TbPencilExclamation as PencilIcon} from "react-icons/tb";
 import {CiRead as ReadIcon} from "react-icons/ci";
 import {FaGripLines as LineIcon} from "react-icons/fa";
 import {PiWavesBold as WaveIcon} from "react-icons/pi";
+import { BiText as TextIcon} from "react-icons/bi";
 import React, {useEffect} from "react";
 import {useStore} from "../../stores";
 import {observer} from "mobx-react-lite";
@@ -21,7 +22,9 @@ const ToolbarViewerRightComp = ({container}) => {
     const {
         createFabricCanvas,
         annotationPencilCanvasConfigFunc,
-        annotationStraightLineCanvasConfigFunc
+        annotationStraightLineCanvasConfigFunc,
+        annotationWaveLineCanvasConfigFunc,
+        annotationTextCanvasConfigFunc
     } = usePDFReaderCompHooks()
 
     const AnnotationIconContainer = (
@@ -127,6 +130,7 @@ const ToolbarViewerRightComp = ({container}) => {
             <AnnotationIconContainer id={'PencilIconContainer'} title={'Annotation Pencil'} onClickFunc={() => {
                 Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
                     const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
+                    // console.log(_.cloneDeep(values), 'values')
                     createFabricCanvas(values, annotationPencilCanvasConfigFunc)
                     commonStore.updateAnnotationIconConfig({
                         canvasAnnotationElGroup: {
@@ -170,12 +174,51 @@ const ToolbarViewerRightComp = ({container}) => {
             </AnnotationIconContainer>
 
 
-            <AnnotationIconContainer id={'WaveIconContainer'} title={'Annotation Wave Line'}>
+            <AnnotationIconContainer id={'WaveIconContainer'} title={'Annotation Wave Line'} onClickFunc={() => {
+                Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
+                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
+                    createFabricCanvas(values, annotationWaveLineCanvasConfigFunc)
+                    commonStore.updateAnnotationIconConfig({
+                        canvasAnnotationElGroup: {
+                            key: `${pageNum}`,
+                            value: {
+                                ...values,
+                                fabricRendered: true
+                            }
+                        }
+                    })
+
+
+                })
+
+
+            }}>
                 <WaveIcon size={'1.25rem'}
                 />
             </AnnotationIconContainer>
 
+            <AnnotationIconContainer id={'TextIconContainer'} title={'Annotation Text'} onClickFunc={() => {
+                Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
+                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
+                    createFabricCanvas(values, annotationTextCanvasConfigFunc)
+                    commonStore.updateAnnotationIconConfig({
+                        canvasAnnotationElGroup: {
+                            key: `${pageNum}`,
+                            value: {
+                                ...values,
+                                fabricRendered: true
+                            }
+                        }
+                    })
 
+
+                })
+
+
+            }}>
+                <TextIcon size={'1.25rem'}
+                />
+            </AnnotationIconContainer>
         </div>
 
 
