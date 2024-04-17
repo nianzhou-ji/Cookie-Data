@@ -7,6 +7,49 @@ import Utils from "../utils";
 class CommonStore {
 
 
+    testVars = 0
+
+    updateTestVars() {
+        this.testVars = this.testVars + 1
+    }
+
+
+    annotationIconConfig = {
+        clicked: {},
+        iframeDocument: null,
+    }
+
+    updateAnnotationIconConfig(value) {
+        const temp = _.cloneDeep(this.annotationIconConfig)
+
+        if (value.clicked !== undefined) {
+            temp.clicked[value.clicked.id] = value.clicked.value
+            // if(temp.clicked[value.clicked.id]===undefined){
+            //
+            // }else{
+            //     Object.keys(temp.clicked).forEach(item=>{
+            //         if(item===value.clicked.id){
+            //             temp.clicked[value.clicked.id] = value.clicked.value
+            //         }else {
+            //             temp.clicked[value.clicked.id] = false
+            //         }
+            //     })
+            // }
+
+
+
+        }
+
+
+        if (value.iframeDocument !== undefined) {
+            temp.iframeDocument = value.iframeDocument
+        }
+
+        this.annotationIconConfig = temp
+
+    }
+
+
     initMarkdownData = {
         "time": 1711019875915,
         "blocks": [],
@@ -71,7 +114,6 @@ class CommonStore {
             }
         }
     }
-
 
 
     searchEngineConfig = {
