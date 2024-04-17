@@ -17,27 +17,37 @@ class CommonStore {
     annotationIconConfig = {
         clicked: {},
         iframeDocument: null,
+        pagesCount:0,
+        canvasAnnotationElGroup:{}
+    }
+
+
+
+    updateAnnotationZIndex(){
+        const elements = this.annotationIconConfig.iframeDocument.querySelectorAll('.JpCanvasAnnotationWrapper');
+        elements.forEach((element, index) => {
+            if (this.annotationIconConfig.clicked['ReadIconContainer']) {
+                element.style.zIndex = '1'
+            } else {
+                element.style.zIndex = '3'
+            }
+        });
     }
 
     updateAnnotationIconConfig(value) {
         const temp = _.cloneDeep(this.annotationIconConfig)
 
+        if (value.canvasAnnotationElGroup !== undefined) {
+            temp.canvasAnnotationElGroup[value.canvasAnnotationElGroup.key] = value.canvasAnnotationElGroup.value
+        }
+
+        if (value.pagesCount !== undefined) {
+            temp.pagesCount = value.pagesCount
+        }
+
         if (value.clicked !== undefined) {
             temp.clicked[value.clicked.id] = value.clicked.value
-            // if(temp.clicked[value.clicked.id]===undefined){
-            //
-            // }else{
-            //     Object.keys(temp.clicked).forEach(item=>{
-            //         if(item===value.clicked.id){
-            //             temp.clicked[value.clicked.id] = value.clicked.value
-            //         }else {
-            //             temp.clicked[value.clicked.id] = false
-            //         }
-            //     })
-            // }
-
-
-
+            this.updateAnnotationZIndex()
         }
 
 

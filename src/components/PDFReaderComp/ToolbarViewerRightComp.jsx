@@ -8,6 +8,8 @@ import React, {useEffect} from "react";
 import {useStore} from "../../stores";
 import {observer} from "mobx-react-lite";
 import _ from 'lodash'
+import {fabric} from "fabric";
+import usePDFReaderCompHooks from "./usePDFReaderCompHooks";
 
 const ToolbarViewerRightComp = ({container}) => {
 
@@ -15,7 +17,21 @@ const ToolbarViewerRightComp = ({container}) => {
     container.innerHTML = '';
     container.style.cssText = "display: flex; align-items: center;";
 
-    const AnnotationIconContainer = ({children, id, title}) => {
+
+    const {
+        createFabricCanvas,
+        annotationPencilCanvasConfigFunc,
+        annotationStraightLineCanvasConfigFunc
+    } = usePDFReaderCompHooks()
+
+    const AnnotationIconContainer = (
+        {
+            children, id, title,
+            initFunc = () => {
+            },
+            onClickFunc = () => {
+            }
+        }) => {
 
         useEffect(() => {
             commonStore.updateAnnotationIconConfig({
@@ -24,19 +40,15 @@ const ToolbarViewerRightComp = ({container}) => {
                     value: false
                 }
             })
+
+
+            initFunc()
         }, []);
+
 
         return <div id={id} title={title} className={`AnnotationIcon`}
                     onClick={e => {
                         const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
-                        // commonStore.updateAnnotationIconConfig({
-                        //     clicked: {
-                        //         id: id,
-                        //         value: !commonStore.annotationIconConfig.clicked[id]
-                        //     }
-                        // })
-
-
                         Object.keys(commonStore.annotationIconConfig.clicked).forEach(item => {
                             if (item === id) {
                                 commonStore.updateAnnotationIconConfig({
@@ -56,8 +68,6 @@ const ToolbarViewerRightComp = ({container}) => {
                                 const otherAnnotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(item)
                                 otherAnnotationIconContainer.classList.toggle("AnnotationIconActive", false)
                                 otherAnnotationIconContainer.classList.toggle("AnnotationIconHover", false)
-
-
                             }
                         })
 
@@ -67,6 +77,9 @@ const ToolbarViewerRightComp = ({container}) => {
                         } else {
                             annotationIconContainer.classList.toggle("AnnotationIconActive", false)
                         }
+
+
+                        onClickFunc()
 
 
                         console.log(_.cloneDeep(commonStore.annotationIconConfig.clicked))
@@ -92,18 +105,66 @@ const ToolbarViewerRightComp = ({container}) => {
 
     return ReactDOM.createPortal(
         <div className={'AnnotationIconGroupContainer'}>
-
-            <AnnotationIconContainer id={'ReadIconContainer'} title={'Only Read'}>
+            <AnnotationIconContainer
+                id={'ReadIconContainer'}
+                title={'Only Read'}
+                initFunc={() => {
+                    commonStore.annotationIconConfig.iframeDocument.getElementById('ReadIconContainer').classList.toggle("AnnotationIconActive", true)
+                    commonStore.updateAnnotationIconConfig({
+                        clicked: {
+                            id: 'ReadIconContainer',
+                            value: true
+                        }
+                    })
+                }}
+                onClickFunc={() => {
+                    commonStore.updateAnnotationZIndex()
+                }}>
                 <ReadIcon size={'1.25rem'}
                 />
             </AnnotationIconContainer>
 
-            <AnnotationIconContainer id={'PencilIconContainer'} title={'Annotation Pencil'}>
+            <AnnotationIconContainer id={'PencilIconContainer'} title={'Annotation Pencil'} onClickFunc={() => {
+                Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
+                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
+                    createFabricCanvas(values, annotationPencilCanvasConfigFunc)
+                    commonStore.updateAnnotationIconConfig({
+                        canvasAnnotationElGroup: {
+                            key: `${pageNum}`,
+                            value: {
+                                ...values,
+                                fabricRendered: true,
+                            }
+                        }
+                    })
+
+                })
+
+
+            }}>
                 <PencilIcon size={'1.25rem'}
                 />
             </AnnotationIconContainer>
 
-            <AnnotationIconContainer id={'LineIconContainer'} title={'Annotation Straight Line'}>
+            <AnnotationIconContainer id={'LineIconContainer'} title={'Annotation Straight Line'} onClickFunc={() => {
+                Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
+                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
+                    createFabricCanvas(values, annotationStraightLineCanvasConfigFunc)
+                    commonStore.updateAnnotationIconConfig({
+                        canvasAnnotationElGroup: {
+                            key: `${pageNum}`,
+                            value: {
+                                ...values,
+                                fabricRendered: true
+                            }
+                        }
+                    })
+
+
+                })
+
+
+            }}>
                 <LineIcon size={'1.25rem'}
                 />
             </AnnotationIconContainer>
