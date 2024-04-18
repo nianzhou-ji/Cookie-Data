@@ -7,25 +7,28 @@ import Utils from "../utils";
 class CommonStore {
 
 
-    testVars = 0
+    testVars = {}
 
-    updateTestVars() {
-        this.testVars = this.testVars + 1
+    updateTestVars(value) {
+        this.testVars[value.key]=value.value
     }
 
 
     annotationIconConfig = {
         clicked: {},
         iframeDocument: null,
-        pagesCount:0,
-        canvasAnnotationElGroup:{} ,
-        history:{},
-        canvasObjSelectionState:false
+        pagesCount: 0,
+        canvasAnnotationElGroup: {},
+        history: {},
+        canvasObjSelectionState: false,
+        fabricCanvas: {},
+
     }
 
 
 
-    updateAnnotationZIndex(){
+
+    updateAnnotationZIndex() {
         const elements = this.annotationIconConfig.iframeDocument.querySelectorAll('.JpCanvasAnnotationWrapper');
         elements.forEach((element, index) => {
             if (this.annotationIconConfig.clicked['ReadIconContainer']) {
@@ -37,7 +40,11 @@ class CommonStore {
     }
 
     updateAnnotationIconConfig(value) {
-        const temp = _.cloneDeep(this.annotationIconConfig)
+        const temp = this.annotationIconConfig
+        if (value.fabricCanvas !== undefined) {
+            temp.fabricCanvas[value.fabricCanvas.key] = value.fabricCanvas.value
+        }
+
         if (value.canvasObjSelectionState !== undefined) {
             temp.canvasObjSelectionState = value.canvasObjSelectionState
         }
