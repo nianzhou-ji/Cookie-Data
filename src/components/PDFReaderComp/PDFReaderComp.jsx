@@ -25,11 +25,9 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
     const {
         createFabricCanvas,
         annotationPencilCanvasConfigFunc,
-        annotationStraightLineCanvasConfigFunc,
         annotationTextCanvasConfigFunc,
-        annotationArrowCanvasConfigFunc,
-
-        saveHistory
+        saveHistory,
+        loadHistory
     } = usePDFReaderCompHooks()
 
 
@@ -43,11 +41,19 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
             const iframeDocument = viewer.shadowRoot.querySelector('iframe').contentDocument
 
+           const headEl = iframeDocument.querySelector('head')
+            // console.log(headEl, 'headEl')
+            const script = document.createElement('script');
+            script.type = 'text/javascript';
+            script.src = await toBlobURL(baseURL+'/pdfjs/tailwindcss.js', 'text/javascript');
+            headEl.appendChild(script);
+
             iframeDocument.querySelector('#toolbarViewer').style.cssText = "display: flex; align-items: center;     justify-content: space-between;"
             const viewFind = iframeDocument.querySelector('#viewFind')
             const sidebarToggle = iframeDocument.querySelector('#sidebarToggle')
             const toolbarViewerLeft = iframeDocument.querySelector('#toolbarViewerLeft')
             const toolbarViewerMiddle = iframeDocument.querySelector('#toolbarViewerMiddle')
+
             toolbarViewerMiddle.innerHTML = ''
             toolbarViewerLeft.innerHTML = ''
             toolbarViewerLeft.appendChild(sidebarToggle)
@@ -68,21 +74,21 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                 const previous = event.previous
 
                 const currentPageActiveObj = commonStore.annotationIconConfig.fabricCanvas[`${pageNumber}`]
-                currentPageActiveObj.discardActiveObject();
-                currentPageActiveObj.renderAll();
+                if(currentPageActiveObj!==undefined){
+                    currentPageActiveObj.discardActiveObject();
+                    currentPageActiveObj.renderAll();
+                }
+
 
 
                 const previousPageActiveObj = commonStore.annotationIconConfig.fabricCanvas[`${previous}`]
 
-                previousPageActiveObj.discardActiveObject();
-                previousPageActiveObj.renderAll();
-
+                if(previousPageActiveObj!==undefined){
+                    previousPageActiveObj.discardActiveObject();
+                    previousPageActiveObj.renderAll();
+                }
 
                 saveHistory()
-
-
-
-
 
             })
 
@@ -99,9 +105,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                 const pageDivEl = viewerDivEl.querySelector(`[data-page-number="${pageNum}"]`)
                 const canvasAnnotationEl = document.createElement('canvas');
                 const pageDivElSize = pageDivEl.querySelector('.canvasWrapper').getBoundingClientRect()
-
                 canvasAnnotationEl.id = 'JpCanvasAnnotationEl' + pageNum
-
                 if (!viewerDivEl.querySelector('#JpCanvasAnnotationEl' + pageNum)) {
                     pageDivEl.appendChild(canvasAnnotationEl)
                     fabric.window = viewer.shadowRoot.querySelector('iframe').contentWindow;
@@ -158,6 +162,9 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
 
                     }
+
+                    loadHistory()
+
 
 
                 }

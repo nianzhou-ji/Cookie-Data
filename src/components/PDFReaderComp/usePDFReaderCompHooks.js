@@ -30,9 +30,9 @@ const usePDFReaderCompHooks = () => {
     const annotationPencilCanvasConfigFunc = (canvas) => {
         // 初始化自由绘图模式参数
         canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-        canvas.freeDrawingBrush.color = commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value;
-        canvas.freeDrawingBrush.width = commonStore.annotationIconConfig.iframeDocument.querySelector('#JpLineWidth').value;
+        // canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+        canvas.freeDrawingBrush.color = 'red';
+        canvas.freeDrawingBrush.width = 3;
 
 
         setElAttr(['JpColorPicker', 'JpLineWidth'], [
@@ -162,7 +162,11 @@ const usePDFReaderCompHooks = () => {
             width: values.pageDivElSize.width,
             height: values.pageDivElSize.height
         });
+
+        canvas.backgroundColor = 'rgba(255, 223, 186, 0.5)';  // 你可以选择任何颜色和透明度
+
         const wrapperEl = values.pageDivEl.querySelector('.JpCanvasAnnotationWrapper')
+        if(wrapperEl===null)return
         wrapperEl.style.zIndex = '1'
         wrapperEl.style.top = `0`
         wrapperEl.style.left = `0`
