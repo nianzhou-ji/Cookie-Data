@@ -4,12 +4,13 @@ import {TbPencilExclamation as PencilIcon} from "react-icons/tb";
 import {CiRead as ReadIcon} from "react-icons/ci";
 import {FaGripLines as LineIcon} from "react-icons/fa";
 import {PiWavesBold as WaveIcon} from "react-icons/pi";
-import { FaLongArrowAltRight as ArrowIcon} from "react-icons/fa";
+import {FaLongArrowAltRight as ArrowIcon} from "react-icons/fa";
 import {BiText as TextIcon} from "react-icons/bi";
+import { LuMousePointerClick as SelectionObjectIcon} from "react-icons/lu";
 import {SiTestin as TestIcon} from "react-icons/si";
 import {IoIosColorPalette as ColorPaletteIcon} from "react-icons/io";
 
-import { RxDividerVertical as VerticalIcon} from "react-icons/rx";
+import {RxDividerVertical as VerticalIcon} from "react-icons/rx";
 import React, {useEffect} from "react";
 import {useStore} from "../../stores";
 import {observer} from "mobx-react-lite";
@@ -31,7 +32,11 @@ const ToolbarViewerRightComp = ({container}) => {
         // annotationWaveLineCanvasConfigFunc,
         annotationTextCanvasConfigFunc,
         annotationArrowCanvasConfigFunc,
-        setElAttr
+        setElAttr,
+        discardActiveObject,
+        loadHistory,
+        annotationSelectionObjectCanvasConfigFunc,
+        saveHistory
     } = usePDFReaderCompHooks()
 
     const AnnotationIconContainer = (
@@ -92,7 +97,7 @@ const ToolbarViewerRightComp = ({container}) => {
                         onClickFunc()
 
 
-                        console.log(_.cloneDeep(commonStore.annotationIconConfig.clicked))
+                        // console.log(_.cloneDeep(commonStore.annotationIconConfig.clicked))
 
                     }}
                     onMouseEnter={() => {
@@ -118,15 +123,18 @@ const ToolbarViewerRightComp = ({container}) => {
 
 
             <div id={'JpAnnotationConfig'} style={{display: "flex"}}>
-                <input type="color" id={'JpColorPicker'} style={{marginRight:'1rem'}}/>
-                <div style={{display:"flex",  alignItems:"center", marginRight:'1rem'}} id={'JpLineWidthContainer'}>
-                    <p style={{fontWeight:"bold", marginRight:'0.25rem'}}>Line Width: </p>
-                    <input type="number" id={'JpLineWidth'} style={{width:'2.5rem'}} defaultValue={3} min={2}/>
+                <input type="color" id={'JpColorPicker'} style={{marginRight: '1rem'}}/>
+                <div style={{display: "flex", alignItems: "center", marginRight: '1rem'}} id={'JpLineWidthContainer'}>
+                    <p style={{fontWeight: "bold", marginRight: '0.25rem'}}>Line Width: </p>
+                    <input type="number" id={'JpLineWidth'} style={{width: '2.5rem'}} defaultValue={3} min={2}/>
                 </div>
             </div>
 
 
-            <VerticalIcon size={'1.25rem'} style={{marginRight:'1rem'}} id={'JpAnnotationConfigDivider'}/>
+            <VerticalIcon size={'1.25rem'} style={{marginRight: '1rem'}} id={'JpAnnotationConfigDivider'}/>
+
+
+
 
             <AnnotationIconContainer
                 id={'ReadIconContainer'}
@@ -141,20 +149,38 @@ const ToolbarViewerRightComp = ({container}) => {
                     })
 
                     setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
-                        (el)=>{el.style.display='none'},
-                        (el)=>{el.style.display='none'},
-                        (el)=>{el.style.display='none'},
+                        (el) => {
+                            el.style.display = 'none'
+                        },
+                        (el) => {
+                            el.style.display = 'none'
+                        },
+                        (el) => {
+                            el.style.display = 'none'
+                        },
                     ])
                 }}
                 onClickFunc={() => {
+                    discardActiveObject()
+                    saveHistory()
                     commonStore.updateAnnotationZIndex()
 
 
                     setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
-                        (el)=>{el.style.display='none'},
-                        (el)=>{el.style.display='none'},
-                        (el)=>{el.style.display='none'},
+                        (el) => {
+                            el.style.display = 'none'
+                        },
+                        (el) => {
+                            el.style.display = 'none'
+                        },
+                        (el) => {
+                            el.style.display = 'none'
+                        },
                     ])
+
+
+                    loadHistory()
+
 
                 }}>
                 <ReadIcon size={'1.25rem'}
@@ -162,9 +188,9 @@ const ToolbarViewerRightComp = ({container}) => {
             </AnnotationIconContainer>
 
 
-
-
             <AnnotationIconContainer id={'PencilIconContainer'} title={'Annotation Pencil'} onClickFunc={() => {
+                discardActiveObject()
+                saveHistory()
                 Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
                     const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
                     // console.log(_.cloneDeep(values), 'values')
@@ -179,14 +205,25 @@ const ToolbarViewerRightComp = ({container}) => {
                         }
                     })
 
+
+
                 })
 
 
                 setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
-                    (el)=>{el.style.display='block'},
-                    (el)=>{el.style.display='flex'},
-                    (el)=>{el.style.display='block'},
+                    (el) => {
+                        el.style.display = 'block'
+                    },
+                    (el) => {
+                        el.style.display = 'flex'
+                    },
+                    (el) => {
+                        el.style.display = 'block'
+                    },
                 ])
+
+                loadHistory()
+
 
 
             }}>
@@ -195,6 +232,8 @@ const ToolbarViewerRightComp = ({container}) => {
             </AnnotationIconContainer>
 
             <AnnotationIconContainer id={'LineIconContainer'} title={'Annotation Straight Line'} onClickFunc={() => {
+                discardActiveObject()
+                saveHistory()
                 Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
                     const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
                     createFabricCanvas(values, annotationStraightLineCanvasConfigFunc)
@@ -213,10 +252,17 @@ const ToolbarViewerRightComp = ({container}) => {
 
 
                 setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
-                    (el)=>{el.style.display='block'},
-                    (el)=>{el.style.display='flex'},
-                    (el)=>{el.style.display='block'},
+                    (el) => {
+                        el.style.display = 'block'
+                    },
+                    (el) => {
+                        el.style.display = 'flex'
+                    },
+                    (el) => {
+                        el.style.display = 'block'
+                    },
                 ])
+                loadHistory()
 
 
             }}>
@@ -225,32 +271,12 @@ const ToolbarViewerRightComp = ({container}) => {
             </AnnotationIconContainer>
 
 
-            {/*<AnnotationIconContainer id={'WaveIconContainer'} title={'Annotation Wave Line'} onClickFunc={() => {*/}
-            {/*    Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {*/}
-            {/*        const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]*/}
-            {/*        createFabricCanvas(values, annotationWaveLineCanvasConfigFunc)*/}
-            {/*        commonStore.updateAnnotationIconConfig({*/}
-            {/*            canvasAnnotationElGroup: {*/}
-            {/*                key: `${pageNum}`,*/}
-            {/*                value: {*/}
-            {/*                    ...values,*/}
-            {/*                    fabricRendered: true*/}
-            {/*                }*/}
-            {/*            }*/}
-            {/*        })*/}
-
-
-            {/*    })*/}
-
-
-            {/*}}>*/}
-            {/*    <WaveIcon size={'1.25rem'}*/}
-            {/*    />*/}
-            {/*</AnnotationIconContainer>*/}
 
 
 
             <AnnotationIconContainer id={'ArrowIconContainer'} title={'Arrow Annotation'} onClickFunc={() => {
+                discardActiveObject()
+                saveHistory()
                 Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
                     const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
                     createFabricCanvas(values, annotationArrowCanvasConfigFunc)
@@ -263,16 +289,24 @@ const ToolbarViewerRightComp = ({container}) => {
                             }
                         }
                     })
-
-
                 })
 
 
+
                 setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
-                    (el)=>{el.style.display='block'},
-                    (el)=>{el.style.display='none'},
-                    (el)=>{el.style.display='block'}
+                    (el) => {
+                        el.style.display = 'block'
+                    },
+                    (el) => {
+                        el.style.display = 'flex'
+                    },
+                    (el) => {
+                        el.style.display = 'block'
+                    }
                 ])
+
+                loadHistory()
+
 
 
             }}>
@@ -281,6 +315,9 @@ const ToolbarViewerRightComp = ({container}) => {
             </AnnotationIconContainer>
 
             <AnnotationIconContainer id={'TextIconContainer'} title={'Annotation Text'} onClickFunc={() => {
+
+                discardActiveObject()
+                saveHistory()
                 Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
                     const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
                     createFabricCanvas(values, annotationTextCanvasConfigFunc)
@@ -298,11 +335,22 @@ const ToolbarViewerRightComp = ({container}) => {
                 })
 
 
+
+
                 setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
-                    (el)=>{el.style.display='block'},
-                    (el)=>{el.style.display='none'},
-                    (el)=>{el.style.display='block'}
+                    (el) => {
+                        el.style.display = 'block'
+                    },
+                    (el) => {
+                        el.style.display = 'none'
+                    },
+                    (el) => {
+                        el.style.display = 'block'
+                    }
                 ])
+
+                loadHistory()
+
 
 
             }}>

@@ -28,7 +28,10 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
         annotationStraightLineCanvasConfigFunc,
         // annotationWaveLineCanvasConfigFunc,
         annotationTextCanvasConfigFunc,
-        annotationArrowCanvasConfigFunc
+        annotationArrowCanvasConfigFunc,
+        loadHistory,
+        annotationSelectionObjectCanvasConfigFunc,
+        saveHistory
     } = usePDFReaderCompHooks()
 
 
@@ -63,17 +66,26 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
             })
             viewerApp.eventBus.on('pagechanging', (event) => {
 
-                const pageNumber= event.pageNumber
-                const previous= event.previous
+                const pageNumber = event.pageNumber
+                const previous = event.previous
 
-               const currentPageActiveObj =commonStore.annotationIconConfig.fabricCanvas[`${pageNumber}`]
+                const currentPageActiveObj = commonStore.annotationIconConfig.fabricCanvas[`${pageNumber}`]
                 currentPageActiveObj.discardActiveObject();
-                currentPageActiveObj.requestRenderAll();
+                currentPageActiveObj.renderAll();
 
-                const previousPageActiveObj =commonStore.annotationIconConfig.fabricCanvas[`${previous}`]
+
+                const previousPageActiveObj = commonStore.annotationIconConfig.fabricCanvas[`${previous}`]
 
                 previousPageActiveObj.discardActiveObject();
-                previousPageActiveObj.requestRenderAll();
+                previousPageActiveObj.renderAll();
+
+
+                saveHistory()
+
+
+
+
+
             })
 
             viewerApp.eventBus.on('pagesloaded', (event) => {
@@ -114,13 +126,38 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                     const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
                     if (!values.fabricRendered) {
 
+
                         if (commonStore.annotationIconConfig.clicked['PencilIconContainer']) {
                             createFabricCanvas(values, annotationPencilCanvasConfigFunc)
+
+                            commonStore.updateAnnotationIconConfig({
+                                canvasAnnotationElGroup: {
+                                    key: `${pageNum}`,
+                                    value: {
+                                        ...values,
+                                        fabricRendered: true,
+                                    }
+                                }
+                            })
+
+                            console.log(pageNum, 'PencilIconContainer')
+
                         }
 
 
                         if (commonStore.annotationIconConfig.clicked['LineIconContainer']) {
                             createFabricCanvas(values, annotationStraightLineCanvasConfigFunc)
+                            commonStore.updateAnnotationIconConfig({
+                                canvasAnnotationElGroup: {
+                                    key: `${pageNum}`,
+                                    value: {
+                                        ...values,
+                                        fabricRendered: true,
+                                    }
+                                }
+                            })
+                            console.log(pageNum, 'LineIconContainer')
+
                         }
 
 
@@ -131,12 +168,36 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
                         if (commonStore.annotationIconConfig.clicked['ArrowIconContainer']) {
                             createFabricCanvas(values, annotationArrowCanvasConfigFunc)
+                            commonStore.updateAnnotationIconConfig({
+                                canvasAnnotationElGroup: {
+                                    key: `${pageNum}`,
+                                    value: {
+                                        ...values,
+                                        fabricRendered: true,
+                                    }
+                                }
+                            })
+                            console.log(pageNum, 'ArrowIconContainer')
+
                         }
 
 
                         if (commonStore.annotationIconConfig.clicked['TextIconContainer']) {
                             createFabricCanvas(values, annotationTextCanvasConfigFunc)
+                            commonStore.updateAnnotationIconConfig({
+                                canvasAnnotationElGroup: {
+                                    key: `${pageNum}`,
+                                    value: {
+                                        ...values,
+                                        fabricRendered: true,
+                                    }
+                                }
+                            })
+
+                            console.log(pageNum, 'TextIconContainer')
+
                         }
+
 
                     }
 

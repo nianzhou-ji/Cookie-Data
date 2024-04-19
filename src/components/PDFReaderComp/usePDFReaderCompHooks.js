@@ -6,6 +6,15 @@ const usePDFReaderCompHooks = () => {
 
     const {commonStore} = useStore()
 
+    const discardActiveObject = () => {
+        Object.keys(commonStore.annotationIconConfig.fabricCanvas).forEach(key => {
+            const canvas = commonStore.annotationIconConfig.fabricCanvas[key]
+
+            canvas.discardActiveObject()
+            canvas.renderAll()
+        })
+    }
+
 
     const setElAttr = (idGroup, funcGroup) => {
 
@@ -42,14 +51,44 @@ const usePDFReaderCompHooks = () => {
 
 
     }
+    const annotationSelectionObjectCanvasConfigFunc = (canvas) => {
+
+    }
+
+
+    const loadHistory = () => {
+
+        Object.keys(commonStore.annotationIconConfig.fabricCanvas).forEach(key => {
+            const canvas = commonStore.annotationIconConfig.fabricCanvas[key]
+            canvas.loadFromJSON(commonStore.annotationIconConfig.history[key], function () {
+                canvas.renderAll();
+            });
+        })
+
+
+    }
+
+
+    const saveHistory = () => {
+
+        Object.keys(commonStore.annotationIconConfig.fabricCanvas).forEach(key => {
+            const canvas = commonStore.annotationIconConfig.fabricCanvas[key]
+            commonStore.updateAnnotationIconConfig({
+                history: {
+                    key: key,
+                    value: canvas.toJSON()
+                }
+            })
+        })
+
+
+    }
 
 
     const annotationStraightLineCanvasConfigFunc = (canvas) => {
 
-        let line, isDown;
+        let line, isDown, points;
         canvas.on('selection:created', () => {
-            // console.log('selection:created')
-
             commonStore.updateAnnotationIconConfig({
                 canvasObjSelectionState: true
             })
@@ -73,33 +112,9 @@ const usePDFReaderCompHooks = () => {
         // 监听鼠标按下事件
         canvas.on('mouse:down', function (o) {
             if (commonStore.annotationIconConfig.canvasObjSelectionState) return
-            const pointer = canvas.getPointer(o.e);
-            const points = [pointer.x, pointer.y, pointer.x, pointer.y];
-            line = new fabric.Line(points, {
-                strokeWidth: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpLineWidth').value,
-                fill: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value,
-                stroke: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value,
-                originX: 'center',
-                originY: 'center'
-            });
             isDown = true;
-            canvas.add(line);
-
-
-            setElAttr(['JpColorPicker', 'JpLineWidth'], [
-                (el) => {
-                    el.addEventListener('change', (e) => {
-                        line.fill = e.target.value
-                        line.stroke = e.target.value
-                    })
-                },
-
-                (el) => {
-                    el.addEventListener('change', (e) => {
-                        line.strokeWidth = e.target.value
-                    })
-                },
-            ])
+            const pointer = canvas.getPointer(o.e);
+            points = [pointer.x, pointer.y, pointer.x, pointer.y];
 
 
         });
@@ -108,14 +123,41 @@ const usePDFReaderCompHooks = () => {
         canvas.on('mouse:move', function (o) {
             if (commonStore.annotationIconConfig.canvasObjSelectionState) return
             if (!isDown) return;
+
             const pointer = canvas.getPointer(o.e);
-            line.set({x2: pointer.x, y2: pointer.y});
+            points[2] = pointer.x
+            points[3] = pointer.y
+
+            canvas.remove(line)
+
+            line = new fabric.Line(points, {
+                strokeWidth: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpLineWidth').value,
+                fill: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value,
+                stroke: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value,
+                originX: 'center',
+                originY: 'center'
+            });
+            canvas.add(line);
+
+
             canvas.renderAll();
         });
 
         // 监听鼠标松开事件
         canvas.on('mouse:up', function (o) {
             isDown = false;
+            if (line === null) return
+            canvas.remove(line)
+            const lineCopy = _.cloneDeep(line)
+
+            canvas.add(lineCopy)
+            canvas.setActiveObject(lineCopy);
+
+            canvas.renderAll();
+
+            line = null
+
+
         });
 
 
@@ -162,10 +204,6 @@ const usePDFReaderCompHooks = () => {
         canvas.on('mouse:move', function (event) {
             if (commonStore.annotationIconConfig.canvasObjSelectionState) return
             if (!isDown) return;
-
-            canvas.loadFromJSON(commonStore.annotationIconConfig.history['arrowCache'], function () {
-                canvas.renderAll();
-            });
 
             const pointer = canvas.getPointer(event.e);
             tox = pointer.x;
@@ -217,12 +255,12 @@ const usePDFReaderCompHooks = () => {
 
 
             pline = new fabric.Polyline(points, {
-                fill: 'red', //'white',
-                stroke: 'red', //'black',
+                fill: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value, //'white',
+                stroke: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value, //'black',
                 opacity: 1,
-                strokeWidth: 1,
-                originX: 'left',
-                originY: 'top',
+                strokeWidth: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpLineWidth').value,
+                // originX: 'left',
+                // originY: 'top',
                 selectable: true
             });
 
@@ -233,25 +271,24 @@ const usePDFReaderCompHooks = () => {
             canvas.renderAll();
 
 
-
-
-
-
-
-
         });
 
 
         // 监听鼠标松开事件
         canvas.on('mouse:up', function (event) {
             isDown = false
+            if (pline === null) return
 
-            commonStore.updateAnnotationIconConfig({
-                history: {
-                    key: 'arrowCache',
-                    value: canvas.toJSON()
-                }
-            })
+            canvas.remove(pline)
+            const plineCopy = _.cloneDeep(pline)
+
+            canvas.add(plineCopy)
+            canvas.setActiveObject(plineCopy);
+
+            canvas.renderAll();
+
+            pline = null
+
 
         });
 
@@ -309,6 +346,9 @@ const usePDFReaderCompHooks = () => {
             ])
 
             canvas.add(textbox);
+            canvas.setActiveObject(textbox);
+            canvas.renderAll();
+
 
         });
 
@@ -340,51 +380,18 @@ const usePDFReaderCompHooks = () => {
         wrapperEl.style.left = `0`
         wrapperEl.style.position = 'absolute'
         canvasConfigFunc(canvas)
-
-        const eventNames = [
-            'object:modified',
-            'object:moving',
-            'object:scaling',
-            'object:rotating',
-            'object:added',
-            'object:removed',
-        ]
+        loadHistory()
 
 
-        eventNames.forEach(name => {
-            canvas.on(name, function (e) {
-                // console.log(name);
-                commonStore.updateAnnotationIconConfig({
-                    history: {
-                        key: values.pageNum,
-                        value: canvas.toJSON()
-                    }
-                })
-            });
-        })
-
-        canvas.loadFromJSON(commonStore.annotationIconConfig.history[values.pageNum], function () {
-            canvas.renderAll();
-        });
 
 
-        canvas.renderAll();
         commonStore.updateAnnotationZIndex()
-
-
         commonStore.updateAnnotationIconConfig({
             fabricCanvas: {
                 key: `${values.pageNum}`,
                 value: canvas
             }
         })
-
-        // commonStore.updateTestVars({
-        //
-        //     key: `${values.pageNum}`,
-        //     value: canvas
-        //
-        // })
 
 
         // 添加键盘事件监听
@@ -412,7 +419,11 @@ const usePDFReaderCompHooks = () => {
         // annotationWaveLineCanvasConfigFunc,
         annotationTextCanvasConfigFunc,
         annotationArrowCanvasConfigFunc,
-        setElAttr
+        setElAttr,
+        discardActiveObject,
+        loadHistory,
+        annotationSelectionObjectCanvasConfigFunc,
+        saveHistory
     }
 
 }
