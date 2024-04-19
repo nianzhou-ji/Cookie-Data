@@ -26,11 +26,9 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
         createFabricCanvas,
         annotationPencilCanvasConfigFunc,
         annotationStraightLineCanvasConfigFunc,
-        // annotationWaveLineCanvasConfigFunc,
         annotationTextCanvasConfigFunc,
         annotationArrowCanvasConfigFunc,
-        loadHistory,
-        annotationSelectionObjectCanvasConfigFunc,
+
         saveHistory
     } = usePDFReaderCompHooks()
 
@@ -129,7 +127,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
                         if (commonStore.annotationIconConfig.clicked['PencilIconContainer']) {
                             createFabricCanvas(values, annotationPencilCanvasConfigFunc)
-
                             commonStore.updateAnnotationIconConfig({
                                 canvasAnnotationElGroup: {
                                     key: `${pageNum}`,
@@ -139,45 +136,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                                     }
                                 }
                             })
-
-                            console.log(pageNum, 'PencilIconContainer')
-
-                        }
-
-
-                        if (commonStore.annotationIconConfig.clicked['LineIconContainer']) {
-                            createFabricCanvas(values, annotationStraightLineCanvasConfigFunc)
-                            commonStore.updateAnnotationIconConfig({
-                                canvasAnnotationElGroup: {
-                                    key: `${pageNum}`,
-                                    value: {
-                                        ...values,
-                                        fabricRendered: true,
-                                    }
-                                }
-                            })
-                            console.log(pageNum, 'LineIconContainer')
-
-                        }
-
-
-                        // if (commonStore.annotationIconConfig.clicked['WaveIconContainer']) {
-                        //     createFabricCanvas(values, annotationWaveLineCanvasConfigFunc)
-                        // }
-
-
-                        if (commonStore.annotationIconConfig.clicked['ArrowIconContainer']) {
-                            createFabricCanvas(values, annotationArrowCanvasConfigFunc)
-                            commonStore.updateAnnotationIconConfig({
-                                canvasAnnotationElGroup: {
-                                    key: `${pageNum}`,
-                                    value: {
-                                        ...values,
-                                        fabricRendered: true,
-                                    }
-                                }
-                            })
-                            console.log(pageNum, 'ArrowIconContainer')
 
                         }
 

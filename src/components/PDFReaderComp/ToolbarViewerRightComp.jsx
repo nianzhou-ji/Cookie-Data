@@ -28,14 +28,12 @@ const ToolbarViewerRightComp = ({container}) => {
     const {
         createFabricCanvas,
         annotationPencilCanvasConfigFunc,
-        annotationStraightLineCanvasConfigFunc,
-        // annotationWaveLineCanvasConfigFunc,
+
         annotationTextCanvasConfigFunc,
-        annotationArrowCanvasConfigFunc,
         setElAttr,
         discardActiveObject,
         loadHistory,
-        annotationSelectionObjectCanvasConfigFunc,
+
         saveHistory
     } = usePDFReaderCompHooks()
 
@@ -206,7 +204,6 @@ const ToolbarViewerRightComp = ({container}) => {
                     })
 
 
-
                 })
 
 
@@ -231,88 +228,8 @@ const ToolbarViewerRightComp = ({container}) => {
                 />
             </AnnotationIconContainer>
 
-            <AnnotationIconContainer id={'LineIconContainer'} title={'Annotation Straight Line'} onClickFunc={() => {
-                discardActiveObject()
-                saveHistory()
-                Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
-                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
-                    createFabricCanvas(values, annotationStraightLineCanvasConfigFunc)
-                    commonStore.updateAnnotationIconConfig({
-                        canvasAnnotationElGroup: {
-                            key: `${pageNum}`,
-                            value: {
-                                ...values,
-                                fabricRendered: true
-                            }
-                        }
-                    })
 
 
-                })
-
-
-                setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
-                    (el) => {
-                        el.style.display = 'block'
-                    },
-                    (el) => {
-                        el.style.display = 'flex'
-                    },
-                    (el) => {
-                        el.style.display = 'block'
-                    },
-                ])
-                loadHistory()
-
-
-            }}>
-                <LineIcon size={'1.25rem'}
-                />
-            </AnnotationIconContainer>
-
-
-
-
-
-            <AnnotationIconContainer id={'ArrowIconContainer'} title={'Arrow Annotation'} onClickFunc={() => {
-                discardActiveObject()
-                saveHistory()
-                Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup).forEach(pageNum => {
-                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[pageNum]
-                    createFabricCanvas(values, annotationArrowCanvasConfigFunc)
-                    commonStore.updateAnnotationIconConfig({
-                        canvasAnnotationElGroup: {
-                            key: `${pageNum}`,
-                            value: {
-                                ...values,
-                                fabricRendered: true
-                            }
-                        }
-                    })
-                })
-
-
-
-                setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
-                    (el) => {
-                        el.style.display = 'block'
-                    },
-                    (el) => {
-                        el.style.display = 'flex'
-                    },
-                    (el) => {
-                        el.style.display = 'block'
-                    }
-                ])
-
-                loadHistory()
-
-
-
-            }}>
-                <ArrowIcon size={'1.25rem'}
-                />
-            </AnnotationIconContainer>
 
             <AnnotationIconContainer id={'TextIconContainer'} title={'Annotation Text'} onClickFunc={() => {
 

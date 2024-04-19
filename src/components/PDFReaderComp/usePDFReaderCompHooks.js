@@ -51,9 +51,7 @@ const usePDFReaderCompHooks = () => {
 
 
     }
-    const annotationSelectionObjectCanvasConfigFunc = (canvas) => {
 
-    }
 
 
     const loadHistory = () => {
@@ -84,216 +82,6 @@ const usePDFReaderCompHooks = () => {
 
     }
 
-
-    const annotationStraightLineCanvasConfigFunc = (canvas) => {
-
-        let line, isDown, points;
-        canvas.on('selection:created', () => {
-            commonStore.updateAnnotationIconConfig({
-                canvasObjSelectionState: true
-            })
-        })
-
-        canvas.on('selection:updated', () => {
-            // console.log('selection:updated ')
-            commonStore.updateAnnotationIconConfig({
-                canvasObjSelectionState: true
-            })
-        })
-
-
-        canvas.on('selection:cleared', () => {
-            // console.log('selection:cleared  ')
-            commonStore.updateAnnotationIconConfig({
-                canvasObjSelectionState: false
-            })
-        })
-
-        // 监听鼠标按下事件
-        canvas.on('mouse:down', function (o) {
-            if (commonStore.annotationIconConfig.canvasObjSelectionState) return
-            isDown = true;
-            const pointer = canvas.getPointer(o.e);
-            points = [pointer.x, pointer.y, pointer.x, pointer.y];
-
-
-        });
-
-        // 监听鼠标移动事件
-        canvas.on('mouse:move', function (o) {
-            if (commonStore.annotationIconConfig.canvasObjSelectionState) return
-            if (!isDown) return;
-
-            const pointer = canvas.getPointer(o.e);
-            points[2] = pointer.x
-            points[3] = pointer.y
-
-            canvas.remove(line)
-
-            line = new fabric.Line(points, {
-                strokeWidth: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpLineWidth').value,
-                fill: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value,
-                stroke: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value,
-                originX: 'center',
-                originY: 'center'
-            });
-            canvas.add(line);
-
-
-            canvas.renderAll();
-        });
-
-        // 监听鼠标松开事件
-        canvas.on('mouse:up', function (o) {
-            isDown = false;
-            if (line === null) return
-            canvas.remove(line)
-            const lineCopy = _.cloneDeep(line)
-
-            canvas.add(lineCopy)
-            canvas.setActiveObject(lineCopy);
-
-            canvas.renderAll();
-
-            line = null
-
-
-        });
-
-
-    }
-    const annotationArrowCanvasConfigFunc = (canvas) => {
-
-        let fromx, fromy, tox, toy, isDown, pline;
-        canvas.on('selection:created', () => {
-            // console.log('selection:created')
-
-            commonStore.updateAnnotationIconConfig({
-                canvasObjSelectionState: true
-            })
-        })
-
-        canvas.on('selection:updated', () => {
-            // console.log('selection:updated ')
-            commonStore.updateAnnotationIconConfig({
-                canvasObjSelectionState: true
-            })
-        })
-
-
-        canvas.on('selection:cleared', () => {
-            // console.log('selection:cleared  ')
-            commonStore.updateAnnotationIconConfig({
-                canvasObjSelectionState: false
-            })
-        })
-
-        // 监听鼠标按下事件
-        canvas.on('mouse:down', function (event) {
-
-            if (commonStore.annotationIconConfig.canvasObjSelectionState) return
-            const pointer = canvas.getPointer(event.e);
-            fromx = pointer.x;
-            fromy = pointer.y;
-            isDown = true
-
-
-        });
-
-        // 监听鼠标移动事件
-        canvas.on('mouse:move', function (event) {
-            if (commonStore.annotationIconConfig.canvasObjSelectionState) return
-            if (!isDown) return;
-
-            const pointer = canvas.getPointer(event.e);
-            tox = pointer.x;
-            toy = pointer.y;
-            //this.drawArrow(startX, startY, endX, endY);
-
-            var angle = Math.atan2(toy - fromy, tox - fromx);
-
-            var headlen = 10;  // arrow head size
-
-            // bring the line end back some to account for arrow head.
-            tox = tox - (headlen) * Math.cos(angle);
-            toy = toy - (headlen) * Math.sin(angle);
-
-            // calculate the points.
-            const points = [
-                {
-                    x: fromx,  // start point
-                    y: fromy
-                }, {
-                    x: fromx - (headlen / 4) * Math.cos(angle - Math.PI / 2),
-                    y: fromy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
-                }, {
-                    x: tox - (headlen / 4) * Math.cos(angle - Math.PI / 2),
-                    y: toy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
-                }, {
-                    x: tox - (headlen) * Math.cos(angle - Math.PI / 2),
-                    y: toy - (headlen) * Math.sin(angle - Math.PI / 2)
-                }, {
-                    x: tox + (headlen) * Math.cos(angle),  // tip
-                    y: toy + (headlen) * Math.sin(angle)
-                }, {
-                    x: tox - (headlen) * Math.cos(angle + Math.PI / 2),
-                    y: toy - (headlen) * Math.sin(angle + Math.PI / 2)
-                }, {
-                    x: tox - (headlen / 4) * Math.cos(angle + Math.PI / 2),
-                    y: toy - (headlen / 4) * Math.sin(angle + Math.PI / 2)
-                }, {
-                    x: fromx - (headlen / 4) * Math.cos(angle + Math.PI / 2),
-                    y: fromy - (headlen / 4) * Math.sin(angle + Math.PI / 2)
-                }, {
-                    x: fromx,
-                    y: fromy
-                }
-            ];
-
-
-            canvas.remove(pline)
-
-
-            pline = new fabric.Polyline(points, {
-                fill: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value, //'white',
-                stroke: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value, //'black',
-                opacity: 1,
-                strokeWidth: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpLineWidth').value,
-                // originX: 'left',
-                // originY: 'top',
-                selectable: true
-            });
-
-
-            canvas.add(pline)
-
-
-            canvas.renderAll();
-
-
-        });
-
-
-        // 监听鼠标松开事件
-        canvas.on('mouse:up', function (event) {
-            isDown = false
-            if (pline === null) return
-
-            canvas.remove(pline)
-            const plineCopy = _.cloneDeep(pline)
-
-            canvas.add(plineCopy)
-            canvas.setActiveObject(plineCopy);
-
-            canvas.renderAll();
-
-            pline = null
-
-
-        });
-
-
-    }
     const annotationTextCanvasConfigFunc = (canvas) => {
         canvas.on('selection:created', () => {
             // console.log('selection:created')
@@ -415,14 +203,10 @@ const usePDFReaderCompHooks = () => {
     return {
         createFabricCanvas,
         annotationPencilCanvasConfigFunc,
-        annotationStraightLineCanvasConfigFunc,
-        // annotationWaveLineCanvasConfigFunc,
         annotationTextCanvasConfigFunc,
-        annotationArrowCanvasConfigFunc,
         setElAttr,
         discardActiveObject,
         loadHistory,
-        annotationSelectionObjectCanvasConfigFunc,
         saveHistory
     }
 
