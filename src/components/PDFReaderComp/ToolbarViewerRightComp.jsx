@@ -18,13 +18,12 @@ import {observer} from "mobx-react-lite";
 import _ from 'lodash'
 import {fabric} from "fabric";
 import usePDFReaderCompHooks from "./usePDFReaderCompHooks";
+import { createRoot } from 'react-dom/client';
+import Utils from "../../utils";
 
 const ToolbarViewerRightComp = ({container}) => {
 
     const {commonStore} = useStore()
-    container.innerHTML = '';
-    container.style.cssText = "display: flex; align-items: center;";
-
 
     const {
         createFabricCanvas,
@@ -44,10 +43,12 @@ const ToolbarViewerRightComp = ({container}) => {
             initFunc = () => {
             },
             onClickFunc = () => {
-            }
+            },
+            joinButtonGroup = true
         }) => {
 
         useEffect(() => {
+
             commonStore.updateAnnotationIconConfig({
                 clicked: {
                     id: id,
@@ -60,7 +61,7 @@ const ToolbarViewerRightComp = ({container}) => {
         }, []);
 
 
-        return <div id={id} title={title} className={`AnnotationIcon`}
+        return <div id={id} title={title} className={`mr-[0.5rem] w-[1.5rem] h-[1.5rem] flex items-center justify-center relative`}
                     onClick={e => {
                         const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
                         Object.keys(commonStore.annotationIconConfig.clicked).forEach(item => {
@@ -71,7 +72,7 @@ const ToolbarViewerRightComp = ({container}) => {
                                         value: !commonStore.annotationIconConfig.clicked[id]
                                     }
                                 })
-                            } else {
+                            } else if (item !== id && joinButtonGroup) {
                                 commonStore.updateAnnotationIconConfig({
                                     clicked: {
                                         id: item,
@@ -80,35 +81,33 @@ const ToolbarViewerRightComp = ({container}) => {
                                 })
 
                                 const otherAnnotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(item)
-                                otherAnnotationIconContainer?.classList?.toggle("AnnotationIconActive", false)
-                                otherAnnotationIconContainer?.classList?.toggle("AnnotationIconHover", false)
+                                otherAnnotationIconContainer?.classList?.toggle("bg-[#AEAEAF]", false)
+                                otherAnnotationIconContainer?.classList?.toggle("bg-[#DDDEDF]", false)
                             }
                         })
 
 
                         if (commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("AnnotationIconActive", true)
+                            annotationIconContainer?.classList?.toggle("bg-[#AEAEAF]", true)
                         } else {
-                            annotationIconContainer?.classList?.toggle("AnnotationIconActive", false)
+                            annotationIconContainer?.classList?.toggle("bg-[#AEAEAF]", false)
                         }
 
 
                         onClickFunc()
 
 
-                        // console.log(_.cloneDeep(commonStore.annotationIconConfig.clicked))
-
                     }}
                     onMouseEnter={() => {
                         const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
                         if (!commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("AnnotationIconHover", true)
+                            annotationIconContainer?.classList?.toggle("bg-[#DDDEDF]", true)
                         }
                     }}
                     onMouseLeave={() => {
                         const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
                         if (!commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("AnnotationIconHover", false)
+                            annotationIconContainer?.classList?.toggle("bg-[#DDDEDF]", false)
                         }
 
                     }}>
@@ -118,15 +117,11 @@ const ToolbarViewerRightComp = ({container}) => {
 
 
     return ReactDOM.createPortal(
-        <div className={'AnnotationIconGroupContainer'}>
+        <div className='flex items-center '>
 
 
             <div id={'JpAnnotationConfig'} style={{display: "flex"}}>
-                <input type="color" id={'JpColorPicker'} className='mr-[1rem]'/>
-                <div className='flex items-center mr-[1rem]' id={'JpLineWidthContainer'}>
-                    <p className='font-bold mr-[0.25rem]'>Line Width: </p>
-                    <input type="number" id={'JpLineWidth'} className='w-[2.5rem]' defaultValue={3} min={2}/>
-                </div>
+                <input type="color" id={'JpColorPicker'} className='mr-[1rem]' value={'#FF0000'}/>
 
             </div>
 
@@ -138,7 +133,7 @@ const ToolbarViewerRightComp = ({container}) => {
                 id={'ReadIconContainer'}
                 title={'Only Read'}
                 initFunc={() => {
-                    commonStore.annotationIconConfig.iframeDocument.getElementById('ReadIconContainer')?.classList?.toggle("AnnotationIconActive", true)
+                    commonStore.annotationIconConfig.iframeDocument.getElementById('ReadIconContainer')?.classList?.toggle("bg-[#AEAEAF]", true)
                     commonStore.updateAnnotationIconConfig({
                         clicked: {
                             id: 'ReadIconContainer',
@@ -146,28 +141,26 @@ const ToolbarViewerRightComp = ({container}) => {
                         }
                     })
 
-                    setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
+                    setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
                         (el) => {
                             el.style.display = 'none'
                         },
-                        (el) => {
-                            el.style.display = 'none'
-                        },
+
                         (el) => {
                             el.style.display = 'none'
                         },
                     ])
                 }}
                 onClickFunc={() => {
+                    commonStore.updateTestVars()
+
+
                     discardActiveObject()
                     saveHistory()
                     commonStore.updateAnnotationZIndex()
 
 
-                    setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
-                        (el) => {
-                            el.style.display = 'none'
-                        },
+                    setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
                         (el) => {
                             el.style.display = 'none'
                         },
@@ -181,7 +174,7 @@ const ToolbarViewerRightComp = ({container}) => {
 
 
                 }}>
-                <ReadIcon size={'1.25rem'} className='bg-red-500'
+                <ReadIcon size={'1.25rem'} className=''
                 />
             </AnnotationIconContainer>
 
@@ -207,12 +200,9 @@ const ToolbarViewerRightComp = ({container}) => {
                 })
 
 
-                setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
+                setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
                     (el) => {
                         el.style.display = 'block'
-                    },
-                    (el) => {
-                        el.style.display = 'flex'
                     },
                     (el) => {
                         el.style.display = 'block'
@@ -249,13 +239,11 @@ const ToolbarViewerRightComp = ({container}) => {
                 })
 
 
-                setElAttr(['JpColorPicker', 'JpLineWidthContainer', 'JpAnnotationConfigDivider'], [
+                setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
                     (el) => {
                         el.style.display = 'block'
                     },
-                    (el) => {
-                        el.style.display = 'none'
-                    },
+
                     (el) => {
                         el.style.display = 'block'
                     }
@@ -270,45 +258,73 @@ const ToolbarViewerRightComp = ({container}) => {
             </AnnotationIconContainer>
 
 
-            <div className="">
+            <AnnotationIconContainer
+                id={'ListIconContainer'}
+                title={'PDF List'}
+                onClickFunc={() => {
+                    commonStore.annotationIconConfig.iframeDocument.getElementById('JpPdfList').classList.toggle('hidden')
+                    const newElement = document.createElement('div');
+                    const root = createRoot(newElement);
+                    root.render(<a
+                        href="#"
+                        className=" block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                        role="menuitem"
+                        onClick={()=>{
+                            console.log('menuitem')
+                        }}
 
-                <ListIcon className='hover:bg-red-500' size={'1.25rem'} onClick={() => {
-                   const JpPdfList = commonStore.annotationIconConfig.iframeDocument.getElementById('JpPdfList')
-                    JpPdfList.classList.toggle('hidden')
-                }}/>
+                        id={'666ID'}
+                    >
+                        {66666}
+                    </a>);
 
+                    // 使用appendChild将这个新的div添加到容器中
+                    commonStore.annotationIconConfig.iframeDocument.querySelector('#JpPdfList .p-2').appendChild(newElement);
 
+                }}
+
+                joinButtonGroup={false}
+
+            >
+                <ListIcon size={'1.25rem'}/>
                 <div id={'JpPdfList'}
-                     className="hidden absolute end-0 z-10 mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
+                     className="hidden absolute top-[100%] end-0 z-10 mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
                      role="menu"
+                     key={commonStore.testVars.length}
                 >
                     <div className="p-2">
 
+                        {
 
-                        <a
-                            href="#"
-                            className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-                            role="menuitem"
-                        >
-                            pdf1
-                        </a>
+                            commonStore.testVars.map((item, index) =>
+                                <div>
+                                    <a
+                                        href="#"
+                                        className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                                        role="menuitem"
+                                        key={index}
+                                        id={index+1+'id'}
+                                    >
+                                        {item}
+                                    </a>
+                                </div>
+
+                                )
+                        }
 
 
-                        <a
-                            href="#"
-                            className="block rounded-lg px-4 py-2 text-sm text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-                            role="menuitem"
-                        >
-                            pdf2
-                        </a>
                     </div>
 
                     <div className="p-2">
-                        <form method="POST" action="#">
+
                             <button
                                 type="submit"
                                 className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-red-50"
                                 role="menuitem"
+                                onClick={()=>{
+                                    Utils.removeElementById('2id', commonStore.annotationIconConfig.iframeDocument)
+                                    // console.log(commonStore.annotationIconConfig.iframeDocument.getElementById('1id'));
+                                }}
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -327,10 +343,13 @@ const ToolbarViewerRightComp = ({container}) => {
 
                                 Delete Product
                             </button>
-                        </form>
+
                     </div>
                 </div>
-            </div>
+            </AnnotationIconContainer>
+
+
+
         </div>
 
 

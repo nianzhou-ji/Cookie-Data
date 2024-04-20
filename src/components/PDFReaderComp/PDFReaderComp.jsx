@@ -12,8 +12,6 @@ import usePDFReaderCompHooks from "./usePDFReaderCompHooks";
 
 const baseURL = 'http://localhost:8082/assets';
 
-const pdfjscssBlobUrl = await toBlobURL(baseURL + '/pdfjs/jp-pdfjs-css.css', 'text/css');
-
 const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
     const {commonStore} = useStore()
@@ -41,23 +39,34 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
             const iframeDocument = viewer.shadowRoot.querySelector('iframe').contentDocument
 
-           const headEl = iframeDocument.querySelector('head')
+            const headEl = iframeDocument.querySelector('head')
             // console.log(headEl, 'headEl')
             const script = document.createElement('script');
             script.type = 'text/javascript';
-            script.src = await toBlobURL(baseURL+'/pdfjs/tailwindcss.js', 'text/javascript');
+            script.src = await toBlobURL(baseURL + '/pdfjs/tailwindcss.js', 'text/javascript');
             headEl.appendChild(script);
 
-            iframeDocument.querySelector('#toolbarViewer').style.cssText = "display: flex; align-items: center;     justify-content: space-between;"
-            const viewFind = iframeDocument.querySelector('#viewFind')
-            const sidebarToggle = iframeDocument.querySelector('#sidebarToggle')
-            const toolbarViewerLeft = iframeDocument.querySelector('#toolbarViewerLeft')
-            const toolbarViewerMiddle = iframeDocument.querySelector('#toolbarViewerMiddle')
+            iframeDocument.querySelector('#toolbarViewer').classList.add('flex', 'items-center', 'justify-between')
+            const waitedEls = ['#previous', '#next', '#pageNumber',
+                '#numPages', '.splitToolbarButton.hiddenSmallView',
+                '.toolbarButtonSpacer', '.splitToolbarButtonSeparator',
+                '#toolbarViewerMiddle',
+                '#openFile',
+                '#print',
+                '#download',
+                '.verticalToolbarSeparator.hiddenMediumView',
+                '#editorModeButtons',
+                '#editorModeButtons',
+                '#editorModeSeparator',
+                '#secondaryToolbarToggle',
 
-            toolbarViewerMiddle.innerHTML = ''
-            toolbarViewerLeft.innerHTML = ''
-            toolbarViewerLeft.appendChild(sidebarToggle)
-            toolbarViewerLeft.appendChild(viewFind)
+            ]
+            waitedEls.forEach(item => {
+                // console.log(item, iframeDocument.querySelector(item))
+                iframeDocument.querySelector(item)?.classList.add('hidden')
+            })
+
+
 
 
             const viewerDivEl = iframeDocument.querySelector("#viewer")
@@ -74,16 +83,15 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                 const previous = event.previous
 
                 const currentPageActiveObj = commonStore.annotationIconConfig.fabricCanvas[`${pageNumber}`]
-                if(currentPageActiveObj!==undefined){
+                if (currentPageActiveObj !== undefined) {
                     currentPageActiveObj.discardActiveObject();
                     currentPageActiveObj.renderAll();
                 }
 
 
-
                 const previousPageActiveObj = commonStore.annotationIconConfig.fabricCanvas[`${previous}`]
 
-                if(previousPageActiveObj!==undefined){
+                if (previousPageActiveObj !== undefined) {
                     previousPageActiveObj.discardActiveObject();
                     previousPageActiveObj.renderAll();
                 }
@@ -166,7 +174,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                     loadHistory()
 
 
-
                 }
 
 
@@ -195,7 +202,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
             width: '100vw',
         }}
         viewer-path={'pdfjs-4.0.189-dist'}
-        viewer-extra-styles-urls={`[${pdfjscssBlobUrl}]`}
+
     >
         {toolbarViewerRightElement !== null ? <ToolbarViewerRightComp container={toolbarViewerRightElement}/> : null}
     </pdfjs-viewer-element>;

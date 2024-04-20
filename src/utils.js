@@ -21,6 +21,20 @@ class Utils {
         return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
     }
 
+    static  removeElementById(elementId, rootContainer) {
+        // 获取元素
+        const element = rootContainer.getElementById(elementId);
+
+        // 确保元素存在
+        if (element) {
+            // 从其父元素中删除该元素
+            element.parentNode.removeChild(element);
+        } else {
+            console.log("Element not found!");
+        }
+    }
+
+
 
     static formatTime(date) {
         const year = date.getFullYear();

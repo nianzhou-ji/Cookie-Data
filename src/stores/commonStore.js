@@ -7,10 +7,17 @@ import Utils from "../utils";
 class CommonStore {
 
 
-    testVars = {}
+    testVars = [
+        '1',
+        '2',
+        '3',
 
-    updateTestVars(value) {
-        this.testVars[value.key]=value.value
+    ]
+
+    updateTestVars() {
+        const temp =  this.testVars
+        temp.push(new Date())
+        this.testVars = temp
     }
 
 
@@ -22,22 +29,12 @@ class CommonStore {
         history: {},
         canvasObjSelectionState: false,
         fabricCanvas: {},
-
+        pdfAsset:{
+            url:'',
+            name:''
+        }
     }
 
-
-
-
-    updateAnnotationZIndex() {
-        const elements = this.annotationIconConfig.iframeDocument.querySelectorAll('.JpCanvasAnnotationWrapper');
-        elements.forEach((element, index) => {
-            if (this.annotationIconConfig.clicked['ReadIconContainer']) {
-                element.style.zIndex = '1'
-            } else {
-                element.style.zIndex = '3'
-            }
-        });
-    }
 
     updateAnnotationIconConfig(value) {
         const temp = this.annotationIconConfig
@@ -73,6 +70,22 @@ class CommonStore {
         this.annotationIconConfig = temp
 
     }
+
+
+
+
+    updateAnnotationZIndex() {
+        const elements = this.annotationIconConfig.iframeDocument.querySelectorAll('.JpCanvasAnnotationWrapper');
+        elements.forEach((element, index) => {
+            if (this.annotationIconConfig.clicked['ReadIconContainer']) {
+                element.style.zIndex = '1'
+            } else {
+                element.style.zIndex = '3'
+            }
+        });
+    }
+
+
 
 
     initMarkdownData = {
