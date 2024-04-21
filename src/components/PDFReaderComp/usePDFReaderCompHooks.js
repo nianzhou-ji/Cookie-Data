@@ -31,8 +31,8 @@ const usePDFReaderCompHooks = () => {
         // const root1 = createRoot(commonStore.annotationIconConfig.iframeDocument.getElementById('JpDocumentMessage'))
         rootContainer.render(
             <>
-                <div id={'JpPDFName'} className='font-bold mr-2'>{name}</div>
-                <div id={'JpPDFPageMessage'} className='font-bold'>{currentPageNum}/{pageCounts} Page</div>
+                <div id={'JpPDFName'} style={{fontWeight: "bold", marginRight: '2rem'}}>{name}</div>
+                <div id={'JpPDFPageMessage'} style={{fontWeight: "bold"}}>{currentPageNum}/{pageCounts} Page</div>
             </>)
     }
 
@@ -247,7 +247,14 @@ const usePDFReaderCompHooks = () => {
 
 
         return <div id={id} title={title}
-                    className={`mr-[0.5rem] w-[1.5rem] h-[1.5rem] flex items-center justify-center relative`}
+                    style={{
+                        marginRight: '0.5rem',
+                        width: '1.5rem',
+                        height: '1.5rem',
+                        position: "relative"
+
+                    }}
+                    className={`JpTw-flex JpTw-items-center JpTw-justify-center`}
                     onClick={e => {
                         const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
 
@@ -268,16 +275,16 @@ const usePDFReaderCompHooks = () => {
                                 })
 
                                 const otherAnnotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(item)
-                                otherAnnotationIconContainer?.classList?.toggle("bg-[#AEAEAF]", false)
-                                otherAnnotationIconContainer?.classList?.toggle("bg-[#DDDEDF]", false)
+                                otherAnnotationIconContainer?.classList?.toggle("JpTw-bg-AEAEAF", false)
+                                otherAnnotationIconContainer?.classList?.toggle("JpTw-bg-DDDEDF", false)
                             }
                         })
 
 
                         if (commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("bg-[#AEAEAF]", true)
+                            annotationIconContainer?.classList?.toggle("JpTw-bg-AEAEAF", true)
                         } else {
-                            annotationIconContainer?.classList?.toggle("bg-[#AEAEAF]", false)
+                            annotationIconContainer?.classList?.toggle("JpTw-bg-AEAEAF", false)
                         }
 
 
@@ -288,13 +295,13 @@ const usePDFReaderCompHooks = () => {
                     onMouseEnter={() => {
                         const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
                         if (!commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("bg-[#DDDEDF]", true)
+                            annotationIconContainer?.classList?.toggle("JpTw-bg-DDDEDF", true)
                         }
                     }}
                     onMouseLeave={() => {
                         const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
                         if (!commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("bg-[#DDDEDF]", false)
+                            annotationIconContainer?.classList?.toggle("JpTw-bg-DDDEDF", false)
                         }
 
                     }}>
@@ -305,9 +312,9 @@ const usePDFReaderCompHooks = () => {
 
     const CustomAnnotationTools = () => {
 
-        return <div className='flex items-center '>
+        return <div className={'JpTw-flex JpTw-items-center '}>
             <div id={'JpAnnotationConfig'} style={{display: "flex"}}>
-                <input type="color" id={'JpColorPicker'} className='mr-[1rem]' defaultValue={'#FF0000'}/>
+                <input type="color" style={{marginRight: '1rem'}} id={'JpColorPicker'} defaultValue={'#FF0000'}/>
             </div>
 
             <VerticalIcon size={'1.25rem'} style={{marginRight: '1rem'}} id={'JpAnnotationConfigDivider'}/>
@@ -317,7 +324,7 @@ const usePDFReaderCompHooks = () => {
                 id={'ReadIconContainer'}
                 title={'Only Read'}
                 initFunc={() => {
-                    commonStore.annotationIconConfig.iframeDocument.getElementById('ReadIconContainer')?.classList?.toggle("bg-[#AEAEAF]", true)
+                    commonStore.annotationIconConfig.iframeDocument.getElementById('ReadIconContainer')?.classList?.toggle("JpTw-bg-AEAEAF", true)
                     commonStore.updateAnnotationIconConfig({
                         clicked: {
                             id: 'ReadIconContainer',
@@ -351,7 +358,7 @@ const usePDFReaderCompHooks = () => {
                     ])
 
                 }}>
-                <ReadIcon size={'1.25rem'} className=''
+                <ReadIcon size={'1.25rem'}
                 />
             </AnnotationIconContainer>
 
@@ -385,8 +392,6 @@ const usePDFReaderCompHooks = () => {
                         el.style.display = 'block'
                     },
                 ])
-
-
 
 
             }}>
@@ -426,8 +431,6 @@ const usePDFReaderCompHooks = () => {
                 ])
 
 
-
-
             }}>
                 <TextIcon size={'1.25rem'}
                 />
@@ -439,21 +442,30 @@ const usePDFReaderCompHooks = () => {
                 title={'PDF List'}
                 onClickFunc={() => {
                     const JpPdfListEl = commonStore.annotationIconConfig.iframeDocument.getElementById('JpPdfList')
-                    JpPdfListEl.querySelector('.p-2').innerHTML = ''
+                    JpPdfListEl.querySelector('#JpListContainer').innerHTML = ''
                     commonStore.annotationIconConfig.pdfAsset.forEach(item => {
                         const newElement = document.createElement('div');
                         newElement.id = item.id
-                        newElement.classList.add('hover:bg-[#DDDEDF]', 'rounded-lg', 'mt-[0.5rem]')
+                        newElement.classList.add('JpTw-bg-DDDEDF-hover')
                         if (commonStore.annotationIconConfig.currentOpenPDF !== null && item.id === commonStore.annotationIconConfig.currentOpenPDF.id) {
-                            newElement.classList.add('bg-[#AEAEAF]')
+                            newElement.classList.add('JpTw-bg-AEAEAF')
                         }
                         const root = createRoot(newElement);
-                        root.render(<a
-                            href="#"
-                            className=" block  px-4 py-2 text-sm text-gray-500  hover:text-gray-700"
-                            role="menuitem"
+                        root.render(<div
+                            style={{
+                                marginBottom: '1rem',
+                                // height:'2rem',
+                                display:"flex",
+                                justifyContent:'flex-start',
+                                alignItems:"center",
+                                padding:'0.5rem'
+
+
+                            }}
                             onClick={async () => {
+                                // const viewerApp = await commonStore.annotationIconConfig.viewer.initialize()
                                 await commonStore.annotationIconConfig.viewerApp.open({data: await Utils.urlToUint8Array(item.url)})
+                                // await viewerApp.open({data: await Utils.urlToUint8Array(item.url)})
                                 commonStore.updateAnnotationIconConfig({
                                     currentOpenPDF: item
                                 })
@@ -468,12 +480,12 @@ const usePDFReaderCompHooks = () => {
 
                         >
                             {item.name}
-                        </a>);
+                        </div>);
 
                         // 使用appendChild将这个新的div添加到容器中
                         JpPdfListEl.querySelector('.p-2').appendChild(newElement);
                     })
-                    JpPdfListEl.classList.toggle('hidden')
+                    JpPdfListEl.classList.toggle('JpTw-hidden')
 
 
                 }}
@@ -481,11 +493,22 @@ const usePDFReaderCompHooks = () => {
             >
                 <ListIcon size={'1.25rem'}/>
                 <div id={'JpPdfList'}
-                     className="hidden absolute top-[100%] end-0 z-10 mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
-                     role="menu"
                      key={commonStore.testVars.length}
+                     style={{
+                         position: "absolute",
+                         top: "100%",
+                         right: '100%',
+                         display: "flex",
+                         flexDirection: "column",
+                         backgroundColor: 'white',
+                         zIndex: 50,
+                         width: '10rem',
+                         padding: '0.5rem',
+                         borderRadius: '1rem'
+
+                     }}
                 >
-                    <div className="p-2">
+                    <div className="p-2" id={'JpListContainer'}>
 
                     </div>
 
@@ -493,7 +516,7 @@ const usePDFReaderCompHooks = () => {
 
                         <button
                             type="submit"
-                            className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-[#AEAEAF]"
+                            className={Utils.prefixClassNames("flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-[#AEAEAF]")}
                             role="menuitem"
                             onClick={async () => {
                                 if (commonStore.annotationIconConfig.currentOpenPDF === null) return
@@ -512,7 +535,10 @@ const usePDFReaderCompHooks = () => {
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
+                                style={{
+                                    height: '4px',
+                                    width: '4px',
+                                }}
                                 fill="none"
                                 viewBox="0 0 24 24"
                                 stroke="currentColor"

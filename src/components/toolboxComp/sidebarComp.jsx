@@ -49,7 +49,7 @@ const SidebarComp = () => {
                                         {
                                             item1.children.map(item2 => {
                                                 return <li key={item2.id}>
-                                                    <h2 className="menu-title flex items-center gap-4 px-1.5"><span
+                                                    <h2 className="menu-title flex items-center  gap-4 px-1.5"><span
                                                         className="text-base-content">{item2.icon}</span> {item2.title}
                                                     </h2>
                                                     <ul>

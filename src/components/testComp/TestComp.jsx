@@ -6,12 +6,12 @@ import ReactDOM from "react-dom";
 
 const baseURL = 'http://localhost:8082/assets/pdfjs';
 
-export default function TestComp({url = baseURL + '/test.pdf'}) {
+export default function TestComp({url = baseURL + '/test1.pdf'}) {
 
 
     const ToolbarViewerRightComp = ({container}) => {
         console.log(container, 'container')
-        container.innerHTML = '';
+        // container.innerHTML = '';
         return ReactDOM.createPortal(
             <button className='btn'>Test</button>,
             container
@@ -142,6 +142,8 @@ export default function TestComp({url = baseURL + '/test.pdf'}) {
     }} viewer-path={'/pdfjs-4.0.189-dist'}>
         {toolbarViewerRightElement!==null?<ToolbarViewerRightComp container={toolbarViewerRightElement}/>:null}
     </pdfjs-viewer-element>;
+
+
 
 }
 

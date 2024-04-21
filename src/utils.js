@@ -8,6 +8,23 @@ class Utils {
         return document.getElementById(id)?.getBoundingClientRect()
     }
 
+
+    static prefixClassNames(classString) {
+        // 分割字符串成数组
+        const classes = classString.split(' ');
+        // 为每个类添加前缀
+        const prefixedClasses = classes.map(className => {
+            let noSpaces = className.replace(/\s+/g, '');
+            if(noSpaces.length!==0){
+              return `JpTw-${className}`
+            }
+            return null
+
+        });
+        // 将数组合并为一个字符串，每个元素之间用空格分隔
+        return prefixedClasses.join(' ');
+    }
+
     static secondsToHMS(totalSeconds) {
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);

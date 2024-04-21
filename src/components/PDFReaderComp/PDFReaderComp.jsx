@@ -1,17 +1,21 @@
 import React, {useEffect, useState} from 'react';
+import 'pdfjs-viewer-element'
 import ReactDOM from "react-dom";
 import {fabric} from "fabric";
 import Utils from "../../utils";
 import {observer} from "mobx-react-lite";
 import {fetchFile, toBlobURL} from '@ffmpeg/util'
 import {useStore} from "../../stores";
-import ToolbarViewerRightComp from "./ToolbarViewerRightComp";
 import _ from "lodash";
 import usePDFReaderCompHooks from "./usePDFReaderCompHooks";
 import {createRoot} from "react-dom/client";
 
 
 const baseURL = 'http://localhost:8082/assets';
+
+
+// const pdfUrl = await toBlobURL(baseURL + '/pdfjs/test1.pdf', 'text/pdf')
+const JpPDFCss = await toBlobURL(baseURL + '/pdfjs/jp-pdfjs-css.css', 'text/css')
 
 const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
@@ -37,6 +41,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
 // Wait for the viewer initialization, receive PDFViewerApplication
             const viewerApp = await viewer.initialize()
+            console.log(viewerApp, 'viewerApp')
 
             const iframeDocument = viewer.shadowRoot.querySelector('iframe').contentDocument
             commonStore.updateAnnotationIconConfig({
@@ -44,18 +49,12 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
             })
 
 
-            const headEl = iframeDocument.querySelector('head')
-            // console.log(headEl, 'headEl')
-            const script = document.createElement('script');
-            script.type = 'text/javascript';
-            script.src = await toBlobURL(baseURL + '/pdfjs/tailwindcss.js', 'text/javascript');
-            headEl.appendChild(script);
 
-            iframeDocument.querySelector('#toolbarViewer')?.classList.add('flex', 'items-center', 'justify-between')
+            iframeDocument.querySelector('#toolbarViewer')?.classList.add('JpTw-flex', 'JpTw-items-center', 'JpTw-justify-between')
             const waitedEls = ['#previous', '#next', '#pageNumber',
                 '#numPages', '.splitToolbarButton.hiddenSmallView',
                 '.toolbarButtonSpacer', '.splitToolbarButtonSeparator',
-                '#openFile',
+                // '#openFile',
                 '#print',
                 '#download',
                 '.verticalToolbarSeparator.hiddenMediumView',
@@ -69,8 +68,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
             ]
             waitedEls.forEach(item => {
-                // console.log(item, iframeDocument.querySelector(item))
-                iframeDocument.querySelector(item)?.classList.add('hidden')
+                iframeDocument.querySelector(item)?.classList.add('JpTw-hidden')
             })
 
 
@@ -78,7 +76,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
             const newElement = document.createElement('div');
             toolbarViewerMiddleEl.appendChild(newElement)
             newElement.id = 'JpDocumentMessage'
-            newElement.classList.add('flex')
+            newElement.classList.add('JpTw-flex')
 
 
             const JpDocumentMessageRoot = createRoot(commonStore.annotationIconConfig.iframeDocument.getElementById('JpDocumentMessage'))
@@ -89,9 +87,11 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
             const viewerDivEl = iframeDocument.querySelector("#viewer")
             const toolbarViewerRightEl = iframeDocument.getElementById('toolbarViewerRight');
-
-
-            const toolbarViewerRightElRoot = createRoot(toolbarViewerRightEl);
+            toolbarViewerRightEl.classList.add('JpTw-flex',  'JpTw-items-center', 'JpTw-justify-center')
+            const CustomAnnotationToolsContainers = document.createElement('div')
+            CustomAnnotationToolsContainers.classList.add('JpTw-flex',  'JpTw-items-center', 'JpTw-justify-center')
+            toolbarViewerRightEl.appendChild(CustomAnnotationToolsContainers)
+            const toolbarViewerRightElRoot = createRoot(CustomAnnotationToolsContainers);
             toolbarViewerRightElRoot.render(<CustomAnnotationTools/>)
 
             commonStore.updateAnnotationIconConfig(
@@ -134,6 +134,8 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                     commonStore.annotationIconConfig.JpDocumentMessageRoot
                 )
 
+                console.log('pagechanging')
+
             })
 
             viewerApp.eventBus.on('pagesloaded', (event) => {
@@ -148,10 +150,13 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                     commonStore.annotationIconConfig.JpDocumentMessageRoot
                 )
 
+                console.log('pagesloaded')
+
             })
 
 
             viewerApp.eventBus.on('pagerendered', (event) => {
+                console.log('pagerendered')
                 const pageNum = event.pageNumber
                 const pageDivEl = viewerDivEl.querySelector(`[data-page-number="${pageNum}"]`)
                 const canvasAnnotationEl = document.createElement('canvas');
@@ -243,10 +248,18 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
             height: '100vh',
             width: '100vw',
         }}
-        viewer-path={'pdfjs-4.0.189-dist'}
-        src={''}
+        viewer-path={'/pdfjs-4.0.189-dist'}
 
+
+        viewer-extra-styles-urls = {`['${JpPDFCss}']`}
+
+
+
+
+        // src = {pdfUrl}
     />;
+
+
 };
 
 export default observer(PdfReaderComp);
