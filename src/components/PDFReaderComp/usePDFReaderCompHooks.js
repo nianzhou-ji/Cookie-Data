@@ -1,18 +1,39 @@
 import {fabric} from "fabric";
 import {useStore} from "../../stores";
 import _ from "lodash";
+import {RxDividerVertical as VerticalIcon} from "react-icons/rx";
+import {CiRead as ReadIcon} from "react-icons/ci";
+import {TbPencilExclamation as PencilIcon} from "react-icons/tb";
+import {BiText as TextIcon} from "react-icons/bi";
+import {createRoot} from "react-dom/client";
+import {ImList as ListIcon} from "react-icons/im";
+import Utils from "../../utils";
+import React, {useEffect} from "react";
+
+const baseURL = 'http://localhost:8082/assets';
 
 const usePDFReaderCompHooks = () => {
 
     const {commonStore} = useStore()
 
     const discardActiveObject = () => {
-        Object.keys(commonStore.annotationIconConfig.fabricCanvas).forEach(key => {
-            const canvas = commonStore.annotationIconConfig.fabricCanvas[key]
+        if (commonStore.annotationIconConfig.currentOpenPDF === null) return
+        Object.keys(commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id]).forEach(key => {
+            const canvas = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][key]
 
             canvas.discardActiveObject()
             canvas.renderAll()
         })
+    }
+
+
+    const refreshPDFMessage = (name, currentPageNum, pageCounts, rootContainer) => {
+        // const root1 = createRoot(commonStore.annotationIconConfig.iframeDocument.getElementById('JpDocumentMessage'))
+        rootContainer.render(
+            <>
+                <div id={'JpPDFName'} className='font-bold mr-2'>{name}</div>
+                <div id={'JpPDFPageMessage'} className='font-bold'>{currentPageNum}/{pageCounts} Page</div>
+            </>)
     }
 
 
@@ -46,30 +67,27 @@ const usePDFReaderCompHooks = () => {
     }
 
 
-
-    const loadHistory = () => {
-
-        Object.keys(commonStore.annotationIconConfig.fabricCanvas).forEach(key => {
-            const canvas = commonStore.annotationIconConfig.fabricCanvas[key]
-            canvas.loadFromJSON(commonStore.annotationIconConfig.history[key], function () {
-                canvas.renderAll();
-            });
-        })
+    const loadHistory = (pageNum) => {
+        if (commonStore.annotationIconConfig.currentOpenPDF === null) return
+        const canvas = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
+        if (commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id] === undefined) return
+        canvas.loadFromJSON(commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum], function () {
+            canvas.renderAll();
+        });
 
 
     }
 
 
-    const saveHistory = () => {
-
-        Object.keys(commonStore.annotationIconConfig.fabricCanvas).forEach(key => {
-            const canvas = commonStore.annotationIconConfig.fabricCanvas[key]
-            commonStore.updateAnnotationIconConfig({
-                history: {
-                    key: key,
-                    value: canvas.toJSON()
-                }
-            })
+    const saveHistory = (pageNum) => {
+        if (commonStore.annotationIconConfig.currentOpenPDF === null) return
+        const canvas = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
+        commonStore.updateAnnotationIconConfig({
+            history: {
+                pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
+                pageNum: pageNum,
+                value: canvas.toJSON()
+            }
         })
 
 
@@ -110,6 +128,8 @@ const usePDFReaderCompHooks = () => {
                 stroke: commonStore.annotationIconConfig.iframeDocument.querySelector('#JpColorPicker').value,
             });
 
+            // console.log('mouse:down', 'annotationTextCanvasConfigFunc')
+
 
             setElAttr(['JpColorPicker'], [
                 (el) => {
@@ -123,7 +143,7 @@ const usePDFReaderCompHooks = () => {
             ])
 
             canvas.add(textbox);
-            canvas.setActiveObject(textbox);
+            canvas.discardActiveObject(textbox)
             canvas.renderAll();
 
 
@@ -145,23 +165,39 @@ const usePDFReaderCompHooks = () => {
         canvas.backgroundColor = 'rgba(255, 223, 186, 0.5)';  // 你可以选择任何颜色和透明度
 
         const wrapperEl = values.pageDivEl.querySelector('.JpCanvasAnnotationWrapper')
-        if(wrapperEl===null)return
+        if (wrapperEl === null) return
         wrapperEl.style.zIndex = '1'
         wrapperEl.style.top = `0`
         wrapperEl.style.left = `0`
         wrapperEl.style.position = 'absolute'
         canvasConfigFunc(canvas)
-        loadHistory()
-
-
 
 
         commonStore.updateAnnotationZIndex()
         commonStore.updateAnnotationIconConfig({
             fabricCanvas: {
+                pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
                 key: `${values.pageNum}`,
                 value: canvas
             }
+        })
+
+
+        const changeEvents = [
+            'object:modified',
+            'object:moving',
+            'object:added',
+            'object:scaling',
+            'object:rotating',
+            'object:skewing',
+        ]
+
+        changeEvents.forEach(item => {
+            canvas.on(item, function (event) {
+                saveHistory(values.pageNum)
+                // console.log(item, _.cloneDeep(commonStore.annotationIconConfig.history))
+            });
+
         })
 
 
@@ -179,7 +215,325 @@ const usePDFReaderCompHooks = () => {
         });
 
 
+        loadHistory(values.pageNum)
+
+
         return canvas
+    }
+
+
+    const AnnotationIconContainer = (
+        {
+            children, id, title,
+            initFunc = () => {
+            },
+            onClickFunc = () => {
+            },
+            joinButtonGroup = true
+        }) => {
+
+        useEffect(() => {
+
+            commonStore.updateAnnotationIconConfig({
+                clicked: {
+                    id: id,
+                    value: false
+                }
+            })
+
+
+            initFunc()
+        }, []);
+
+
+        return <div id={id} title={title}
+                    className={`mr-[0.5rem] w-[1.5rem] h-[1.5rem] flex items-center justify-center relative`}
+                    onClick={e => {
+                        const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
+
+                        Object.keys(commonStore.annotationIconConfig.clicked).forEach(item => {
+                            if (item === id) {
+                                commonStore.updateAnnotationIconConfig({
+                                    clicked: {
+                                        id: id,
+                                        value: !commonStore.annotationIconConfig.clicked[id]
+                                    }
+                                })
+                            } else if (item !== id && joinButtonGroup) {
+                                commonStore.updateAnnotationIconConfig({
+                                    clicked: {
+                                        id: item,
+                                        value: false
+                                    }
+                                })
+
+                                const otherAnnotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(item)
+                                otherAnnotationIconContainer?.classList?.toggle("bg-[#AEAEAF]", false)
+                                otherAnnotationIconContainer?.classList?.toggle("bg-[#DDDEDF]", false)
+                            }
+                        })
+
+
+                        if (commonStore.annotationIconConfig.clicked[id]) {
+                            annotationIconContainer?.classList?.toggle("bg-[#AEAEAF]", true)
+                        } else {
+                            annotationIconContainer?.classList?.toggle("bg-[#AEAEAF]", false)
+                        }
+
+
+                        onClickFunc()
+
+
+                    }}
+                    onMouseEnter={() => {
+                        const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
+                        if (!commonStore.annotationIconConfig.clicked[id]) {
+                            annotationIconContainer?.classList?.toggle("bg-[#DDDEDF]", true)
+                        }
+                    }}
+                    onMouseLeave={() => {
+                        const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
+                        if (!commonStore.annotationIconConfig.clicked[id]) {
+                            annotationIconContainer?.classList?.toggle("bg-[#DDDEDF]", false)
+                        }
+
+                    }}>
+            {children}
+        </div>
+    }
+
+
+    const CustomAnnotationTools = () => {
+
+        return <div className='flex items-center '>
+            <div id={'JpAnnotationConfig'} style={{display: "flex"}}>
+                <input type="color" id={'JpColorPicker'} className='mr-[1rem]' defaultValue={'#FF0000'}/>
+            </div>
+
+            <VerticalIcon size={'1.25rem'} style={{marginRight: '1rem'}} id={'JpAnnotationConfigDivider'}/>
+
+
+            <AnnotationIconContainer
+                id={'ReadIconContainer'}
+                title={'Only Read'}
+                initFunc={() => {
+                    commonStore.annotationIconConfig.iframeDocument.getElementById('ReadIconContainer')?.classList?.toggle("bg-[#AEAEAF]", true)
+                    commonStore.updateAnnotationIconConfig({
+                        clicked: {
+                            id: 'ReadIconContainer',
+                            value: true
+                        }
+                    })
+
+                    setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
+                        (el) => {
+                            el.style.display = 'none'
+                        },
+
+                        (el) => {
+                            el.style.display = 'none'
+                        },
+                    ])
+                }}
+                onClickFunc={() => {
+                    commonStore.updateTestVars()
+
+                    commonStore.updateAnnotationZIndex()
+
+
+                    setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
+                        (el) => {
+                            el.style.display = 'none'
+                        },
+                        (el) => {
+                            el.style.display = 'none'
+                        },
+                    ])
+
+                }}>
+                <ReadIcon size={'1.25rem'} className=''
+                />
+            </AnnotationIconContainer>
+
+
+            <AnnotationIconContainer id={'PencilIconContainer'} title={'Annotation Pencil'} onClickFunc={() => {
+
+                Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id]).forEach(pageNum => {
+                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
+                    // console.log(_.cloneDeep(values), 'values')
+                    createFabricCanvas(values, annotationPencilCanvasConfigFunc)
+                    commonStore.updateAnnotationIconConfig({
+                        canvasAnnotationElGroup: {
+                            pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
+                            pageNum: `${pageNum}`,
+                            value: {
+                                ...values,
+                                fabricRendered: true,
+                            }
+                        }
+                    })
+
+
+                })
+
+
+                setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
+                    (el) => {
+                        el.style.display = 'block'
+                    },
+                    (el) => {
+                        el.style.display = 'block'
+                    },
+                ])
+
+
+
+
+            }}>
+                <PencilIcon size={'1.25rem'}
+                />
+            </AnnotationIconContainer>
+
+
+            <AnnotationIconContainer id={'TextIconContainer'} title={'Annotation Text'} onClickFunc={() => {
+
+                Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id]).forEach(pageNum => {
+                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
+                    createFabricCanvas(values, annotationTextCanvasConfigFunc)
+                    commonStore.updateAnnotationIconConfig({
+                        canvasAnnotationElGroup: {
+                            pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
+                            pageNum: `${pageNum}`,
+                            value: {
+                                ...values,
+                                fabricRendered: true
+                            }
+                        }
+                    })
+
+
+                })
+
+
+                setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
+                    (el) => {
+                        el.style.display = 'block'
+                    },
+
+                    (el) => {
+                        el.style.display = 'block'
+                    }
+                ])
+
+
+
+
+            }}>
+                <TextIcon size={'1.25rem'}
+                />
+            </AnnotationIconContainer>
+
+
+            <AnnotationIconContainer
+                id={'ListIconContainer'}
+                title={'PDF List'}
+                onClickFunc={() => {
+                    const JpPdfListEl = commonStore.annotationIconConfig.iframeDocument.getElementById('JpPdfList')
+                    JpPdfListEl.querySelector('.p-2').innerHTML = ''
+                    commonStore.annotationIconConfig.pdfAsset.forEach(item => {
+                        const newElement = document.createElement('div');
+                        newElement.id = item.id
+                        newElement.classList.add('hover:bg-[#DDDEDF]', 'rounded-lg', 'mt-[0.5rem]')
+                        if (commonStore.annotationIconConfig.currentOpenPDF !== null && item.id === commonStore.annotationIconConfig.currentOpenPDF.id) {
+                            newElement.classList.add('bg-[#AEAEAF]')
+                        }
+                        const root = createRoot(newElement);
+                        root.render(<a
+                            href="#"
+                            className=" block  px-4 py-2 text-sm text-gray-500  hover:text-gray-700"
+                            role="menuitem"
+                            onClick={async () => {
+                                await commonStore.annotationIconConfig.viewerApp.open({data: await Utils.urlToUint8Array(item.url)})
+                                commonStore.updateAnnotationIconConfig({
+                                    currentOpenPDF: item
+                                })
+                                refreshPDFMessage(
+                                    commonStore.annotationIconConfig.currentOpenPDF.name,
+                                    1,
+                                    commonStore.annotationIconConfig.pagesCount,
+                                    commonStore.annotationIconConfig.JpDocumentMessageRoot
+                                )
+                            }}
+                            key={item.id}
+
+                        >
+                            {item.name}
+                        </a>);
+
+                        // 使用appendChild将这个新的div添加到容器中
+                        JpPdfListEl.querySelector('.p-2').appendChild(newElement);
+                    })
+                    JpPdfListEl.classList.toggle('hidden')
+
+
+                }}
+                joinButtonGroup={false}
+            >
+                <ListIcon size={'1.25rem'}/>
+                <div id={'JpPdfList'}
+                     className="hidden absolute top-[100%] end-0 z-10 mt-2 w-56 divide-y divide-gray-100 rounded-md border border-gray-100 bg-white shadow-lg"
+                     role="menu"
+                     key={commonStore.testVars.length}
+                >
+                    <div className="p-2">
+
+                    </div>
+
+                    <div className="p-2">
+
+                        <button
+                            type="submit"
+                            className="flex w-full items-center gap-2 rounded-lg px-4 py-2 text-sm text-red-700 hover:bg-[#AEAEAF]"
+                            role="menuitem"
+                            onClick={async () => {
+                                if (commonStore.annotationIconConfig.currentOpenPDF === null) return
+                                Utils.removeElementById(commonStore.annotationIconConfig.currentOpenPDF.id, commonStore.annotationIconConfig.iframeDocument)
+                                commonStore.updateAnnotationIconConfig({
+                                    pdfAsset: {
+                                        id: commonStore.annotationIconConfig.currentOpenPDF.id,
+                                        value: null
+                                    }
+                                })
+                                commonStore.updateAnnotationIconConfig({
+                                    currentOpenPDF: null
+                                })
+
+                            }}
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                            </svg>
+
+                            Delete Current PDF
+                        </button>
+
+                    </div>
+                </div>
+            </AnnotationIconContainer>
+
+
+        </div>
     }
 
 
@@ -190,7 +544,9 @@ const usePDFReaderCompHooks = () => {
         setElAttr,
         discardActiveObject,
         loadHistory,
-        saveHistory
+        saveHistory,
+        CustomAnnotationTools,
+        refreshPDFMessage
     }
 
 }

@@ -7,15 +7,17 @@ import Utils from "../utils";
 class CommonStore {
 
 
-    testVars = [
-        '1',
-        '2',
-        '3',
+    BASE_URL = 'http://localhost:8082/assets'
 
+
+    testVars = [
+        'test1.pdf',
+        'test2.pdf',
+        'test3.pdf',
     ]
 
     updateTestVars() {
-        const temp =  this.testVars
+        const temp = this.testVars
         temp.push(new Date())
         this.testVars = temp
     }
@@ -25,33 +27,96 @@ class CommonStore {
         clicked: {},
         iframeDocument: null,
         pagesCount: 0,
+        currentPageNum: 1,
         canvasAnnotationElGroup: {},
         history: {},
         canvasObjSelectionState: false,
         fabricCanvas: {},
-        pdfAsset:{
-            url:'',
-            name:''
-        }
+        pdfAsset: [
+            {
+                id: 'test1-5646545',
+                url: this.BASE_URL + '/pdfjs/test1.pdf',
+                name: 'test1.pdf'
+            },
+
+            {
+                id: 'test2-sfegge',
+                url: this.BASE_URL + '/pdfjs/test2.pdf',
+                name: 'test2.pdf'
+            },
+
+            {
+                id: 'test3-brehteh[]]]s',
+                url: this.BASE_URL + '/pdfjs/test3.pdf',
+                name: 'test3.pdf'
+            },
+        ],
+        viewerApp: null,
+        viewer: null,
+        currentOpenPDF: null,
+        JpDocumentMessageRoot: null
     }
 
 
     updateAnnotationIconConfig(value) {
         const temp = this.annotationIconConfig
+        if (value.pdfAsset !== undefined) {
+            if (value.pdfAsset.id !== null && value.pdfAsset.value === null) {
+                temp.pdfAsset = temp.pdfAsset.filter(item => item.id !== value.pdfAsset.id)
+            }
+
+            if (value.pdfAsset.id === null && value.pdfAsset.value !== null) {
+                temp.pdfAsset.push(value.pdfAsset.value)
+            }
+
+        }
+        if (value.JpDocumentMessageRoot !== undefined) {
+            temp.JpDocumentMessageRoot = value.JpDocumentMessageRoot
+        }
+
+        if (value.currentOpenPDF !== undefined) {
+            temp.currentOpenPDF = value.currentOpenPDF
+        }
+
+
+        if (value.viewer !== undefined) {
+            temp.viewer = value.viewer
+        }
+
+
+        if (value.viewerApp !== undefined) {
+            temp.viewerApp = value.viewerApp
+        }
+
         if (value.fabricCanvas !== undefined) {
-            temp.fabricCanvas[value.fabricCanvas.key] = value.fabricCanvas.value
+            if (temp.fabricCanvas[value.fabricCanvas.pdfID] === undefined) {
+                temp.fabricCanvas[value.fabricCanvas.pdfID] = {}
+            }
+            temp.fabricCanvas[value.fabricCanvas.pdfID][value.fabricCanvas.key] = value.fabricCanvas.value
         }
 
         if (value.canvasObjSelectionState !== undefined) {
             temp.canvasObjSelectionState = value.canvasObjSelectionState
         }
+
         if (value.history !== undefined) {
-            temp.history[value.history.key] = value.history.value
+            if (temp.history[value.history.pdfID] === undefined) {
+                temp.history[value.history.pdfID] = {}
+            }
+            temp.history[value.history.pdfID][value.history.pageNum] = value.history.value
         }
 
         if (value.canvasAnnotationElGroup !== undefined) {
-            temp.canvasAnnotationElGroup[value.canvasAnnotationElGroup.key] = value.canvasAnnotationElGroup.value
+            if (temp.canvasAnnotationElGroup[value.canvasAnnotationElGroup.pdfID] === undefined) {
+                temp.canvasAnnotationElGroup[value.canvasAnnotationElGroup.pdfID] = {}
+            }
+            temp.canvasAnnotationElGroup[value.canvasAnnotationElGroup.pdfID][value.canvasAnnotationElGroup.pageNum] = value.canvasAnnotationElGroup.value
         }
+
+        if (value.currentPageNum !== undefined) {
+            temp.currentPageNum = value.currentPageNum
+        }
+
 
         if (value.pagesCount !== undefined) {
             temp.pagesCount = value.pagesCount
@@ -72,8 +137,6 @@ class CommonStore {
     }
 
 
-
-
     updateAnnotationZIndex() {
         const elements = this.annotationIconConfig.iframeDocument.querySelectorAll('.JpCanvasAnnotationWrapper');
         elements.forEach((element, index) => {
@@ -84,8 +147,6 @@ class CommonStore {
             }
         });
     }
-
-
 
 
     initMarkdownData = {

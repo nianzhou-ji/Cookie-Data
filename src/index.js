@@ -9,9 +9,11 @@ import PdfReaderComp from "./components/PDFReaderComp/PDFReaderComp";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <PdfReaderComp />
-  </React.StrictMode>
+  // <React.StrictMode>
+  //   <PdfReaderComp />
+  // </React.StrictMode>
+
+<PdfReaderComp />
 );
 
 // If you want to start measuring performance in your app, pass a function
