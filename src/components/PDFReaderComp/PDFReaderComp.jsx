@@ -35,13 +35,26 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
 
     useEffect(() => {
-        const uuid = uuidv4();
-        console.log('UUID:', uuid);
+        // const uuid = uuidv4();
+        // console.log('UUID:', uuid);
+
+        // const test=async ()=>{
+        //     console.log(await Utils.urlToBase64(baseURL + '/pdfjs/test2.pdf'));
+        // }
+        //
+        // test()
+
     }, [])
 
 
     useEffect(() => {
         const init = async () => {
+
+            const currentObj = commonStore.getCurrentDocumentObj()
+            if (currentObj !== null) {
+                // console.log(currentObj.PDFAnnotationData, 'PDFAnnotationData')
+                commonStore.initPDFAnnotationData(currentObj.PDFAnnotationData)
+            }
 
 
             const viewer = document.querySelector('pdfjs-viewer-element')
@@ -191,6 +204,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
         init()
 
+
     }, []);
 
 
@@ -204,15 +218,11 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
     return <pdfjs-viewer-element
         style={{
-            height: '100vh',
-            width: '100vw',
+            width: '100%',
+            height: '100%',
         }}
         viewer-path={'/pdfjs-4.0.189-dist'}
-
-
         viewer-extra-styles-urls={`['${JpPDFCss}']`}
-
-        // src = {pdfUrl}
     />;
 
 

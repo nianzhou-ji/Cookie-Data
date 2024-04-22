@@ -115,6 +115,33 @@ class Utils {
         }
     }
 
+    static async  urlToBase64(url) {
+        try {
+            // 使用 Fetch API 获取远程资源
+            const response = await fetch(url);
+            const blob = await response.blob();
+
+            // 创建一个 FileReader 对象
+            const reader = new FileReader();
+
+            // 将读取完成事件封装为 Promise
+            const loadPromise = new Promise((resolve, reject) => {
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+            });
+
+            // 读取 Blob 对象
+            reader.readAsDataURL(blob);
+
+            // 等待读取完成并返回 Base64 数据
+            const base64Data = await loadPromise;
+            return base64Data;
+        } catch (error) {
+            console.error('Error fetching and converting PDF:', error);
+            throw error;
+        }
+    }
+
 
     static async urlToUint8Array(url) {
         try {

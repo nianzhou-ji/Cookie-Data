@@ -11,6 +11,8 @@ import {FaRegFolderOpen as OpenFileIcon} from "react-icons/fa";
 import Utils from "../../utils";
 import React, {useEffect} from "react";
 import {MdDelete as DeleteIcon} from "react-icons/md";
+import Swal from "sweetalert2";
+import PdfReaderComp from "./PDFReaderComp";
 
 const baseURL = 'http://localhost:8082/assets';
 
@@ -147,7 +149,7 @@ const usePDFReaderCompHooks = () => {
                 }
 
 
-                if(object.type==='textbox'){
+                if (object.type === 'textbox') {
                     object.scaleX = scaleWidth;
                     object.scaleY = scaleHeight;
                 }
@@ -423,7 +425,7 @@ const usePDFReaderCompHooks = () => {
             commonStore.annotationIconConfig.JpDocumentMessageRoot
         )
 
-        commonStore.annotationIconConfig.pdfAsset.forEach(itemInner => {
+        commonStore.annotationIconConfig.pdfAssets.forEach(itemInner => {
             if (commonStore.annotationIconConfig.currentOpenPDF === null) return
             if (commonStore.annotationIconConfig.currentOpenPDF.id === itemInner.id) {
 
@@ -462,17 +464,27 @@ const usePDFReaderCompHooks = () => {
                            if (e.target.files.length === 0) return
                            const file = e.target.files[0];
                            const blobUrl = URL.createObjectURL(file);
-                           commonStore.updateAnnotationIconConfig({
-                               pdfAsset: {
-                                   id: null,
-                                   value: {
-                                       name: file.name,
-                                       url: blobUrl
-                                   }
-                               }
-                           })
 
-                           await displayPDFFile(commonStore.annotationIconConfig.pdfAsset[commonStore.annotationIconConfig.pdfAsset.length - 1])
+                           const reader = new FileReader();
+                           reader.onload = async function (event) {
+                               const base64String = event.target.result;
+                               commonStore.updateAnnotationIconConfig({
+                                   pdfAssets: {
+                                       id: null,
+                                       value: {
+                                           name: file.name,
+                                           url: base64String
+                                       }
+                                   }
+                               })
+
+                               await displayPDFFile(commonStore.annotationIconConfig.pdfAssets[commonStore.annotationIconConfig.pdfAssets.length - 1])
+
+                               // console.log(base64String, 'base64String'); // 打印 Base64 编码的字符串
+
+
+                           };
+                           reader.readAsDataURL(file); // 将文件读取为 Data URL
 
                        }}/>
             </AnnotationIconContainer>
@@ -555,9 +567,9 @@ const usePDFReaderCompHooks = () => {
             >
                 <ListIcon size={'1.25rem'} onClick={(event) => {
                     const JpPdfListEl = commonStore.annotationIconConfig.iframeDocument.getElementById('JpPdfList')
-                    console.log(_.cloneDeep(commonStore.annotationIconConfig.pdfAsset), 'ListIcon')
+                    console.log(_.cloneDeep(commonStore.annotationIconConfig.pdfAssets), 'ListIcon')
                     JpPdfListEl.querySelector('#JpListContainer').innerHTML = ''
-                    commonStore.annotationIconConfig.pdfAsset.forEach(item => {
+                    commonStore.annotationIconConfig.pdfAssets.forEach(item => {
                         const newElement = document.createElement('div');
                         newElement.id = item.id
                         newElement.classList.add('JpTw-bg-DDDEDF-hover')
@@ -631,7 +643,7 @@ const usePDFReaderCompHooks = () => {
                                 if (commonStore.annotationIconConfig.currentOpenPDF === null) return
                                 Utils.removeElementById(commonStore.annotationIconConfig.currentOpenPDF.id, commonStore.annotationIconConfig.iframeDocument)
                                 commonStore.updateAnnotationIconConfig({
-                                    pdfAsset: {
+                                    pdfAssets: {
                                         id: commonStore.annotationIconConfig.currentOpenPDF.id,
                                         value: null
                                     }
@@ -639,6 +651,16 @@ const usePDFReaderCompHooks = () => {
                                 commonStore.updateAnnotationIconConfig({
                                     currentOpenPDF: null
                                 })
+
+
+                                const PDFReaderContainer = createRoot(document.getElementById('PDFReaderContainer'))
+                                PDFReaderContainer.render(<PdfReaderComp/>)
+
+
+                                await Swal.fire({
+                                    icon: "info",
+                                    title: `Delete  Success!`,
+                                });
 
                             }}
                 />
