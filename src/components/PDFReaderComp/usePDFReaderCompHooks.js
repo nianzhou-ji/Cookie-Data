@@ -19,12 +19,13 @@ const usePDFReaderCompHooks = () => {
     const {commonStore} = useStore()
 
     const renderCanvas = (pageNumber) => {
-        if(commonStore.annotationIconConfig.currentOpenPDF===null){
+        if (commonStore.annotationIconConfig.currentOpenPDF === null) {
             console.log('commonStore.annotationIconConfig.currentOpenPDF===null')
             return
-        };
+        }
+        ;
         const canvasAnnotationElItem = commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id]
-        if(canvasAnnotationElItem===undefined){
+        if (canvasAnnotationElItem === undefined) {
             console.log('canvasAnnotationElItem===undefined')
             return
         }
@@ -113,11 +114,54 @@ const usePDFReaderCompHooks = () => {
         if (commonStore.annotationIconConfig.currentOpenPDF === null) return
         if (commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id] === undefined) return
         const canvas = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
-        canvas.loadFromJSON(commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum], function () {
-            canvas.requestRenderAll();  // 确保画布更新显示
-        });
 
-        console.log('load history success')
+
+        const history = commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id]
+        if (commonStore.annotationIconConfig.canvasBoundingClientRect !== null) {
+            const scaleWidth = commonStore.annotationIconConfig.canvasBoundingClientRect.width / history['canvasBoundingClientRect'].width;
+            const scaleHeight = commonStore.annotationIconConfig.canvasBoundingClientRect.height / history['canvasBoundingClientRect'].height;
+
+            history[pageNum].objects.forEach(object => {
+
+                object.width = object.width * scaleWidth;
+                object.height = object.height * scaleHeight;
+                object.left = object.left * scaleWidth;
+                object.top = object.top * scaleHeight;
+
+                if (object.type === 'path') {
+                    object.path.forEach(item2 => {
+                        if (item2[0] === 'M') {
+                            item2[1] = item2[1] * scaleWidth
+                            item2[2] = item2[2] * scaleHeight
+                        } else if (item2[0] === 'Q') {
+                            item2[1] = item2[1] * scaleWidth
+                            item2[2] = item2[2] * scaleHeight
+                            item2[3] = item2[3] * scaleWidth
+                            item2[4] = item2[4] * scaleHeight
+
+                        } else if (item2[0] === 'L') {
+                            item2[1] = item2[1] * scaleWidth
+                            item2[2] = item2[2] * scaleHeight
+                        }
+                    })
+                }
+
+
+                if(object.type==='textbox'){
+                    object.scaleX = scaleWidth;
+                    object.scaleY = scaleHeight;
+                }
+            })
+
+            canvas.loadFromJSON(history[pageNum], function () {
+                canvas.requestRenderAll();  // 确保画布更新显示
+                console.log('load history success')
+
+
+            });
+
+
+        }
 
 
     }
@@ -131,9 +175,12 @@ const usePDFReaderCompHooks = () => {
             history: {
                 pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
                 pageNum: pageNum,
-                value: canvas.toJSON()
+                value: canvas.toJSON(),
             }
         })
+
+
+        console.log(_.cloneDeep(commonStore.annotationIconConfig.history), 'canvas.toJSON()')
 
 
     }
@@ -412,7 +459,7 @@ const usePDFReaderCompHooks = () => {
 
                 <input accept="application/pdf" type="file" id="JpOpenPDFFile" style={{display: "none"}}
                        onChange={async e => {
-                           if(e.target.files.length===0)return
+                           if (e.target.files.length === 0) return
                            const file = e.target.files[0];
                            const blobUrl = URL.createObjectURL(file);
                            commonStore.updateAnnotationIconConfig({
@@ -528,7 +575,10 @@ const usePDFReaderCompHooks = () => {
                                 padding: '0.5rem'
                             }}
                             onClick={async (event) => {
+                                commonStore.annotationIconConfig.iframeDocument.querySelector('#PencilIconContainer').click()
                                 await displayPDFFile(item)
+
+
                             }}
                             key={item.id}
                             id={item.id}

@@ -40,9 +40,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
     }, [])
 
 
-
-
-
     useEffect(() => {
         const init = async () => {
 
@@ -51,7 +48,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
 // Wait for the viewer initialization, receive PDFViewerApplication
             const viewerApp = await viewer.initialize()
-            console.log(viewerApp, 'viewerApp')
+
 
             const iframeDocument = viewer.shadowRoot.querySelector('iframe').contentDocument
             commonStore.updateAnnotationIconConfig({
@@ -173,7 +170,10 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                                 pageDivEl,
                                 pageNum: `${pageNum}`
                             }
-                        }
+                        },
+                        canvasBoundingClientRect: pageDivElSize
+
+
                     })
 
                     renderCanvas(pageNum)
@@ -181,11 +181,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                     console.log('pagerendered', pageNum)
 
 
-
                 }
-
-
-
 
 
             });
