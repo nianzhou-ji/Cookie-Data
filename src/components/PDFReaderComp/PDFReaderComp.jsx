@@ -9,7 +9,7 @@ import {useStore} from "../../stores";
 import _ from "lodash";
 import usePDFReaderCompHooks from "./usePDFReaderCompHooks";
 import {createRoot} from "react-dom/client";
-
+import { v4 as uuidv4 } from 'uuid';
 
 const baseURL = 'http://localhost:8082/assets';
 
@@ -33,6 +33,12 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
     } = usePDFReaderCompHooks()
 
 
+    useEffect(()=>{
+        const uuid = uuidv4();
+        console.log('UUID:', uuid);
+    }, [])
+
+
     useEffect(() => {
         const init = async () => {
 
@@ -54,7 +60,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
             const waitedEls = ['#previous', '#next', '#pageNumber',
                 '#numPages', '.splitToolbarButton.hiddenSmallView',
                 '.toolbarButtonSpacer', '.splitToolbarButtonSeparator',
-                // '#openFile',
+                '#openFile',
                 '#print',
                 '#download',
                 '.verticalToolbarSeparator.hiddenMediumView',
@@ -64,8 +70,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                 '#secondaryToolbarToggle',
                 '#scaleSelectContainer',
                 '#toolbarViewerMiddle .splitToolbarButton',
-
-
             ]
             waitedEls.forEach(item => {
                 iframeDocument.querySelector(item)?.classList.add('JpTw-hidden')
@@ -252,9 +256,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
 
         viewer-extra-styles-urls = {`['${JpPDFCss}']`}
-
-
-
 
         // src = {pdfUrl}
     />;

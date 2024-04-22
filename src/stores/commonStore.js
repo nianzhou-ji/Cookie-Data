@@ -2,6 +2,7 @@ import {makeAutoObservable} from "mobx";
 import _ from 'lodash'
 import indexedDBEngine from "../indexDBUtils/indexDBUtils";
 import Utils from "../utils";
+import { v4 as uuidv4 } from 'uuid';
 
 
 class CommonStore {
@@ -46,7 +47,7 @@ class CommonStore {
             },
 
             {
-                id: 'test3-brehteh[]]]s',
+                id: 'test3-brehtehs',
                 url: this.BASE_URL + '/pdfjs/test3.pdf',
                 name: 'test3.pdf'
             },
@@ -66,7 +67,10 @@ class CommonStore {
             }
 
             if (value.pdfAsset.id === null && value.pdfAsset.value !== null) {
-                temp.pdfAsset.push(value.pdfAsset.value)
+                temp.pdfAsset.push({
+                    ...value.pdfAsset.value,
+                    id:'Jp'+uuidv4()
+                })
             }
 
         }
