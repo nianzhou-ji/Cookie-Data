@@ -9,7 +9,7 @@ import {useStore} from "../../stores";
 import _ from "lodash";
 import usePDFReaderCompHooks from "./usePDFReaderCompHooks";
 import {createRoot} from "react-dom/client";
-import { v4 as uuidv4 } from 'uuid';
+import {v4 as uuidv4} from 'uuid';
 
 const baseURL = 'http://localhost:8082/assets';
 
@@ -29,14 +29,18 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
         saveHistory,
         loadHistory,
         CustomAnnotationTools,
-        refreshPDFMessage
+        refreshPDFMessage,
+        renderCanvas
     } = usePDFReaderCompHooks()
 
 
-    useEffect(()=>{
+    useEffect(() => {
         const uuid = uuidv4();
         console.log('UUID:', uuid);
     }, [])
+
+
+
 
 
     useEffect(() => {
@@ -53,7 +57,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
             commonStore.updateAnnotationIconConfig({
                 iframeDocument: iframeDocument
             })
-
 
 
             iframeDocument.querySelector('#toolbarViewer')?.classList.add('JpTw-flex', 'JpTw-items-center', 'JpTw-justify-between')
@@ -91,9 +94,9 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
             const viewerDivEl = iframeDocument.querySelector("#viewer")
             const toolbarViewerRightEl = iframeDocument.getElementById('toolbarViewerRight');
-            toolbarViewerRightEl.classList.add('JpTw-flex',  'JpTw-items-center', 'JpTw-justify-center')
+            toolbarViewerRightEl.classList.add('JpTw-flex', 'JpTw-items-center', 'JpTw-justify-center')
             const CustomAnnotationToolsContainers = document.createElement('div')
-            CustomAnnotationToolsContainers.classList.add('JpTw-flex',  'JpTw-items-center', 'JpTw-justify-center')
+            CustomAnnotationToolsContainers.classList.add('JpTw-flex', 'JpTw-items-center', 'JpTw-justify-center')
             toolbarViewerRightEl.appendChild(CustomAnnotationToolsContainers)
             const toolbarViewerRightElRoot = createRoot(CustomAnnotationToolsContainers);
             toolbarViewerRightElRoot.render(<CustomAnnotationTools/>)
@@ -110,21 +113,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                 // console.log(commonStore.annotationIconConfig.currentOpenPDF.id, 'commonStore.annotationIconConfig.currentOpenPDF.id')
                 const pageNumber = event.pageNumber
                 const previous = event.previous
-                //
-                // const currentPageActiveObj = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][`${pageNumber}`]
-                // if (currentPageActiveObj !== undefined) {
-                //     currentPageActiveObj.discardActiveObject();
-                //     currentPageActiveObj.renderAll();
-                // }
-                //
-                //
-                // const previousPageActiveObj = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][`${previous}`]
-                //
-                // if (previousPageActiveObj !== undefined) {
-                //     previousPageActiveObj.discardActiveObject();
-                //     previousPageActiveObj.renderAll();
-                // }
-
 
                 commonStore.updateAnnotationIconConfig({
                     currentPageNum: pageNumber
@@ -138,7 +126,10 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                     commonStore.annotationIconConfig.JpDocumentMessageRoot
                 )
 
-                console.log('pagechanging')
+
+                renderCanvas(previous)
+                renderCanvas(pageNumber)
+
 
             })
 
@@ -172,7 +163,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                     fabric.window = viewer.shadowRoot.querySelector('iframe').contentWindow;
                     fabric.document = viewer.shadowRoot.querySelector('iframe').contentWindow.document;
                     commonStore.updateAnnotationZIndex()
-
                     commonStore.updateAnnotationIconConfig({
                         canvasAnnotationElGroup: {
                             pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
@@ -186,47 +176,16 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                         }
                     })
 
+                    renderCanvas(pageNum)
 
-                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
-                    if (!values.fabricRendered) {
-                        if (commonStore.annotationIconConfig.clicked['PencilIconContainer']) {
-                            createFabricCanvas(values, annotationPencilCanvasConfigFunc)
-                            commonStore.updateAnnotationIconConfig({
-                                canvasAnnotationElGroup: {
-                                    pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
-                                    pageNum: `${pageNum}`,
-                                    value: {
-                                        ...values,
-                                        fabricRendered: true,
-                                    }
-                                }
-                            })
-
-                        }
+                    console.log('pagerendered', pageNum)
 
 
-                        if (commonStore.annotationIconConfig.clicked['TextIconContainer']) {
-                            createFabricCanvas(values, annotationTextCanvasConfigFunc)
-                            commonStore.updateAnnotationIconConfig({
-                                canvasAnnotationElGroup: {
-                                    pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
-                                    key: `${pageNum}`,
-                                    value: {
-                                        ...values,
-                                        fabricRendered: true,
-                                    }
-                                }
-                            })
-
-                        }
-
-
-                    }
 
                 }
 
 
-                console.log('pagerendered')
+
 
 
             });
@@ -255,7 +214,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
         viewer-path={'/pdfjs-4.0.189-dist'}
 
 
-        viewer-extra-styles-urls = {`['${JpPDFCss}']`}
+        viewer-extra-styles-urls={`['${JpPDFCss}']`}
 
         // src = {pdfUrl}
     />;

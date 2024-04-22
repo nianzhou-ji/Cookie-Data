@@ -18,11 +18,51 @@ const usePDFReaderCompHooks = () => {
 
     const {commonStore} = useStore()
 
+    const renderCanvas = (pageNumber) => {
+        if(commonStore.annotationIconConfig.currentOpenPDF===null){
+            console.log('commonStore.annotationIconConfig.currentOpenPDF===null')
+            return
+        };
+        const canvasAnnotationElItem = commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id]
+        if(canvasAnnotationElItem===undefined){
+            console.log('canvasAnnotationElItem===undefined')
+            return
+        }
+        const values = canvasAnnotationElItem[pageNumber]
+        if (commonStore.annotationIconConfig.clicked['PencilIconContainer']) {
+            createFabricCanvas(values, annotationPencilCanvasConfigFunc)
+            commonStore.updateAnnotationIconConfig({
+                canvasAnnotationElGroup: {
+                    pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
+                    pageNum: `${pageNumber}`,
+                    value: values
+                }
+            })
+
+            console.log('PencilIconContainer render')
+
+        }
+
+
+        if (commonStore.annotationIconConfig.clicked['TextIconContainer']) {
+            createFabricCanvas(values, annotationTextCanvasConfigFunc)
+            commonStore.updateAnnotationIconConfig({
+                canvasAnnotationElGroup: {
+                    pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
+                    key: `${pageNumber}`,
+                    value: values
+                }
+            })
+
+            console.log('TextIconContainer render')
+
+        }
+    }
+
     const discardActiveObject = () => {
         if (commonStore.annotationIconConfig.currentOpenPDF === null) return
         Object.keys(commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id]).forEach(key => {
             const canvas = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][key]
-
             canvas.discardActiveObject()
             canvas.renderAll()
         })
@@ -71,11 +111,13 @@ const usePDFReaderCompHooks = () => {
 
     const loadHistory = (pageNum) => {
         if (commonStore.annotationIconConfig.currentOpenPDF === null) return
-        const canvas = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
         if (commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id] === undefined) return
+        const canvas = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
         canvas.loadFromJSON(commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum], function () {
-            canvas.renderAll();
+            canvas.requestRenderAll();  // 确保画布更新显示
         });
+
+        console.log('load history success')
 
 
     }
@@ -83,6 +125,7 @@ const usePDFReaderCompHooks = () => {
 
     const saveHistory = (pageNum) => {
         if (commonStore.annotationIconConfig.currentOpenPDF === null) return
+        if (commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id] === undefined) return
         const canvas = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
         commonStore.updateAnnotationIconConfig({
             history: {
@@ -145,7 +188,6 @@ const usePDFReaderCompHooks = () => {
             ])
 
             canvas.add(textbox);
-            canvas.discardActiveObject(textbox)
             canvas.renderAll();
 
 
@@ -211,10 +253,22 @@ const usePDFReaderCompHooks = () => {
                     canvas.requestRenderAll();  // 确保画布更新显示
                 }
             }
+
+            if (event.key === 'Escape') {
+                const activeObject = canvas.getActiveObject();
+                if (activeObject) {
+                    // 删除当前选中的对象
+                    canvas.discardActiveObject(activeObject);
+                    canvas.requestRenderAll();  // 确保画布更新显示
+                }
+            }
+
         });
 
 
         loadHistory(values.pageNum)
+
+        canvas.requestRenderAll();  // 确保画布更新显示
 
 
         return canvas
@@ -322,8 +376,6 @@ const usePDFReaderCompHooks = () => {
             commonStore.annotationIconConfig.JpDocumentMessageRoot
         )
 
-
-
         commonStore.annotationIconConfig.pdfAsset.forEach(itemInner => {
             if (commonStore.annotationIconConfig.currentOpenPDF === null) return
             if (commonStore.annotationIconConfig.currentOpenPDF.id === itemInner.id) {
@@ -354,12 +406,13 @@ const usePDFReaderCompHooks = () => {
                 JpOpenPDFFileEl.click()
 
 
-            }}>
+            }} joinButtonGroup={false}>
                 <OpenFileIcon size={'1.25rem'}
                 />
 
                 <input accept="application/pdf" type="file" id="JpOpenPDFFile" style={{display: "none"}}
                        onChange={async e => {
+                           if(e.target.files.length===0)return
                            const file = e.target.files[0];
                            const blobUrl = URL.createObjectURL(file);
                            commonStore.updateAnnotationIconConfig({
@@ -373,7 +426,6 @@ const usePDFReaderCompHooks = () => {
                            })
 
                            await displayPDFFile(commonStore.annotationIconConfig.pdfAsset[commonStore.annotationIconConfig.pdfAsset.length - 1])
-
 
                        }}/>
             </AnnotationIconContainer>
@@ -412,25 +464,7 @@ const usePDFReaderCompHooks = () => {
 
             <AnnotationIconContainer id={'PencilIconContainer'} title={'Annotation Pencil'} onClickFunc={() => {
 
-                Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id]).forEach(pageNum => {
-                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
-                    // console.log(_.cloneDeep(values), 'values')
-                    createFabricCanvas(values, annotationPencilCanvasConfigFunc)
-                    commonStore.updateAnnotationIconConfig({
-                        canvasAnnotationElGroup: {
-                            pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
-                            pageNum: `${pageNum}`,
-                            value: {
-                                ...values,
-                                fabricRendered: true,
-                            }
-                        }
-                    })
-
-
-                })
-
-
+                renderCanvas(1)
                 setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
                     (el) => {
                         el.style.display = 'block'
@@ -448,25 +482,7 @@ const usePDFReaderCompHooks = () => {
 
 
             <AnnotationIconContainer id={'TextIconContainer'} title={'Annotation Text'} onClickFunc={() => {
-
-                Object.keys(commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id]).forEach(pageNum => {
-                    const values = commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
-                    createFabricCanvas(values, annotationTextCanvasConfigFunc)
-                    commonStore.updateAnnotationIconConfig({
-                        canvasAnnotationElGroup: {
-                            pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
-                            pageNum: `${pageNum}`,
-                            value: {
-                                ...values,
-                                fabricRendered: true
-                            }
-                        }
-                    })
-
-
-                })
-
-
+                renderCanvas(1)
                 setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
                     (el) => {
                         el.style.display = 'block'
@@ -476,8 +492,6 @@ const usePDFReaderCompHooks = () => {
                         el.style.display = 'block'
                     }
                 ])
-
-
             }}>
                 <TextIcon size={'1.25rem'}
                 />
@@ -594,7 +608,8 @@ const usePDFReaderCompHooks = () => {
         loadHistory,
         saveHistory,
         CustomAnnotationTools,
-        refreshPDFMessage
+        refreshPDFMessage,
+        renderCanvas
     }
 
 }
