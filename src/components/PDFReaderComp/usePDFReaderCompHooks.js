@@ -633,9 +633,11 @@ const usePDFReaderCompHooks = () => {
                          flexDirection: "column",
                          backgroundColor: 'white',
                          zIndex: 50,
-                         width: '10rem',
+                         width: '15rem',
                          padding: '0.5rem',
-                         borderRadius: '1rem'
+                         borderRadius: '1rem',
+                         maxHeight:'30rem',
+                         overflowY:"auto"
                      }}
                 >
                     <div className="p-2" id={'JpListContainer'}>
