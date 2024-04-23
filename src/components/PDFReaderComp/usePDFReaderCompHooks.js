@@ -117,7 +117,7 @@ const usePDFReaderCompHooks = () => {
         if (commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id] === undefined) return
         const canvas = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
         const history = commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id]
-        if (history[pageNum]!==undefined) {
+        if (history[pageNum] !== undefined) {
             const currentCanvasBoundingClientRect = commonStore.annotationIconConfig.canvasBoundingClientRect[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
             const scaleWidth = currentCanvasBoundingClientRect.width / history[pageNum]['canvasSizeData'].width;
             const scaleHeight = currentCanvasBoundingClientRect.height / history[pageNum]['canvasSizeData'].height;
@@ -565,7 +565,16 @@ const usePDFReaderCompHooks = () => {
                 }}
                 joinButtonGroup={false}
             >
-                <ListIcon size={'1.25rem'} onClick={(event) => {
+                <ListIcon size={'1.25rem'} onClick={async (event) => {
+                    if (commonStore.annotationIconConfig.pdfAssets.length === 0) {
+                        await Swal.fire({
+                            icon: "warning",
+                            title: "Oops...",
+                            text: "No PDF Exist"
+                        });
+                        return
+                    }
+
                     const JpPdfListEl = commonStore.annotationIconConfig.iframeDocument.getElementById('JpPdfList')
                     console.log(_.cloneDeep(commonStore.annotationIconConfig.pdfAssets), 'ListIcon')
                     JpPdfListEl.querySelector('#JpListContainer').innerHTML = ''
@@ -596,8 +605,10 @@ const usePDFReaderCompHooks = () => {
                             }}
                             key={item.id}
                             id={item.id}
+
+                            title={Utils.getAbbreviateStr(item.name).tooltip===null?null:Utils.getAbbreviateStr(item.name).tooltip}
                         >
-                            {item.name}
+                            {Utils.getAbbreviateStr(item.name).text}
                         </div>);
 
                         // 使用appendChild将这个新的div添加到容器中

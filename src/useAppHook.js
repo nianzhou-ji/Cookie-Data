@@ -8,7 +8,7 @@ const useAppHook = () => {
     const {updateMarkdownData} = useMarkdownHooks()
 
     const buttonGroupID = ['AddIconID', 'DeleteIconID', 'MarkDownIconID', 'DrawIConID', 'DocumentsIconID',
-        'SaveIconID', 'BackupIconID', 'ImportBackupDataIconID']
+        'SaveIconID', 'BackupIconID', 'ImportBackupDataIconID', 'PDFReaderIconID']
 
 
     const initAppIconState=()=>{

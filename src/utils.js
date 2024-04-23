@@ -1,9 +1,6 @@
 class Utils {
 
 
-
-
-
     static     getContainerSize = (id) => {
         return document.getElementById(id)?.getBoundingClientRect()
     }
@@ -15,8 +12,8 @@ class Utils {
         // 为每个类添加前缀
         const prefixedClasses = classes.map(className => {
             let noSpaces = className.replace(/\s+/g, '');
-            if(noSpaces.length!==0){
-              return `JpTw-${className}`
+            if (noSpaces.length !== 0) {
+                return `JpTw-${className}`
             }
             return null
 
@@ -38,7 +35,7 @@ class Utils {
         return `${paddedHours}:${paddedMinutes}:${paddedSeconds}`;
     }
 
-    static  removeElementById(elementId, rootContainer) {
+    static removeElementById(elementId, rootContainer) {
         // 获取元素
         const element = rootContainer.getElementById(elementId);
 
@@ -50,7 +47,6 @@ class Utils {
             console.log("Element not found!");
         }
     }
-
 
 
     static formatTime(date) {
@@ -115,7 +111,31 @@ class Utils {
         }
     }
 
-    static async  urlToBase64(url) {
+
+    static      getAbbreviateStr = (str, maxLength = 10) => {
+        try {
+            if (str.length > maxLength) {
+                return {
+                    text: str.substring(0, maxLength) + '...',
+                    tooltip: str
+                }
+            } else {
+                return {
+                    text: str,
+                    tooltip: null
+                }
+            }
+        } catch (e) {
+            return {
+                text: null,
+                tooltip: null
+            }
+        }
+
+
+    }
+
+    static async urlToBase64(url) {
         try {
             // 使用 Fetch API 获取远程资源
             const response = await fetch(url);

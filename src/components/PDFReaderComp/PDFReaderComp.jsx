@@ -215,23 +215,18 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
     }, []);
 
 
-    // 开发时使用
-    // return <pdfjs-viewer-element style={{
-    //     height: '100vh',
-    //     width: '100vw',
-    // }} viewer-path={baseURL+'/pdfjs/pdfjs-4.0.189-dist'}>
-    //     {toolbarViewerRightElement !== null ? <ToolbarViewerRightComp container={toolbarViewerRightElement}/> : null}
-    // </pdfjs-viewer-element>;
 
 
-    // build 时使用
+
+
+
     return <pdfjs-viewer-element
         style={{
             width: '100%',
             height: '100%',
         }}
-        // viewer-path={'/pdfjs-4.0.189-dist'}
-        viewer-path={baseURL+'/pdfjs/pdfjs-4.0.189-dist'}
+        // viewer-path={'/pdfjs-4.0.189-dist'} // 开发时使用
+        viewer-path={baseURL+'/pdfjs/pdfjs-4.0.189-dist'} // build 时使用
         viewer-extra-styles-urls={`['${JpPDFCss}']`}
     />;
 

@@ -110,28 +110,7 @@ function App() {
     });
 
 
-    const getAbbreviateStr = (str, maxLength = 10) => {
-        try {
-            if (str.length > maxLength) {
-                return {
-                    text: str.substring(0, maxLength) + '...',
-                    tooltip: str
-                }
-            } else {
-                return {
-                    text: str,
-                    tooltip: null
-                }
-            }
-        } catch (e) {
-            return {
-                text: null,
-                tooltip: null
-            }
-        }
 
-
-    }
 
 
     const btnClass = ' btn btn-ghost btn-square btn-sm hover:scale-125 hover:shadow-xl focus:outline-none focus:ring active:bg-gray-500'
@@ -158,9 +137,9 @@ function App() {
                 <div className='flex'>
                     <div
                         className={`font-bold  flex items-center ${toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'} 
-                    ${getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip === null ? null : 'tooltip tooltip-bottom'}
-                    `} data-tip={getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip}>
-                        {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: ' + getAbbreviateStr(commonStore.getCurrentDocumentObj().name).text}
+                    ${Utils.getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip === null ? null : 'tooltip tooltip-bottom'}
+                    `} data-tip={Utils.getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip}>
+                        {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: ' + Utils.getAbbreviateStr(commonStore.getCurrentDocumentObj().name).text}
                     </div>
                     <div className={tooltipWrapperClass} data-tip="add document">
                         <ModalContainerComp>
