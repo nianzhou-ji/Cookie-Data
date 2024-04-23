@@ -74,7 +74,7 @@ class CommonStore {
     }
 
     initPDFAnnotationData(value) {
-        console.log('initPDFAnnotationData', value)
+        // console.log('initPDFAnnotationData', value)
         if (value === undefined) return
         const temp = this.annotationIconConfig
         temp.history = value.annotationHistory
