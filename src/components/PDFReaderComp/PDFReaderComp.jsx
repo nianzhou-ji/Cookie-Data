@@ -90,6 +90,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
 
             const toolbarViewerMiddleEl = iframeDocument.getElementById('toolbarViewerMiddle')
+            if(toolbarViewerMiddleEl===null)return
             const newElement = document.createElement('div');
             toolbarViewerMiddleEl.appendChild(newElement)
             newElement.id = 'JpDocumentMessage'
@@ -161,7 +162,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
 
 
             viewerApp.eventBus.on('pagerendered', (event) => {
-                console.log('pagerendered')
                 const pageNum = event.pageNumber
                 const pageDivEl = viewerDivEl.querySelector(`[data-page-number="${pageNum}"]`)
                 const canvasAnnotationEl = document.createElement('canvas');
@@ -184,14 +184,21 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
                                 pageNum: `${pageNum}`
                             }
                         },
-                        canvasBoundingClientRect: pageDivElSize
+                        canvasBoundingClientRect: {
+                            pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
+                            pageNum: `${pageNum}`,
+                            width: pageDivElSize.width,
+                            height: pageDivElSize.height,
+                        }
 
 
                     })
 
+
+
                     renderCanvas(pageNum)
 
-                    console.log('pagerendered', pageNum)
+                    // console.log('pagerendered', pageNum)
 
 
                 }

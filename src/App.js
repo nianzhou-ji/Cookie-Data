@@ -14,7 +14,7 @@ import {observer} from "mobx-react-lite";
 import MarkdownComp from "./components/MarkdownComp/MarkdownComp";
 import {LuDatabaseBackup as BackupIcon} from "react-icons/lu";
 import {TbDatabaseImport as ImportBackupDataIcon} from "react-icons/tb";
-import { FaFilePdf as PDFReaderIcon} from "react-icons/fa6";
+import {FaFilePdf as PDFReaderIcon} from "react-icons/fa6";
 import {useStore} from "./stores";
 import indexedDBEngine from "./indexDBUtils/indexDBUtils";
 import ModalContainerComp from "./components/ModalComp/ModalComp";
@@ -51,6 +51,18 @@ function App() {
 
 
     }, []);
+
+
+    useEffect(() => {
+
+        commonStore.initPDFReaderData()
+
+
+        const PDFReaderContainer = createRoot(document.getElementById('PDFReaderContainer'))
+        PDFReaderContainer.render(<PdfReaderComp/>)
+
+
+    }, [commonStore.currentDocumentID]);
 
 
     useEffect(() => {
@@ -181,7 +193,7 @@ function App() {
                                                     processAppOpen: false,
                                                     errorPageAppOpen: false,
                                                     toolboxAppOpen: false,
-                                                    PDFReaderAppOpen:false
+                                                    PDFReaderAppOpen: false
                                                 })
 
 
@@ -224,7 +236,7 @@ function App() {
                                         processAppOpen: false,
                                         errorPageAppOpen: true,
                                         toolboxAppOpen: false,
-                                        PDFReaderAppOpen:false
+                                        PDFReaderAppOpen: false
                                     })
                                     return
                                 }
@@ -251,7 +263,7 @@ function App() {
                                 processAppOpen: false,
                                 errorPageAppOpen: false,
                                 toolboxAppOpen: false,
-                                PDFReaderAppOpen:false
+                                PDFReaderAppOpen: false
                             })
                             await initInterfaceData()
 
@@ -261,7 +273,7 @@ function App() {
 
                     <div className={tooltipWrapperClass} data-tip="PDF Reader">
                         <PDFReaderIcon id={'PDFReaderIconID'} size={'1.5rem'}
-                                      className={btnClass + 'cursor-pointer'} onClick={async () => {
+                                       className={btnClass + 'cursor-pointer'} onClick={async () => {
                             commonStore.updateAppCompOpenConfig({
                                 markdownAppOpen: false,
                                 processAppOpen: false,
@@ -284,7 +296,7 @@ function App() {
                                 processAppOpen: true,
                                 errorPageAppOpen: false,
                                 toolboxAppOpen: false,
-                                PDFReaderAppOpen:false
+                                PDFReaderAppOpen: false
                             })
 
                             toolBoxStore.updateToolboxAppOpenIconState(true)
@@ -318,7 +330,9 @@ function App() {
                                             <a
                                                 onClick={async () => {
                                                     commonStore.updateCurrentDocumentID(item.id)
+
                                                     await initInterfaceData()
+
                                                 }}>{item.name}</a>
                                         </li>)}
 
@@ -363,9 +377,8 @@ function App() {
                                               title: "Oops...",
                                               text: "import failed:" + res.error
                                           });
-
-
                                       }
+
                                   }}/>
                     </div>
 
@@ -413,7 +426,7 @@ function App() {
                                                     processAppOpen: false,
                                                     errorPageAppOpen: false,
                                                     toolboxAppOpen: false,
-                                                    PDFReaderAppOpen:false
+                                                    PDFReaderAppOpen: false
                                                 })
 
                                                 await Swal.fire({
@@ -458,7 +471,7 @@ function App() {
                                 processAppOpen: false,
                                 errorPageAppOpen: false,
                                 toolboxAppOpen: true,
-                                PDFReaderAppOpen:false
+                                PDFReaderAppOpen: false
                             })
 
                             toolBoxStore.updateToolboxAppOpenIconState(false)
@@ -508,7 +521,8 @@ function App() {
                 <ProcessComp/>
                 <ErrorPage/>
                 <ToolboxComp/>
-                <div id={'PDFReaderContainer'} className={`${commonStore.appCompOpenConfig.PDFReaderAppOpen?'null':'hidden'}  h-full` }></div>
+                <div id={'PDFReaderContainer'}
+                     className={`${commonStore.appCompOpenConfig.PDFReaderAppOpen ? 'null' : 'hidden'}  h-full`}></div>
 
             </div>
 

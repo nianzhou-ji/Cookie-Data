@@ -42,7 +42,7 @@ const usePDFReaderCompHooks = () => {
                 }
             })
 
-            console.log('PencilIconContainer render')
+            // console.log('PencilIconContainer render')
 
         }
 
@@ -116,15 +116,12 @@ const usePDFReaderCompHooks = () => {
         if (commonStore.annotationIconConfig.currentOpenPDF === null) return
         if (commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id] === undefined) return
         const canvas = commonStore.annotationIconConfig.fabricCanvas[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
-
-
         const history = commonStore.annotationIconConfig.history[commonStore.annotationIconConfig.currentOpenPDF.id]
-        if (commonStore.annotationIconConfig.canvasBoundingClientRect !== null) {
-            const scaleWidth = commonStore.annotationIconConfig.canvasBoundingClientRect.width / history['canvasBoundingClientRect'].width;
-            const scaleHeight = commonStore.annotationIconConfig.canvasBoundingClientRect.height / history['canvasBoundingClientRect'].height;
-
-            history[pageNum].objects.forEach(object => {
-
+        if (history[pageNum]!==undefined) {
+            const currentCanvasBoundingClientRect = commonStore.annotationIconConfig.canvasBoundingClientRect[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum]
+            const scaleWidth = currentCanvasBoundingClientRect.width / history[pageNum]['canvasSizeData'].width;
+            const scaleHeight = currentCanvasBoundingClientRect.height / history[pageNum]['canvasSizeData'].height;
+            history[pageNum]['canvasObjectData']?.objects.forEach(object => {
                 object.width = object.width * scaleWidth;
                 object.height = object.height * scaleHeight;
                 object.left = object.left * scaleWidth;
@@ -150,14 +147,16 @@ const usePDFReaderCompHooks = () => {
 
 
                 if (object.type === 'textbox') {
-                    object.scaleX = scaleWidth;
-                    object.scaleY = scaleHeight;
+                    object.scaleY = object.scaleY * scaleHeight
+                    object.scaleX = object.scaleX * scaleWidth
                 }
+
+
             })
 
-            canvas.loadFromJSON(history[pageNum], function () {
+            canvas.loadFromJSON(history[pageNum]['canvasObjectData'], function () {
                 canvas.requestRenderAll();  // 确保画布更新显示
-                console.log('load history success')
+                // console.log('load history success')
 
 
             });
@@ -177,13 +176,12 @@ const usePDFReaderCompHooks = () => {
             history: {
                 pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
                 pageNum: pageNum,
-                value: canvas.toJSON(),
+                value: {
+                    canvasObjectData: canvas.toJSON(),
+                    canvasSizeData: commonStore.annotationIconConfig.canvasBoundingClientRect[commonStore.annotationIconConfig.currentOpenPDF.id][pageNum],
+                },
             }
         })
-
-
-        console.log(_.cloneDeep(commonStore.annotationIconConfig.history), 'canvas.toJSON()')
-
 
     }
 
@@ -356,7 +354,7 @@ const usePDFReaderCompHooks = () => {
                         position: "relative"
 
                     }}
-                    className={`JpTw-flex JpTw-items-center JpTw-justify-center`}
+                    className={`JpTw-flex JpTw-items-center JpTw-justify-center JpTw-bg-enter`}
                     onClick={e => {
                         const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
 
@@ -378,7 +376,6 @@ const usePDFReaderCompHooks = () => {
 
                                 const otherAnnotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(item)
                                 otherAnnotationIconContainer?.classList?.toggle("JpTw-bg-active", false)
-                                otherAnnotationIconContainer?.classList?.toggle("JpTw-bg-DDDEDF", false)
                             }
                         })
 
@@ -396,17 +393,18 @@ const usePDFReaderCompHooks = () => {
                     }}
                     onMouseEnter={() => {
                         const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
-                        if (!commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("JpTw-bg-DDDEDF", true)
+                        if (commonStore.annotationIconConfig.clicked[id]) {
+                            annotationIconContainer?.classList?.toggle("JpTw-bg-enter", false)
                         }
                     }}
                     onMouseLeave={() => {
                         const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
-                        if (!commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("JpTw-bg-DDDEDF", false)
+                        if (commonStore.annotationIconConfig.clicked[id]) {
+                            annotationIconContainer?.classList?.toggle("JpTw-bg-enter", true)
                         }
 
-                    }}>
+                    }}
+        >
             {children}
         </div>
     }
@@ -524,6 +522,7 @@ const usePDFReaderCompHooks = () => {
             <AnnotationIconContainer id={'PencilIconContainer'} title={'Annotation Pencil'} onClickFunc={() => {
 
                 renderCanvas(1)
+                renderCanvas(commonStore.annotationIconConfig.currentPageNum)
                 setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
                     (el) => {
                         el.style.display = 'block'
@@ -542,6 +541,7 @@ const usePDFReaderCompHooks = () => {
 
             <AnnotationIconContainer id={'TextIconContainer'} title={'Annotation Text'} onClickFunc={() => {
                 renderCanvas(1)
+                renderCanvas(commonStore.annotationIconConfig.currentPageNum)
                 setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
                     (el) => {
                         el.style.display = 'block'
@@ -572,7 +572,7 @@ const usePDFReaderCompHooks = () => {
                     commonStore.annotationIconConfig.pdfAssets.forEach(item => {
                         const newElement = document.createElement('div');
                         newElement.id = item.id
-                        newElement.classList.add('JpTw-bg-DDDEDF-hover')
+                        newElement.classList.add('JpTw-bg-enter')
                         if (commonStore.annotationIconConfig.currentOpenPDF !== null && item.id === commonStore.annotationIconConfig.currentOpenPDF.id) {
                             newElement.classList.add('JpTw-bg-active')
                         }
@@ -587,7 +587,9 @@ const usePDFReaderCompHooks = () => {
                                 padding: '0.5rem'
                             }}
                             onClick={async (event) => {
-                                commonStore.annotationIconConfig.iframeDocument.querySelector('#PencilIconContainer').click()
+                                if (!commonStore.annotationIconConfig.clicked['PencilIconContainer']) {
+                                    commonStore.annotationIconConfig.iframeDocument.querySelector('#PencilIconContainer').click()
+                                }
                                 await displayPDFFile(item)
 
 

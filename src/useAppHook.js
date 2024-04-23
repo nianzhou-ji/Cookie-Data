@@ -35,6 +35,7 @@ const useAppHook = () => {
                     toolboxAppOpen:false,
                     markdownAppOpen: false,
                     processAppOpen: false,
+                    PDFReaderAppOpen:false
 
                 })
 

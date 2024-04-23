@@ -30,14 +30,33 @@ class CommonStore {
     savePDFAnnotationStore = () => {
         const pdfAssets = _.cloneDeep(this.annotationIconConfig.pdfAssets)
         const annotationHistory = _.cloneDeep(this.annotationIconConfig.history)
-        return {pdfAssets, annotationHistory}
+        const canvasBoundingClientRect = _.cloneDeep(this.annotationIconConfig.canvasBoundingClientRect)
+        return {pdfAssets, annotationHistory, canvasBoundingClientRect}
+    }
+
+    initPDFReaderData = () => {
+        this.annotationIconConfig = {
+            canvasBoundingClientRect: {},
+            clicked: {},
+            iframeDocument: null,
+            pagesCount: 0,
+            currentPageNum: 1,
+            canvasAnnotationElGroup: {},
+            // history: {},
+            history: {},
+            canvasObjSelectionState: false,
+            fabricCanvas: {},
+            pdfAssets: [],
+            viewerApp: null,
+            viewer: null,
+            currentOpenPDF: null,
+            JpDocumentMessageRoot: null
+        }
     }
 
 
     annotationIconConfig = {
-
-
-        canvasBoundingClientRect: null,
+        canvasBoundingClientRect: {},
         clicked: {},
         iframeDocument: null,
         pagesCount: 0,
@@ -54,11 +73,13 @@ class CommonStore {
         JpDocumentMessageRoot: null
     }
 
-    initPDFAnnotationData(value){
+    initPDFAnnotationData(value) {
         console.log('initPDFAnnotationData', value)
+        if (value === undefined) return
         const temp = this.annotationIconConfig
         temp.history = value.annotationHistory
         temp.pdfAssets = value.pdfAssets
+        temp.canvasBoundingClientRect = value.canvasBoundingClientRect
         this.annotationIconConfig = temp
 
     }
@@ -81,7 +102,22 @@ class CommonStore {
         }
 
         if (value.canvasBoundingClientRect !== undefined) {
-            temp.canvasBoundingClientRect = value.canvasBoundingClientRect
+
+
+            if (temp.canvasBoundingClientRect[value.canvasBoundingClientRect.pdfID] === undefined) {
+                temp.canvasBoundingClientRect[value.canvasBoundingClientRect.pdfID] = {}
+            }
+
+            if (temp.canvasBoundingClientRect[value.canvasBoundingClientRect.pdfID][value.canvasBoundingClientRect.pageNum] === undefined) {
+                temp.canvasBoundingClientRect[value.canvasBoundingClientRect.pdfID][value.canvasBoundingClientRect.pageNum] = {}
+            }
+
+            temp.canvasBoundingClientRect[value.canvasBoundingClientRect.pdfID][value.canvasBoundingClientRect.pageNum] = {
+                width: value.canvasBoundingClientRect.width,
+                height: value.canvasBoundingClientRect.height,
+            }
+
+
         }
 
         if (value.JpDocumentMessageRoot !== undefined) {
@@ -119,12 +155,13 @@ class CommonStore {
             }
             temp.history[value.history.pdfID][value.history.pageNum] = value.history.value
 
-            if (temp.history[value.history.pdfID]['canvasBoundingClientRect'] === undefined) {
-                temp.history[value.history.pdfID]['canvasBoundingClientRect'] = {
-                    width: this.annotationIconConfig.canvasBoundingClientRect.width,
-                    height: this.annotationIconConfig.canvasBoundingClientRect.height,
-                }
-            }
+            // if (temp.history[value.history.pdfID]['canvasBoundingClientRect'] === undefined) {
+            //     temp.history[value.history.pdfID]['canvasBoundingClientRect'] = {
+            //         width: this.annotationIconConfig.canvasBoundingClientRect.width,
+            //         height: this.annotationIconConfig.canvasBoundingClientRect.height,
+            //     }
+            // }
+            // temp.history[value.history.pdfID]['canvasBoundingClientRect'] = this.annotationIconConfig.canvasBoundingClientRect
 
         }
 
@@ -324,12 +361,23 @@ class CommonStore {
         const temp = _.cloneDeep(this.appCompOpenConfig)
         if (value.PDFReaderAppOpen !== undefined) {
             temp.PDFReaderAppOpen = value.PDFReaderAppOpen
-            const viewer = document.querySelector('pdfjs-viewer-element')
-            if (viewer === null) {
+
+            if (value.PDFReaderAppOpen) {
+                // const viewer = document.querySelector('pdfjs-viewer-element')
+                // if (viewer === null) {
+                //     const PDFReaderContainer = createRoot(document.getElementById('PDFReaderContainer'))
+                //     PDFReaderContainer.render(<PdfReaderComp/>)
+                //     // console.log('PdfReaderComp render')
+                // }
+
+
                 const PDFReaderContainer = createRoot(document.getElementById('PDFReaderContainer'))
                 PDFReaderContainer.render(<PdfReaderComp/>)
-                console.log('PdfReaderComp render')
+                // console.log('PdfReaderComp render')
+
+
             }
+
 
         }
         if (value.markdownAppOpen !== undefined) {
@@ -528,11 +576,11 @@ class CommonStore {
             }
 
 
-            const PDFAnnotationData = this.savePDFAnnotationStore()
-            this.patchDocumentsGroup(PDFAnnotationData, 'PDFAnnotationData')
-
-
-            // console.log(_.cloneDeep(this.documentsGroup), 'documentsGroup')
+            const viewer = document.querySelector('pdfjs-viewer-element')
+            if (viewer !== null) {
+                const PDFAnnotationData = this.savePDFAnnotationStore()
+                this.patchDocumentsGroup(PDFAnnotationData, 'PDFAnnotationData')
+            }
 
 
             await indexedDBEngine.open()
