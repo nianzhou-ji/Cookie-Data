@@ -77,7 +77,7 @@ const usePDFReaderCompHooks = () => {
         rootContainer.render(
             <>
                 <div id={'JpPDFName'} style={{fontWeight: "bold", marginRight: '2rem'}}>{name}</div>
-                <div id={'JpPDFPageMessage'} style={{fontWeight: "bold"}}>{currentPageNum}/{pageCounts} Page</div>
+                <div id={'JpPDFPageMessage'} style={{fontWeight: "bold", alignItems:"center"}}>{currentPageNum}/{pageCounts} Page</div>
             </>)
     }
 

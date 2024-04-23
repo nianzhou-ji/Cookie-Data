@@ -94,7 +94,7 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
             const newElement = document.createElement('div');
             toolbarViewerMiddleEl.appendChild(newElement)
             newElement.id = 'JpDocumentMessage'
-            newElement.classList.add('JpTw-flex')
+            newElement.classList.add('JpTw-flex', 'JpTw-items-center')
 
 
             const JpDocumentMessageRoot = createRoot(commonStore.annotationIconConfig.iframeDocument.getElementById('JpDocumentMessage'))
@@ -225,8 +225,8 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
             width: '100%',
             height: '100%',
         }}
-        // viewer-path={'/pdfjs-4.0.189-dist'} // 开发时使用
-        viewer-path={baseURL+'/pdfjs/pdfjs-4.0.189-dist'} // build 时使用
+        viewer-path={'/pdfjs-4.0.189-dist'} // 开发时使用
+        // viewer-path={baseURL+'/pdfjs/pdfjs-4.0.189-dist'} // build 时使用
         viewer-extra-styles-urls={`['${JpPDFCss}']`}
     />;
 
