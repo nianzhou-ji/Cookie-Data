@@ -43,6 +43,7 @@ function useSidebarHook() {
 
 
             ],
+            defaultOpen:true
 
 
         },
@@ -91,7 +92,7 @@ function useSidebarHook() {
 
 
             ],
-            defaultOpen:true
+
         },
         // {
         //     id: '901dd1e1',

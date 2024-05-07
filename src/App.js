@@ -101,6 +101,11 @@ function App() {
                 reader.onload = function (event) {
                     // 此处的event.target.result就是图像的Base64编码
                     const base64String = event.target.result;
+                    navigator.clipboard.writeText(`<img src="${base64String}" />`).then(function () {
+                        console.log('Copying to clipboard was successful!');
+                    }, function (err) {
+                        console.error('Could not copy text: ', err);
+                    });
                 };
 
                 // 读取文件为Data URL
@@ -108,9 +113,6 @@ function App() {
             }
         }
     });
-
-
-
 
 
     const btnClass = ' btn btn-ghost btn-square btn-sm hover:scale-125 hover:shadow-xl focus:outline-none focus:ring active:bg-gray-500'

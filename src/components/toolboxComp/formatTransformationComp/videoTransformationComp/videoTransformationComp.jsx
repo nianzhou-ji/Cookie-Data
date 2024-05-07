@@ -5,6 +5,7 @@ import _ from 'lodash'
 import {FFmpeg} from '@ffmpeg/ffmpeg'
 import {fetchFile, toBlobURL} from '@ffmpeg/util'
 import Utils from "../../../../utils";
+import Swal from "sweetalert2";
 
 const VideoTransformationComp = () => {
     const {toolBoxStore, commonStore} = useStore()
@@ -47,10 +48,6 @@ const VideoTransformationComp = () => {
     }, []);
 
 
-
-
-
-
     return (
         <div className={`flex h-full ${toolBoxStore.appOpen.videoTransformationComp ? null : 'hidden'}`}>
 
@@ -76,17 +73,16 @@ const VideoTransformationComp = () => {
                                        srcType: file.type
                                    });
 
-                                   if(toolBoxStore.videoTransformationCompAttr.srcVideoContainerSize===null) {
+                                   if (toolBoxStore.videoTransformationCompAttr.srcVideoContainerSize === null) {
                                        toolBoxStore.updateVideoTransformationCompAttr({
-                                           srcVideoContainerSize:Utils.getContainerSize('srcVideoContainer')
+                                           srcVideoContainerSize: Utils.getContainerSize('srcVideoContainer')
                                        });
                                    }
 
 
-
-                                   if(toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize===null) {
+                                   if (toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize === null) {
                                        toolBoxStore.updateVideoTransformationCompAttr({
-                                           targetVideoContainerSize:Utils.getContainerSize('targetVideoContainer')
+                                           targetVideoContainerSize: Utils.getContainerSize('targetVideoContainer')
                                        });
                                    }
 
@@ -108,7 +104,7 @@ const VideoTransformationComp = () => {
                            }}/>
                 </label>
                 <div id={'srcVideoContainer'}
-                    className={`skeleton flex-grow
+                     className={`skeleton flex-grow
                     ${toolBoxStore.videoTransformationCompAttr.srcType === 'video/avi' || toolBoxStore.videoTransformationCompAttr.src === null ? null : 'hidden'}`}/>
 
 
@@ -128,8 +124,8 @@ const VideoTransformationComp = () => {
                     }}
 
                     style={{
-                        maxHeight:toolBoxStore.videoTransformationCompAttr.srcVideoContainerSize?.height,
-                        maxWidth:toolBoxStore.videoTransformationCompAttr.srcVideoContainerSize?.width
+                        maxHeight: toolBoxStore.videoTransformationCompAttr.srcVideoContainerSize?.height,
+                        maxWidth: toolBoxStore.videoTransformationCompAttr.srcVideoContainerSize?.width
                     }}
 
                 />
@@ -207,15 +203,30 @@ const VideoTransformationComp = () => {
                     <div className='flex items-center mt-3'>
                         <button className="btn btn-neutral mr-3 " onClick={async () => {
 
-                            if (toolBoxStore.videoTransformationCompAttr.endTime === toolBoxStore.videoTransformationCompAttr.startTime
-                                || toolBoxStore.videoTransformationCompAttr.endTime < toolBoxStore.videoTransformationCompAttr.startTime) {
-                                alert('Start time must greater than start time')
-                                return
+
+                            if (toolBoxStore.videoTransformationCompAttr.srcType !== 'video/avi') {
+                                if (toolBoxStore.videoTransformationCompAttr.endTime === toolBoxStore.videoTransformationCompAttr.startTime
+                                    || toolBoxStore.videoTransformationCompAttr.endTime < toolBoxStore.videoTransformationCompAttr.startTime) {
+                                    await Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: "Start time must greater than start time"
+                                    });
+
+                                    return
+                                }
                             }
 
 
                             if (toolBoxStore.videoTransformationCompAttr.ffmpeg === null) {
-                                alert('Ffmpeg is null')
+
+                                await Swal.fire({
+                                    icon: "error",
+                                    title: "Oops...",
+                                    text: "Ffmpeg initial error"
+                                });
+
+
                                 return
                             }
 
@@ -223,14 +234,14 @@ const VideoTransformationComp = () => {
                             toolBoxStore.updateVideoTransformationCompAttr({
                                 converting: true,
                                 targetSrc: null,
-                                progress:0
+                                progress: 0
                             });
 
 
                             const inputFileName = `${toolBoxStore.videoTransformationCompAttr.srcType === 'video/mp4' ? 'input.mp4' : 'input.avi'}`
                             const outputFileName = `output.${toolBoxStore.videoTransformationCompAttr.targetFormat.toLowerCase()}`
 
-                            console.log(inputFileName, outputFileName)
+                            // console.log(inputFileName, outputFileName)
 
                             // writing the video file to memory
                             await toolBoxStore.videoTransformationCompAttr.ffmpeg.writeFile(inputFileName, await fetchFile(toolBoxStore.videoTransformationCompAttr.src))
@@ -313,10 +324,20 @@ const VideoTransformationComp = () => {
                         </button>
 
 
-                        {toolBoxStore.videoTransformationCompAttr.converting ?
-                            <div className="radial-progress"
-                                 style={{"--value": toolBoxStore.videoTransformationCompAttr.progress ,"--size": "3rem", "--thickness": "4px" }}
-                                 role="progressbar">{toolBoxStore.videoTransformationCompAttr.progress}%</div> : null}
+                        <div
+                            className={`${toolBoxStore.videoTransformationCompAttr.srcType === 'video/mp4' && toolBoxStore.videoTransformationCompAttr.converting ? null : 'hidden'} radial-progress`}
+                            style={{
+                                "--value": toolBoxStore.videoTransformationCompAttr.progress,
+                                "--size": "3rem",
+                                "--thickness": "4px"
+                            }}
+                            role="progressbar">{toolBoxStore.videoTransformationCompAttr.progress}%
+                        </div>
+
+
+                        <span className={`${toolBoxStore.videoTransformationCompAttr.srcType === 'video/avi' && toolBoxStore.videoTransformationCompAttr.converting ? null : 'hidden'} loading loading-spinner loading-lg`}></span>
+
+
                     </div>
 
 
@@ -338,8 +359,8 @@ const VideoTransformationComp = () => {
                                      className='object-contain'
 
                                      style={{
-                                         maxHeight:toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.height,
-                                         maxWidth:toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.width
+                                         maxHeight: toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.height,
+                                         maxWidth: toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.width
                                      }}
                                 /> : null
 
@@ -352,8 +373,8 @@ const VideoTransformationComp = () => {
                                        src={toolBoxStore.videoTransformationCompAttr.targetSrc}
                                        className='object-contain'
                                        style={{
-                                           maxHeight:toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.height,
-                                           maxWidth:toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.width
+                                           maxHeight: toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.height,
+                                           maxWidth: toolBoxStore.videoTransformationCompAttr.targetVideoContainerSize?.width
                                        }}
                                 /> : null
 

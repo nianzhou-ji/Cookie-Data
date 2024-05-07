@@ -76,7 +76,7 @@ const usePDFReaderCompHooks = () => {
         // const root1 = createRoot(commonStore.annotationIconConfig.iframeDocument.getElementById('JpDocumentMessage'))
         rootContainer.render(
             <>
-                <div id={'JpPDFName'} style={{fontWeight: "bold", marginRight: '2rem'}}>{name}</div>
+                <div id={'JpPDFName'} style={{fontWeight: "bold", marginRight: '2rem'}} title={Utils.getAbbreviateStr(name, 20).tooltip}>{Utils.getAbbreviateStr(name, 20).text}</div>
                 <div id={'JpPDFPageMessage'} style={{fontWeight: "bold", alignItems:"center"}}>{currentPageNum}/{pageCounts} Page</div>
             </>)
     }

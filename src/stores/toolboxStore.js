@@ -88,8 +88,8 @@ class ToolBoxStore {
 
     appOpen = {
         audioRecognitionComp: false,
-        videoTransformationComp: false,
-        imageRecognitionComp: true
+        videoTransformationComp: true,
+        imageRecognitionComp: false
 
     }
 
