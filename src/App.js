@@ -30,6 +30,7 @@ import SearchComp from "./components/searchComp/searchComp";
 import ToolboxComp from "./components/toolboxComp/toolboxComp";
 import PdfReaderComp from "./components/PDFReaderComp/PDFReaderComp";
 import {createRoot} from "react-dom/client";
+import {useCommonHooks} from "./components/useCommonHooks";
 
 function App() {
     const {commonStore, toolBoxStore} = useStore()
@@ -119,6 +120,9 @@ function App() {
 
 
     const tooltipWrapperClass = 'tooltip tooltip-left tooltip tooltip-left mr-2 flex items-center'
+
+
+    const {saveData} = useCommonHooks()
 
 
     return (
@@ -339,26 +343,7 @@ function App() {
                                       // })
 
 
-                                      const res = await commonStore.saveIndexedDB()
-                                      if (res.state) {
-                                          // Swal.close()
-                                          await Swal.fire({
-                                              position: "top-end",
-                                              icon: "success",
-                                              title: "data save success",
-                                              showConfirmButton: false,
-                                              timer: 3000
-                                          });
-                                          commonStore.setIsDocumentsGroupDataUpdate(false)
-
-
-                                      } else {
-                                          await Swal.fire({
-                                              icon: "error",
-                                              title: "Oops...",
-                                              text: "import failed:" + res.error
-                                          });
-                                      }
+                                      await saveData('Data save success')
 
                                   }}/>
                     </div>

@@ -85,6 +85,8 @@ class CommonStore {
     }
 
 
+
+
     updateAnnotationIconConfig(value) {
         const temp = this.annotationIconConfig
         if (value.pdfAssets !== undefined) {
@@ -98,6 +100,7 @@ class CommonStore {
                     id: 'Jp' + uuidv4()
                 })
             }
+
 
         }
 

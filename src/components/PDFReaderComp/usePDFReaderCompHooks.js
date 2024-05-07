@@ -283,7 +283,6 @@ const usePDFReaderCompHooks = () => {
         changeEvents.forEach(item => {
             canvas.on(item, function (event) {
                 saveHistory(values.pageNum)
-                // console.log(item, _.cloneDeep(commonStore.annotationIconConfig.history))
             });
 
         })
@@ -322,92 +321,7 @@ const usePDFReaderCompHooks = () => {
     }
 
 
-    const AnnotationIconContainer = (
-        {
-            children, id, title,
-            initFunc = () => {
-            },
-            onClickFunc = () => {
-            },
-            joinButtonGroup = true
-        }) => {
 
-        useEffect(() => {
-
-            commonStore.updateAnnotationIconConfig({
-                clicked: {
-                    id: id,
-                    value: false
-                }
-            })
-
-
-            initFunc()
-        }, []);
-
-
-        return <div id={id} title={title}
-                    style={{
-                        marginRight: '0.5rem',
-                        width: '1.5rem',
-                        height: '1.5rem',
-                        position: "relative"
-
-                    }}
-                    className={`JpTw-flex JpTw-items-center JpTw-justify-center JpTw-bg-enter`}
-                    onClick={e => {
-                        const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
-
-                        Object.keys(commonStore.annotationIconConfig.clicked).forEach(item => {
-                            if (item === id) {
-                                commonStore.updateAnnotationIconConfig({
-                                    clicked: {
-                                        id: id,
-                                        value: !commonStore.annotationIconConfig.clicked[id]
-                                    }
-                                })
-                            } else if (item !== id && joinButtonGroup) {
-                                commonStore.updateAnnotationIconConfig({
-                                    clicked: {
-                                        id: item,
-                                        value: false
-                                    }
-                                })
-
-                                const otherAnnotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(item)
-                                otherAnnotationIconContainer?.classList?.toggle("JpTw-bg-active", false)
-                            }
-                        })
-
-
-                        if (commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("JpTw-bg-active", true)
-                        } else {
-                            annotationIconContainer?.classList?.toggle("JpTw-bg-active", false)
-                        }
-
-
-                        onClickFunc()
-
-
-                    }}
-                    onMouseEnter={() => {
-                        const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
-                        if (commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("JpTw-bg-enter", false)
-                        }
-                    }}
-                    onMouseLeave={() => {
-                        const annotationIconContainer = commonStore.annotationIconConfig.iframeDocument.getElementById(id)
-                        if (commonStore.annotationIconConfig.clicked[id]) {
-                            annotationIconContainer?.classList?.toggle("JpTw-bg-enter", true)
-                        }
-
-                    }}
-        >
-            {children}
-        </div>
-    }
 
 
     const displayPDFFile = async (pdfItem) => {
@@ -434,256 +348,12 @@ const usePDFReaderCompHooks = () => {
         })
 
         JpPdfListEl.style.display = 'none'
+
+
     }
 
 
-    const CustomAnnotationTools = () => {
 
-        return <div className={'JpTw-flex JpTw-items-center '}>
-            <div id={'JpAnnotationConfig'} style={{display: "flex"}}>
-                <input type="color" style={{marginRight: '1rem'}} id={'JpColorPicker'} defaultValue={'#FF0000'}/>
-            </div>
-
-            <VerticalIcon size={'1.25rem'} style={{marginRight: '1rem'}} id={'JpAnnotationConfigDivider'}/>
-
-
-            <AnnotationIconContainer id={'OpenFileIconContainer'} title={'Open PDF'} onClickFunc={() => {
-
-                const JpOpenPDFFileEl = commonStore.annotationIconConfig.iframeDocument.querySelector('#JpOpenPDFFile')
-                JpOpenPDFFileEl.click()
-
-
-            }} joinButtonGroup={false}>
-                <OpenFileIcon size={'1.25rem'}
-                />
-
-                <input accept="application/pdf" type="file" id="JpOpenPDFFile" style={{display: "none"}}
-                       onChange={async e => {
-                           if (e.target.files.length === 0) return
-                           const file = e.target.files[0];
-                           const blobUrl = URL.createObjectURL(file);
-
-                           const reader = new FileReader();
-                           reader.onload = async function (event) {
-                               const base64String = event.target.result;
-                               commonStore.updateAnnotationIconConfig({
-                                   pdfAssets: {
-                                       id: null,
-                                       value: {
-                                           name: file.name,
-                                           url: base64String
-                                       }
-                                   }
-                               })
-
-                               await displayPDFFile(commonStore.annotationIconConfig.pdfAssets[commonStore.annotationIconConfig.pdfAssets.length - 1])
-
-                               // console.log(base64String, 'base64String'); // 打印 Base64 编码的字符串
-
-
-                           };
-                           reader.readAsDataURL(file); // 将文件读取为 Data URL
-
-                       }}/>
-            </AnnotationIconContainer>
-
-
-            <AnnotationIconContainer
-                id={'ReadIconContainer'}
-                title={'Only Read'}
-                initFunc={() => {
-                    setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
-                        (el) => {
-                            el.style.display = 'none'
-                        },
-
-                        (el) => {
-                            el.style.display = 'none'
-                        },
-                    ])
-                }}
-                onClickFunc={() => {
-                    commonStore.updateAnnotationZIndex()
-                    setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
-                        (el) => {
-                            el.style.display = 'none'
-                        },
-                        (el) => {
-                            el.style.display = 'none'
-                        },
-                    ])
-
-                }}>
-                <ReadIcon size={'1.25rem'}
-                />
-            </AnnotationIconContainer>
-
-
-            <AnnotationIconContainer id={'PencilIconContainer'} title={'Annotation Pencil'} onClickFunc={() => {
-
-                renderCanvas(1)
-                renderCanvas(commonStore.annotationIconConfig.currentPageNum)
-                setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
-                    (el) => {
-                        el.style.display = 'block'
-                    },
-                    (el) => {
-                        el.style.display = 'block'
-                    },
-                ])
-
-
-            }}>
-                <PencilIcon size={'1.25rem'}
-                />
-            </AnnotationIconContainer>
-
-
-            <AnnotationIconContainer id={'TextIconContainer'} title={'Annotation Text'} onClickFunc={() => {
-                renderCanvas(1)
-                renderCanvas(commonStore.annotationIconConfig.currentPageNum)
-                setElAttr(['JpColorPicker', 'JpAnnotationConfigDivider'], [
-                    (el) => {
-                        el.style.display = 'block'
-                    },
-
-                    (el) => {
-                        el.style.display = 'block'
-                    }
-                ])
-            }}>
-                <TextIcon size={'1.25rem'}
-                />
-            </AnnotationIconContainer>
-
-
-            <AnnotationIconContainer
-                id={'ListIconContainer'}
-                title={'PDF List'}
-                onClickFunc={() => {
-
-                }}
-                joinButtonGroup={false}
-            >
-                <ListIcon size={'1.25rem'} onClick={async (event) => {
-                    if (commonStore.annotationIconConfig.pdfAssets.length === 0) {
-                        await Swal.fire({
-                            icon: "warning",
-                            title: "Oops...",
-                            text: "No PDF Exist"
-                        });
-                        return
-                    }
-
-                    const JpPdfListEl = commonStore.annotationIconConfig.iframeDocument.getElementById('JpPdfList')
-                    console.log(_.cloneDeep(commonStore.annotationIconConfig.pdfAssets), 'ListIcon')
-                    JpPdfListEl.querySelector('#JpListContainer').innerHTML = ''
-                    commonStore.annotationIconConfig.pdfAssets.forEach(item => {
-                        const newElement = document.createElement('div');
-                        newElement.id = item.id
-                        newElement.classList.add('JpTw-bg-enter')
-                        if (commonStore.annotationIconConfig.currentOpenPDF !== null && item.id === commonStore.annotationIconConfig.currentOpenPDF.id) {
-                            newElement.classList.add('JpTw-bg-active')
-                        }
-                        const root = createRoot(newElement);
-                        root.render(<div
-                            style={{
-                                marginBottom: '1rem',
-                                // height:'2rem',
-                                display: "flex",
-                                justifyContent: 'flex-start',
-                                alignItems: "center",
-                                padding: '0.5rem'
-                            }}
-                            onClick={async (event) => {
-                                if (!commonStore.annotationIconConfig.clicked['PencilIconContainer']) {
-                                    commonStore.annotationIconConfig.iframeDocument.querySelector('#PencilIconContainer').click()
-                                }
-                                await displayPDFFile(item)
-
-
-                            }}
-                            key={item.id}
-                            id={item.id}
-
-                            title={Utils.getAbbreviateStr(item.name).tooltip===null?null:Utils.getAbbreviateStr(item.name).tooltip}
-                        >
-                            {Utils.getAbbreviateStr(item.name).text}
-                        </div>);
-
-                        // 使用appendChild将这个新的div添加到容器中
-                        commonStore.annotationIconConfig.iframeDocument.getElementById('JpPdfList').querySelector('.p-2').appendChild(newElement);
-                    })
-
-                    if (JpPdfListEl.style.display === 'flex') {
-                        JpPdfListEl.style.display = 'none'
-                    } else if (JpPdfListEl.style.display === 'none') {
-                        JpPdfListEl.style.display = 'flex'
-                    }
-
-
-                }}/>
-                <div id={'JpPdfList'}
-                     key={commonStore.testVars.length}
-                     style={{
-                         position: "absolute",
-                         top: "100%",
-                         right: '100%',
-                         display: "none",
-                         flexDirection: "column",
-                         backgroundColor: 'white',
-                         zIndex: 50,
-                         width: '15rem',
-                         padding: '0.5rem',
-                         borderRadius: '1rem',
-                         maxHeight:'30rem',
-                         overflowY:"auto"
-                     }}
-                >
-                    <div className="p-2" id={'JpListContainer'}>
-
-                    </div>
-
-                </div>
-            </AnnotationIconContainer>
-
-
-            <AnnotationIconContainer id={'DeleteIconContainer'} title={'Delete Current PDF'} joinButtonGroup={false}
-                                     onClickFunc={() => {
-
-                                     }}>
-                <DeleteIcon size={'1.25rem'}
-
-                            onClick={async () => {
-                                if (commonStore.annotationIconConfig.currentOpenPDF === null) return
-                                Utils.removeElementById(commonStore.annotationIconConfig.currentOpenPDF.id, commonStore.annotationIconConfig.iframeDocument)
-                                commonStore.updateAnnotationIconConfig({
-                                    pdfAssets: {
-                                        id: commonStore.annotationIconConfig.currentOpenPDF.id,
-                                        value: null
-                                    }
-                                })
-                                commonStore.updateAnnotationIconConfig({
-                                    currentOpenPDF: null
-                                })
-
-
-                                const PDFReaderContainer = createRoot(document.getElementById('PDFReaderContainer'))
-                                PDFReaderContainer.render(<PdfReaderComp/>)
-
-
-                                await Swal.fire({
-                                    icon: "info",
-                                    title: `Delete  Success!`,
-                                });
-
-                            }}
-                />
-            </AnnotationIconContainer>
-
-
-        </div>
-    }
 
 
     return {
@@ -694,9 +364,9 @@ const usePDFReaderCompHooks = () => {
         discardActiveObject,
         loadHistory,
         saveHistory,
-        CustomAnnotationTools,
         refreshPDFMessage,
-        renderCanvas
+        renderCanvas,
+        displayPDFFile
     }
 
 }

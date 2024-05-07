@@ -10,6 +10,7 @@ import _ from "lodash";
 import usePDFReaderCompHooks from "./usePDFReaderCompHooks";
 import {createRoot} from "react-dom/client";
 import {v4 as uuidv4} from 'uuid';
+import CustomAnnotationTools from "./CustomAnnotationTools";
 
 const baseURL = 'http://localhost:8082/assets';
 
@@ -28,7 +29,6 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
         annotationTextCanvasConfigFunc,
         saveHistory,
         loadHistory,
-        CustomAnnotationTools,
         refreshPDFMessage,
         renderCanvas
     } = usePDFReaderCompHooks()
@@ -225,8 +225,8 @@ const PdfReaderComp = ({url = baseURL + '/pdfjs/test.pdf'}) => {
             width: '100%',
             height: '100%',
         }}
-        // viewer-path={'/pdfjs-4.0.189-dist'} // 开发时使用
-        viewer-path={baseURL+'/pdfjs/pdfjs-4.0.189-dist'} // build 时使用
+        viewer-path={'/pdfjs-4.0.189-dist'} // 开发时使用
+        // viewer-path={baseURL+'/pdfjs/pdfjs-4.0.189-dist'} // build 时使用
         viewer-extra-styles-urls={`['${JpPDFCss}']`}
     />;
 
