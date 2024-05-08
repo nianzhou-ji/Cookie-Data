@@ -14,7 +14,7 @@ export const useCommonHooks = () => {
                 icon: "success",
                 title: title,
                 showConfirmButton: false,
-                timer: 3000
+                timer: 1500
             });
             commonStore.setIsDocumentsGroupDataUpdate(false)
 

@@ -418,6 +418,31 @@ class CommonStore {
         this.markdownObj = value
     }
 
+    getAbbreviateStr = (str, maxLength = 10) => {
+        try {
+            if (str.length > maxLength) {
+                return {
+                    text: str.substring(0, maxLength) + '...',
+                    tooltip: str,
+                    class: 'tooltip'
+                }
+            } else {
+                return {
+                    text: str,
+                    tooltip: null,
+                    class: null
+                }
+            }
+        } catch (e) {
+            return {
+                text: null,
+                tooltip: null
+            }
+        }
+
+
+    }
+
 
     documentsGroup = []
 
@@ -640,6 +665,15 @@ class CommonStore {
         const res = this.documentsGroup.find(item => item.id === this.currentDocumentID)
         if (res === undefined) return null
         return _.cloneDeep(res)
+    }
+
+    updateCurrentDocumentName(name){
+        const tempObj = _.cloneDeep(this.documentsGroup)
+        if (tempObj.length === 0) return false
+        const res = tempObj.find(item => item.id === this.currentDocumentID)
+        if (res === undefined) return false
+        res.name = name
+        this.documentsGroup = tempObj
     }
 
 

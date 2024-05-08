@@ -31,6 +31,7 @@ import ToolboxComp from "./components/toolboxComp/toolboxComp";
 import PdfReaderComp from "./components/PDFReaderComp/PDFReaderComp";
 import {createRoot} from "react-dom/client";
 import {useCommonHooks} from "./components/useCommonHooks";
+import AbbreviatedComp from "./components/abbreviatedComp/abbreviatedComp";
 
 function App() {
     const {commonStore, toolBoxStore} = useStore()
@@ -71,6 +72,9 @@ function App() {
 
 
     }, [commonStore.documentsGroup])
+
+
+    const [documentNameDoubleClick, setDocumentNameDoubleClick] = useState(false)
 
 
     // document.addEventListener('keydown', async function (event) {
@@ -141,12 +145,51 @@ function App() {
 
 
                 <div className='flex'>
-                    <div
-                        className={`font-bold  flex items-center ${toolBoxStore.toolboxAppOpenIconState ? null : 'hidden'} 
-                    ${Utils.getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip === null ? null : 'tooltip tooltip-bottom'}
-                    `} data-tip={Utils.getAbbreviateStr(commonStore.getCurrentDocumentObj()?.name).tooltip}>
-                        {commonStore.getCurrentDocumentObj() === null ? "" : 'Document Title: ' + Utils.getAbbreviateStr(commonStore.getCurrentDocumentObj().name).text}
-                    </div>
+                    <AbbreviatedComp
+                        averageWordSize={10}
+                        lineNum={1}
+                        className={`mr-3 max-w-[200px] w-[200px]  font-bold  flex items-center ${toolBoxStore.toolboxAppOpenIconState && !documentNameDoubleClick ? null : 'hidden'} tooltip-bottom`}
+                        text={commonStore.getCurrentDocumentObj()?.name}
+                        onDoubleClick={() => {
+                            setDocumentNameDoubleClick(true)
+                        }}
+
+
+                    />
+
+
+                    <input type="text" placeholder="Type here"
+                           className={`mr-3 mt-2 input input-sm input-bordered w-[200px] ${toolBoxStore.toolboxAppOpenIconState && documentNameDoubleClick ? null : 'hidden'}`}
+                           defaultValue={commonStore.getCurrentDocumentObj()?.name}
+                           onKeyDown={async (event) => {
+                               if (event.key === "Enter") {
+                                   // 当 Enter 键被按下时执行的逻辑
+                                   setDocumentNameDoubleClick(false); // 清空输入框
+
+                                   if(event.target.value.length!==0){
+
+                                       commonStore.updateCurrentDocumentName(event.target.value)
+
+                                       await saveData('Update document name success')
+                                   }
+
+
+
+
+                               }
+
+
+                               if (event.key === "Escape") {
+                                   // 当 Escape 键被按下时执行的逻辑
+                                   setDocumentNameDoubleClick(false); // 清空输入框
+
+
+                               }
+                           }}
+
+                      />
+
+
                     <div className={tooltipWrapperClass} data-tip="add document">
                         <ModalContainerComp>
                             <dialog id="addDocument_modal" className="modal">
@@ -159,7 +202,7 @@ function App() {
                                     <div className="modal-action">
                                         <form method="dialog">
                                             {/* if there is a button in form, it will close the modal */}
-                                            <button className="btn" onClick={() => {
+                                            <button className="btn" onClick={async () => {
                                                 const id = crypto.randomUUID()
                                                 const name = commonStore.addDocumentName
                                                 const markdownData = _.cloneDeep(commonStore.initMarkdownData)
@@ -182,6 +225,9 @@ function App() {
                                                 })
 
 
+                                                await saveData('Create document success')
+
+
                                             }}>Confirm
                                             </button>
 
@@ -202,41 +248,58 @@ function App() {
                     <div className={tooltipWrapperClass} data-tip="delete document">
                         <DeleteIcon id={'DeleteIconID'} size={'1.5rem'}
                                     className={btnClass + 'cursor-pointer'} onClick={async () => {
-                            commonStore.deleteDocumentsGroup(commonStore.currentDocumentID)
-                            const res = await commonStore.saveIndexedDB()
 
-                            if (res.state) {
-                                await Swal.fire({
-                                    position: "top-end",
-                                    icon: "success",
-                                    title: "delete saved",
-                                    showConfirmButton: false,
-                                    timer: 1500
-                                });
+                            const result = await Swal.fire({
+                                html: `${commonStore.getCurrentDocumentObj().name}`,
+                                title: 'Delete document',
+                                icon: "warning",
+                                showCancelButton: true,
+                                confirmButtonColor: "#3085d6",
+                                cancelButtonColor: "#d33",
+                                confirmButtonText: 'Confirm',
+                                cancelButtonText: 'Cancel',
+                            })
+                            if (result.isConfirmed) {
+
+                                commonStore.deleteDocumentsGroup(commonStore.currentDocumentID)
+                                const res = await commonStore.saveIndexedDB()
+
+                                if (res.state) {
+                                    await Swal.fire({
+                                        position: "top-end",
+                                        icon: "success",
+                                        title: "Delete success",
+                                        showConfirmButton: false,
+                                        timer: 1500
+                                    });
 
 
-                                if (commonStore.documentsGroup.length === 0) {
-                                    commonStore.updateAppCompOpenConfig({
-                                        markdownAppOpen: false,
-                                        processAppOpen: false,
-                                        errorPageAppOpen: true,
-                                        toolboxAppOpen: false,
-                                        PDFReaderAppOpen: false
-                                    })
-                                    return
+                                    if (commonStore.documentsGroup.length === 0) {
+                                        commonStore.updateAppCompOpenConfig({
+                                            markdownAppOpen: false,
+                                            processAppOpen: false,
+                                            errorPageAppOpen: true,
+                                            toolboxAppOpen: false,
+                                            PDFReaderAppOpen: false
+                                        })
+                                        return
+                                    }
+
+                                    commonStore.updateCurrentDocumentID(commonStore.documentsGroup[commonStore.documentsGroup.length - 1].id)
+                                    await initInterfaceData()
+
+
+                                } else {
+                                    await Swal.fire({
+                                        icon: "error",
+                                        title: "Oops...",
+                                        text: "Delete failed"
+                                    });
                                 }
 
-                                commonStore.updateCurrentDocumentID(commonStore.documentsGroup[commonStore.documentsGroup.length - 1].id)
-                                await initInterfaceData()
-
-
-                            } else {
-                                await Swal.fire({
-                                    icon: "error",
-                                    title: "Oops...",
-                                    text: "delete failed"
-                                });
                             }
+
+
                         }}/>
                     </div>
 
@@ -311,7 +374,7 @@ function App() {
                                     <ul className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
                                         {/* Sidebar content here */}
                                         {commonStore.documentsGroup.slice().reverse().map(item => <li key={item.id}
-                                                                                                      className={`${item.id === commonStore.currentDocumentID ? 'bg-blue-100' : null}`}>
+                                                                                                      className={`mb-3 ${item.id === commonStore.currentDocumentID ? 'bg-blue-100' : null}`}>
                                             <a
                                                 onClick={async () => {
                                                     commonStore.updateCurrentDocumentID(item.id)

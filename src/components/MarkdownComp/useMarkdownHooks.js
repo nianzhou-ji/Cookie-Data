@@ -204,7 +204,7 @@ const useMarkdownHooks = () => {
         data: {}
     }
 
-    const getNewEditorJS = (editorJSOnReady=()=>{}) => {
+    const getNewEditorJS =async (editorJSOnReady=()=>{}) => {
 
         const parentNode = document.getElementById('editorjs');
         while (parentNode?.firstChild) {
@@ -212,7 +212,7 @@ const useMarkdownHooks = () => {
         }
 
 
-        const editorJS = new EditorJS({
+        const editorJS =await  new EditorJS({
             ...editorConfig,
             onChange: (e => {
                 commonStore.setIsDocumentsGroupDataUpdate(true)
