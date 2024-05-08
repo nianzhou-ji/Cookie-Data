@@ -14,7 +14,7 @@ This single-page web app is designed specifically for temporary data collection.
    A suite of handy utilities to expand the app's functionality:
    - **ffmpeg.js Integration**
      Convert video formats using ffmpeg.js, making video handling more versatile.
-   - **whisper.cpp Integration**
+   - **Whisper.cpp Integration**
      Convert video audio tracks into text quickly and efficiently via whisperCpp.
    - **Tesseract.js Integration**
      Recognize text in images using Tesseract.js for OCR.
