@@ -44,7 +44,7 @@ class Utils {
             // 从其父元素中删除该元素
             element.parentNode.removeChild(element);
         } else {
-            console.log("Element not found!");
+            // console.log("Element not found!");
         }
     }
 

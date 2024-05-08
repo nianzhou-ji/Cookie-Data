@@ -106,7 +106,7 @@ const SearchComp = () => {
 
 
                     searchObj.search(_.cloneDeep(searchPattern))
-                    console.log(searchObj.res, 'searchObj.res')
+                    // console.log(searchObj.res, 'searchObj.res')
                     const res = searchObj.postSearchResult()
 
 

@@ -34,24 +34,24 @@ const ProcessComp = ({className}) => {
             // Added
             for (const record of Object.values(change.changes.added)) {
                 if (record.typeName === 'shape') {
-                    console.log('Added shape')
+                    // console.log('Added shape')
                     commonStore.setIsDocumentsGroupDataUpdate(true)
                 }
             }
             // Updated
             for (const [from, to] of Object.values(change.changes.updated)) {
                 if (from.typeName === 'instance' && to.typeName === 'instance' && from.currentPageId !== to.currentPageId) {
-                    console.log('changed page ')
+                    // console.log('changed page ')
                     commonStore.setIsDocumentsGroupDataUpdate(true)
                 } else if (from.id.startsWith('shape') && to.id.startsWith('shape')) {
-                    console.log('updated shape')
+                    // console.log('updated shape')
                     commonStore.setIsDocumentsGroupDataUpdate(true)
                 }
             }
             // Removed
             for (const record of Object.values(change.changes.removed)) {
                 if (record.typeName === 'shape') {
-                    console.log('deleted shape')
+                    // console.log('deleted shape')
                     commonStore.setIsDocumentsGroupDataUpdate(true)
                 }
             }

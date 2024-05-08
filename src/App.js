@@ -107,9 +107,9 @@ function App() {
                     // 此处的event.target.result就是图像的Base64编码
                     const base64String = event.target.result;
                     navigator.clipboard.writeText(`<img src="${base64String}" />`).then(function () {
-                        console.log('Copying to clipboard was successful!');
+                        // console.log('Copying to clipboard was successful!');
                     }, function (err) {
-                        console.error('Could not copy text: ', err);
+                        // console.error('Could not copy text: ', err);
                     });
                 };
 

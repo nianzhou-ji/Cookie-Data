@@ -59,9 +59,11 @@ const CustomAnnotationTools = () => {
                                }
                            })
 
+
                            await displayPDFFile(commonStore.annotationIconConfig.pdfAssets[commonStore.annotationIconConfig.pdfAssets.length - 1])
 
-                           commonStore.setIsDocumentsGroupDataUpdate(true)
+
+
 
 
                        };
@@ -175,10 +177,11 @@ const CustomAnnotationTools = () => {
                             padding: '0.5rem'
                         }}
                         onClick={async (event) => {
-                            if (!commonStore.annotationIconConfig.clicked['PencilIconContainer']) {
-                                commonStore.annotationIconConfig.iframeDocument.querySelector('#PencilIconContainer').click()
-                            }
+
                             await displayPDFFile(item)
+
+
+
 
 
                         }}

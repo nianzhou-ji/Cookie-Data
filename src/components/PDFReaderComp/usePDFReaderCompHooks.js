@@ -13,6 +13,8 @@ import React, {useEffect} from "react";
 import {MdDelete as DeleteIcon} from "react-icons/md";
 import Swal from "sweetalert2";
 import PdfReaderComp from "./PDFReaderComp";
+import {fetchFile, toBlobURL} from '@ffmpeg/util'
+import CustomAnnotationTools from "./CustomAnnotationTools";
 
 const baseURL = 'http://localhost:8082/assets';
 
@@ -20,28 +22,197 @@ const usePDFReaderCompHooks = () => {
 
     const {commonStore} = useStore()
 
+
+
+    const initPDFReaderComp = async () => {
+
+        const currentObj = commonStore.getCurrentDocumentObj()
+        if (currentObj !== null) {
+            // console.log(currentObj.PDFAnnotationData, 'PDFAnnotationData')
+            commonStore.initPDFAnnotationData(currentObj.PDFAnnotationData)
+        }
+
+
+        const viewer = document.querySelector('pdfjs-viewer-element')
+
+// Wait for the viewer initialization, receive PDFViewerApplication
+        const viewerApp = await viewer.initialize()
+
+        const iframeDocument = viewer.shadowRoot.querySelector('iframe').contentDocument
+        commonStore.updateAnnotationIconConfig({
+            iframeDocument: iframeDocument
+        })
+
+
+        iframeDocument.querySelector('#toolbarViewer')?.classList.add('JpTw-flex', 'JpTw-items-center', 'JpTw-justify-between')
+        const waitedEls = [
+            '#previous',
+            '#next',
+            '#pageNumber',
+            '#numPages',
+            '.splitToolbarButton.hiddenSmallView',
+            '.toolbarButtonSpacer',
+            '.splitToolbarButtonSeparator',
+            '#openFile',
+            '#print',
+            '#download',
+            '.verticalToolbarSeparator.hiddenMediumView',
+            '#editorModeButtons',
+            '#editorModeButtons',
+            '#editorModeSeparator',
+            '#secondaryToolbarToggle',
+            '#scaleSelectContainer',
+            '#toolbarViewerMiddle .splitToolbarButton',
+        ]
+        waitedEls.forEach(item => {
+            iframeDocument.querySelector(item)?.classList.add('JpTw-hidden')
+        })
+
+
+        const toolbarViewerMiddleEl = iframeDocument.getElementById('toolbarViewerMiddle')
+        if (toolbarViewerMiddleEl === null) return
+        const newElement = document.createElement('div');
+        toolbarViewerMiddleEl.appendChild(newElement)
+        newElement.id = 'JpDocumentMessage'
+        newElement.classList.add('JpTw-flex', 'JpTw-items-center')
+
+
+        const JpDocumentMessageRoot = createRoot(commonStore.annotationIconConfig.iframeDocument.getElementById('JpDocumentMessage'))
+        commonStore.updateAnnotationIconConfig({
+            JpDocumentMessageRoot
+        })
+
+
+        const viewerDivEl = iframeDocument.querySelector("#viewer")
+        const toolbarViewerRightEl = iframeDocument.getElementById('toolbarViewerRight');
+        toolbarViewerRightEl.classList.add('JpTw-flex', 'JpTw-items-center', 'JpTw-justify-center')
+        const CustomAnnotationToolsContainers = document.createElement('div')
+        CustomAnnotationToolsContainers.classList.add('JpTw-flex', 'JpTw-items-center', 'JpTw-justify-center')
+        toolbarViewerRightEl.appendChild(CustomAnnotationToolsContainers)
+        const toolbarViewerRightElRoot = createRoot(CustomAnnotationToolsContainers);
+        toolbarViewerRightElRoot.render(<CustomAnnotationTools/>)
+
+        commonStore.updateAnnotationIconConfig(
+            {
+                viewerApp,
+                viewer
+            }
+        )
+
+
+
+        viewerApp.eventBus.on('pagechanging', (event) => {
+            // console.log(commonStore.annotationIconConfig.currentOpenPDF.id, 'commonStore.annotationIconConfig.currentOpenPDF.id')
+            const pageNumber = event.pageNumber
+            const previous = event.previous
+
+            commonStore.updateAnnotationIconConfig({
+                currentPageNum: pageNumber
+            })
+
+
+            refreshPDFMessage(
+                commonStore.annotationIconConfig.currentOpenPDF.name,
+                pageNumber,
+                commonStore.annotationIconConfig.pagesCount,
+                commonStore.annotationIconConfig.JpDocumentMessageRoot
+            )
+
+
+            renderCanvas(previous)
+            renderCanvas(pageNumber)
+
+
+        })
+
+        viewerApp.eventBus.on('pagesloaded', (event) => {
+            commonStore.updateAnnotationIconConfig({
+                pagesCount: event.pagesCount
+            })
+
+            refreshPDFMessage(
+                commonStore.annotationIconConfig.currentOpenPDF.name,
+                1,
+                event.pagesCount,
+                commonStore.annotationIconConfig.JpDocumentMessageRoot
+            )
+
+            commonStore.annotationIconConfig.iframeDocument.querySelector('#ReadIconContainer')?.click()
+
+        })
+
+
+        viewerApp.eventBus.on('pagerendered', (event) => {
+            const pageNum = event.pageNumber
+            const pageDivEl = viewerDivEl.querySelector(`[data-page-number="${pageNum}"]`)
+            const canvasAnnotationEl = document.createElement('canvas');
+            // canvasAnnotationEl.classList.add('bg-red-500', 'bg-opacity-50')
+            const pageDivElSize = pageDivEl.querySelector('.canvasWrapper').getBoundingClientRect()
+            canvasAnnotationEl.id = 'JpCanvasAnnotationEl' + pageNum
+            if (!viewerDivEl.querySelector('#JpCanvasAnnotationEl' + pageNum)) {
+                pageDivEl.appendChild(canvasAnnotationEl)
+                fabric.window = viewer.shadowRoot.querySelector('iframe').contentWindow;
+                fabric.document = viewer.shadowRoot.querySelector('iframe').contentWindow.document;
+                commonStore.updateAnnotationZIndex()
+                commonStore.updateAnnotationIconConfig({
+                    canvasAnnotationElGroup: {
+                        pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
+                        pageNum: `${pageNum}`,
+                        value: {
+                            pageDivElSize,
+                            canvasAnnotationEl,
+                            pageDivEl,
+                            pageNum: `${pageNum}`
+                        }
+                    },
+                    canvasBoundingClientRect: {
+                        pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
+                        pageNum: `${pageNum}`,
+                        width: pageDivElSize.width,
+                        height: pageDivElSize.height,
+                    }
+
+
+                })
+
+
+                renderCanvas(pageNum)
+
+                // console.log('pagerendered', pageNum)
+
+
+            }
+
+
+        });
+
+
+    }
+
     const renderCanvas = (pageNumber) => {
         if (commonStore.annotationIconConfig.currentOpenPDF === null) {
             console.log('commonStore.annotationIconConfig.currentOpenPDF===null')
             return
         }
-        ;
+
         const canvasAnnotationElItem = commonStore.annotationIconConfig.canvasAnnotationElGroup[commonStore.annotationIconConfig.currentOpenPDF.id]
         if (canvasAnnotationElItem === undefined) {
-            console.log('canvasAnnotationElItem===undefined')
             return
         }
         const values = canvasAnnotationElItem[pageNumber]
-        if (commonStore.annotationIconConfig.clicked['PencilIconContainer']) {
-            createFabricCanvas(values, annotationPencilCanvasConfigFunc)
-            commonStore.updateAnnotationIconConfig({
-                canvasAnnotationElGroup: {
-                    pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
-                    pageNum: `${pageNumber}`,
-                    value: values
-                }
-            })
 
+
+
+
+        if (commonStore.annotationIconConfig.clicked['ReadIconContainer'] ) {
+            createFabricCanvas(values)
+            // console.log('ReadIconContainer render')
+
+        }
+
+
+        if (commonStore.annotationIconConfig.clicked['PencilIconContainer'] ) {
+            createFabricCanvas(values, annotationPencilCanvasConfigFunc)
             // console.log('PencilIconContainer render')
 
         }
@@ -49,17 +220,18 @@ const usePDFReaderCompHooks = () => {
 
         if (commonStore.annotationIconConfig.clicked['TextIconContainer']) {
             createFabricCanvas(values, annotationTextCanvasConfigFunc)
-            commonStore.updateAnnotationIconConfig({
-                canvasAnnotationElGroup: {
-                    pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
-                    key: `${pageNumber}`,
-                    value: values
-                }
-            })
-
-            console.log('TextIconContainer render')
-
+            // console.log('TextIconContainer render')
         }
+
+
+        commonStore.updateAnnotationIconConfig({
+            canvasAnnotationElGroup: {
+                pdfID: commonStore.annotationIconConfig.currentOpenPDF.id,
+                key: `${pageNumber}`,
+                value: values
+            }
+        })
+
     }
 
     const discardActiveObject = () => {
@@ -246,6 +418,8 @@ const usePDFReaderCompHooks = () => {
 
     const createFabricCanvas = (values, canvasConfigFunc = canvas => {
     }) => {
+        if (values === undefined) return
+
         const canvas = new fabric.Canvas(values.canvasAnnotationEl, {
             containerClass: 'JpCanvasAnnotationWrapper',
             width: values.pageDivElSize.width,
@@ -278,11 +452,16 @@ const usePDFReaderCompHooks = () => {
             'object:scaling',
             'object:rotating',
             'object:skewing',
+            'object:removed'
         ]
 
         changeEvents.forEach(item => {
             canvas.on(item, function (event) {
                 saveHistory(values.pageNum)
+
+
+                commonStore.setIsDocumentsGroupDataUpdate(true)
+
             });
 
         })
@@ -326,7 +505,11 @@ const usePDFReaderCompHooks = () => {
 
     const displayPDFFile = async (pdfItem) => {
         const JpPdfListEl = commonStore.annotationIconConfig.iframeDocument.getElementById('JpPdfList')
-        await commonStore.annotationIconConfig.viewerApp.open({data: await Utils.urlToUint8Array(pdfItem.url)})
+        const pdfjsViewerElement = document.querySelector('#PDFReaderContainer pdfjs-viewer-element')
+        pdfjsViewerElement.setAttribute('src', await  toBlobURL(pdfItem.url, 'application/pdf'));
+
+        await initPDFReaderComp()
+
         commonStore.updateAnnotationIconConfig({
             currentOpenPDF: pdfItem
         })
@@ -366,7 +549,8 @@ const usePDFReaderCompHooks = () => {
         saveHistory,
         refreshPDFMessage,
         renderCanvas,
-        displayPDFFile
+        displayPDFFile,
+        initPDFReaderComp
     }
 
 }

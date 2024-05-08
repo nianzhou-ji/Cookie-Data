@@ -78,7 +78,12 @@ class CommonStore {
         if (value === undefined) return
         const temp = this.annotationIconConfig
         temp.history = value.annotationHistory
-        temp.pdfAssets = value.pdfAssets
+
+        if(temp.pdfAssets.length===0){
+            temp.pdfAssets = value.pdfAssets
+        }
+
+
         temp.canvasBoundingClientRect = value.canvasBoundingClientRect
         this.annotationIconConfig = temp
 
@@ -92,6 +97,7 @@ class CommonStore {
         if (value.pdfAssets !== undefined) {
             if (value.pdfAssets.id !== null && value.pdfAssets.value === null) {
                 temp.pdfAssets = temp.pdfAssets.filter(item => item.id !== value.pdfAssets.id)
+                // console.log(value,'1')
             }
 
             if (value.pdfAssets.id === null && value.pdfAssets.value !== null) {
@@ -99,7 +105,15 @@ class CommonStore {
                     ...value.pdfAssets.value,
                     id: 'Jp' + uuidv4()
                 })
+
+                // console.log(value,'2')
+
+
+
             }
+
+
+            // console.log(_.cloneDeep(temp.pdfAssets),'3')
 
 
         }

@@ -95,7 +95,7 @@ class SearchEngine {
     constructor(data, fuseOptions) {
         this.fuse = new Fuse(SearchEngine.convertSearchDatabase(data), fuseOptions);
 
-        console.log(fuseOptions, 'fuseOptions')
+        // console.log(fuseOptions, 'fuseOptions')
     }
 
 
