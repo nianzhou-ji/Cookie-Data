@@ -98,6 +98,18 @@ class CommonStore {
             if (value.pdfAssets.id !== null && value.pdfAssets.value === null) {
                 temp.pdfAssets = temp.pdfAssets.filter(item => item.id !== value.pdfAssets.id)
                 // console.log(value,'1')
+
+                if(temp.history[value.pdfAssets.id]){
+                    delete temp.history[value.pdfAssets.id];
+                }
+
+                if(temp.canvasBoundingClientRect[value.pdfAssets.id]){
+                    delete temp.canvasBoundingClientRect[value.pdfAssets.id];
+                }
+
+
+
+
             }
 
             if (value.pdfAssets.id === null && value.pdfAssets.value !== null) {

@@ -4,6 +4,8 @@ import {CiRead as ReadIcon} from "react-icons/ci";
 import {TbPencilExclamation as PencilIcon} from "react-icons/tb";
 import {BiText as TextIcon} from "react-icons/bi";
 import {MdDelete as DeleteIcon, MdFormatListNumberedRtl as ListIcon} from "react-icons/md";
+
+import {HiAnnotation as AnnotationIcon} from "react-icons/hi";
 import Swal from "sweetalert2";
 import _ from "lodash";
 import {createRoot} from "react-dom/client";
@@ -61,9 +63,6 @@ const CustomAnnotationTools = () => {
 
 
                            await displayPDFFile(commonStore.annotationIconConfig.pdfAssets[commonStore.annotationIconConfig.pdfAssets.length - 1])
-
-
-
 
 
                        };
@@ -166,7 +165,7 @@ const CustomAnnotationTools = () => {
                 commonStore.annotationIconConfig.pdfAssets.forEach(item => {
                     const newElement = document.createElement('div');
                     newElement.id = item.id
-                    newElement.style = 'margin-bottom: 5px;'
+                    newElement.style = 'margin-bottom: 5px; cursor: pointer;'
                     newElement.classList.add('JpTw-bg-enter')
                     if (commonStore.annotationIconConfig.currentOpenPDF !== null && item.id === commonStore.annotationIconConfig.currentOpenPDF.id) {
                         newElement.classList.add('JpTw-bg-active')
@@ -177,13 +176,7 @@ const CustomAnnotationTools = () => {
                             padding: '0.5rem'
                         }}
                         onClick={async (event) => {
-
                             await displayPDFFile(item)
-
-
-
-
-
                         }}
                         key={item.id}
                         title={Utils.getAbbreviateStr(item.name).tooltip === null ? null : Utils.getAbbreviateStr(item.name).tooltip}
@@ -214,6 +207,112 @@ const CustomAnnotationTools = () => {
                      backgroundColor: 'white',
                      zIndex: 50,
                      width: '15rem',
+                     padding: '0.5rem',
+                     borderRadius: '1rem',
+                     maxHeight: '30rem',
+                     overflowY: "auto"
+                 }}
+            >
+
+
+            </div>
+        </AnnotationIconContainer>
+
+
+        <AnnotationIconContainer
+            id={'AnnotationsIconContainer'}
+            title={'Annotations List'}
+            onClickFunc={() => {
+
+            }}
+            joinButtonGroup={false}
+        >
+            <AnnotationIcon size={'1.25rem'} onClick={async (event) => {
+                const id = commonStore.annotationIconConfig.currentOpenPDF?.id
+
+                if (!id) {
+                    await Swal.fire({
+                        icon: "warning",
+                        title: "Oops...",
+                        text: "Not PDF Opened"
+                    });
+                    return
+                }
+
+                const currentHistory = commonStore.annotationIconConfig.history[id]
+
+
+                if (!currentHistory) {
+                    await Swal.fire({
+                        icon: "warning",
+                        title: "Oops...",
+                        text: "No Annotation Exist"
+                    });
+                    return
+                }
+
+
+                const annotations = Object.keys(currentHistory)
+
+
+                if (annotations.length === 0) {
+                    await Swal.fire({
+                        icon: "warning",
+                        title: "Oops...",
+                        text: "No Annotation Exist"
+                    });
+                    return
+                }
+
+                const JpAnnotationsListEl = commonStore.annotationIconConfig.iframeDocument.getElementById('JpAnnotationsList')
+                commonStore.annotationIconConfig.iframeDocument.getElementById('JpAnnotationsList').innerHTML = ''
+
+                annotations.filter(i=>currentHistory[i]['canvasObjectData']['objects'].length!==0).forEach(item => {
+                    const newElement = document.createElement('div');
+                    newElement.id = item
+
+                    newElement.style = 'margin-bottom: 5px;     cursor: pointer;'
+                    newElement.classList.add('JpTw-bg-enter')
+
+                    const root = createRoot(newElement);
+                    root.render(<div
+                        style={{
+                            padding: '0.5rem'
+                        }}
+                        onClick={async (event) => {
+
+                            commonStore.annotationIconConfig.viewerApp.pdfViewer.currentPageNumber = parseInt(item);
+
+                        }}
+                        key={item}
+                    >
+
+                        {`${currentHistory[item]['canvasObjectData']['objects'].length} annotations on the ${item} page`}
+                    </div>);
+
+                    // 使用appendChild将这个新的div添加到容器中
+                    commonStore.annotationIconConfig.iframeDocument.getElementById('JpAnnotationsList').appendChild(newElement);
+                })
+
+                if (JpAnnotationsListEl.style.display === 'flex') {
+                    JpAnnotationsListEl.style.display = 'none'
+                } else if (JpAnnotationsListEl.style.display === 'none') {
+                    JpAnnotationsListEl.style.display = 'flex'
+                }
+
+
+            }}/>
+            <div id={'JpAnnotationsList'}
+                 key={commonStore.testVars.length}
+                 style={{
+                     position: "absolute",
+                     top: "100%",
+                     right: '100%',
+                     display: "none",
+                     flexDirection: "column",
+                     backgroundColor: 'white',
+                     zIndex: 50,
+                     width: '18rem',
                      padding: '0.5rem',
                      borderRadius: '1rem',
                      maxHeight: '30rem',

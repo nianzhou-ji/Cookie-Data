@@ -6,7 +6,7 @@
       <paths name="E:\software\nginx-1.25.4\staticAssets\CookieDataApp">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$/build" web="/" />
           </mappings>
         </serverdata>
       </paths>
