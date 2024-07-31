@@ -17,6 +17,7 @@ import {observer} from "mobx-react-lite";
 import AnnotationIconContainer from "./AnnotationIconContainer";
 import usePDFReaderCompHooks from "./usePDFReaderCompHooks";
 import {useCommonHooks} from "../useCommonHooks";
+import { IoMdCodeDownload as  DownloadIcon} from "react-icons/io";
 
 const CustomAnnotationTools = () => {
     const {commonStore} = useStore()
@@ -375,6 +376,58 @@ const CustomAnnotationTools = () => {
 
 
                             }
+
+
+                        }}
+            />
+        </AnnotationIconContainer>
+
+
+
+        <AnnotationIconContainer id={'DownloadPDFIconContainer'} title={'Download Current PDF'} joinButtonGroup={false}  isChecked={false}
+                                 onClickFunc={() => {
+
+                                 }}>
+            <DownloadIcon size={'1.25rem'}
+
+                        onClick={async () => {
+                            if (commonStore.annotationIconConfig.currentOpenPDF === null) {
+                                await Swal.fire({
+                                    icon: "warning",
+                                    title: `Please open a  pdf!`,
+                                });
+
+                                return
+                            }
+
+
+
+                            function downloadFile(url, filename) {
+                                // 创建一个<a>元素
+                                const a = document.createElement('a');
+
+                                // 设置<a>元素的href属性为下载文件的URL
+                                a.href = url;
+
+                                // 设置下载文件的名称
+                                a.download = filename;
+
+                                // 将<a>元素添加到DOM中
+                                document.body.appendChild(a);
+
+                                // 模拟点击<a>元素以触发下载
+                                a.click();
+
+                                // 下载后移除<a>元素
+                                document.body.removeChild(a);
+                            }
+
+
+                           const item = commonStore.annotationIconConfig.pdfAssets.find(item=>item.id===commonStore.annotationIconConfig.currentOpenPDF.id)
+                            if(item===undefined)return
+
+                            downloadFile(item.url, item.name);
+
 
 
                         }}

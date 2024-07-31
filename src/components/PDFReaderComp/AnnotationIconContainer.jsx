@@ -9,7 +9,8 @@ const AnnotationIconContainer = (
         },
         onClickFunc = () => {
         },
-        joinButtonGroup = true
+        joinButtonGroup = true,
+        isChecked = true
     }) => {
 
     const {commonStore} = useStore()
@@ -62,11 +63,17 @@ const AnnotationIconContainer = (
                     })
 
 
-                    if (commonStore.annotationIconConfig.clicked[id]) {
-                        annotationIconContainer?.classList?.toggle("JpTw-bg-active", true)
-                    } else {
+                    if (isChecked){
+                        if (commonStore.annotationIconConfig.clicked[id]) {
+                            annotationIconContainer?.classList?.toggle("JpTw-bg-active", true)
+                        } else {
+                            annotationIconContainer?.classList?.toggle("JpTw-bg-active", false)
+                        }
+                    }else {
                         annotationIconContainer?.classList?.toggle("JpTw-bg-active", false)
                     }
+
+
 
 
                     onClickFunc()
